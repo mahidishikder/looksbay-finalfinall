@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   },
   description:
     "Independent Squarespace studio building unmistakable brands, beautiful websites, and practical templates for ambitious people.",
+  icons: {
+    icon: "/assets/favicon.png",
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

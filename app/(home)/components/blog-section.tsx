@@ -10,7 +10,7 @@ export function BlogSection() {
         <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">NOTES FROM THE STUDIO</span>
         <h2 className="mb-0 mt-1.5 text-[30px] font-semibold leading-[1.14] mobile:text-[25px]">Latest on the Blog</h2>
       </div>
-      <div className="grid grid-cols-4 gap-7 tablet:grid-cols-2 mobile:gap-[9px]">
+      <div className="grid grid-cols-4 gap-7 tablet:grid-cols-2 mobile:grid-cols-2 mobile:gap-[9px]">
         {articles.map((article) => (
           <Link href="/templates" className="min-w-0 overflow-hidden rounded-lg border border-line bg-gradient-to-br from-white to-[#fbfcff] p-3.5 shadow-card mobile:p-[7px]" key={article.title}>
             <ImageFrame className="h-[220px] mobile:h-[110px]" image={article.image} imageAlt={article.title} />

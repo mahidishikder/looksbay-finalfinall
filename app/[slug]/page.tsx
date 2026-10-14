@@ -82,14 +82,14 @@ function ServicesPage() {
             );
           })}
         </div>
-        <div className="grid grid-cols-3 gap-5 py-[42px] tablet:grid-cols-1 tablet:gap-4 tablet:py-7">
+        <div className="grid grid-cols-3 gap-5 py-[42px] tablet:grid-cols-1 tablet:gap-4 tablet:py-7 mobile:grid-cols-1 mobile:gap-4 mobile:py-7">
           <div className="flex items-center gap-[13px]"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#eef5ff] text-blue"><MousePointerClick size={18} /></span><div><h3 className="my-1 text-base font-semibold">First, a conversation.</h3><p className="m-0 text-sm text-muted">No pressure. Just a real chat.</p></div></div>
           <div className="flex items-center gap-[13px]"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#eef5ff] text-blue"><BadgeCheck size={18} /></span><div><h3 className="my-1 text-base font-semibold">Then, a clear proposal.</h3><p className="m-0 text-sm text-muted">Good communication, always.</p></div></div>
           <div className="flex items-center gap-[13px]"><span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#eef5ff] text-blue"><Globe2 size={18} /></span><div><h3 className="my-1 text-base font-semibold">And your moment to launch.</h3><p className="m-0 text-sm text-muted">We’ll be right there with you.</p></div></div>
         </div>
       </div>
       <section className="scroll-mt-[65px] bg-paper px-6 py-[82px] mobile:px-5 mobile:py-[55px]" id="estimate">
-        <div className="mx-auto grid max-w-[1160px] grid-cols-[.8fr_1.2fr] items-start gap-[75px] tablet:grid-cols-1 tablet:gap-5">
+        <div className="mx-auto grid max-w-[1160px] grid-cols-[.8fr_1.2fr] items-start gap-[75px] tablet:grid-cols-1 tablet:gap-5 mobile:grid-cols-1 mobile:gap-5">
           <div><span className="inline-flex items-center gap-2 text-sm font-semibold text-muted"><span className="size-[7px] rounded-full bg-blue" />A little more clarity</span><h2 className="mb-3 mt-4 text-[42px] font-semibold leading-[1.12]">What might<br />this look like?</h2><p className="max-w-[330px] text-base leading-[1.85] text-muted">Choose your starting point and anything else you have in mind. You’ll get a rough estimate in seconds, and a completely human conversation after.</p></div>
           <ServicesPlanner />
         </div>

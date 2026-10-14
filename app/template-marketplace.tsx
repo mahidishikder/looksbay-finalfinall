@@ -62,7 +62,7 @@ export default function TemplateMarketplace() {
       </dialog>
       <p className="mb-0 mt-5 text-center text-base text-muted">Every template is designed for Squarespace 7.1 and Fluid Engine. One purchase, yours to keep.</p>
       <section className="scroll-mt-[88px] pt-[67px]" id="buying-guide">
-        <div className="grid grid-cols-[.75fr_1.25fr] gap-20 tablet:grid-cols-1 tablet:gap-3">
+        <div className="grid grid-cols-[.75fr_1.25fr] gap-20 tablet:grid-cols-1 tablet:gap-3 mobile:grid-cols-1 mobile:gap-3">
           <div><span className="inline-flex items-center gap-2 text-sm font-semibold text-muted"><span className="size-[7px] rounded-full bg-blue" />Good to know</span><h2 className="mb-2.5 mt-3.5 text-[38px] font-semibold">A few things<br />you might wonder.</h2><p className="max-w-[350px] text-base leading-[1.8] text-muted">A template should be the easy part. Here’s what happens next.</p></div>
           <div>
             <details className="group border-b border-line"><summary className="flex min-h-[55px] cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium [&::-webkit-details-marker]:hidden">Will this work with my Squarespace website?<span className="text-xl text-blue group-open:rotate-45">+</span></summary><p className="mb-[18px] mt-0 max-w-[510px] text-base leading-[1.8] text-muted">Yes. These designs are built exclusively for Squarespace 7.1 using Fluid Engine. Your Squarespace subscription is separate; we’ll walk you through the transfer after purchase.</p></details>

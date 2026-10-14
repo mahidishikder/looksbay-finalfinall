@@ -6,7 +6,7 @@ import { projects } from "../data";
 export function PortfolioSection() {
   return (
     <section className="bg-paper px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] mobile:px-[18px] mobile:py-[60px]">
-      <div className="mb-[23px] flex items-end justify-between gap-6 tablet:items-start tablet:flex-col">
+      <div className="mb-[23px] flex items-end justify-between gap-6 tablet:items-start tablet:flex-col mobile:items-start mobile:flex-col">
         <div className="max-w-[720px]">
           <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">A FEW GOOD PROJECTS</span>
           <h2 className="mb-2 mt-1.5 text-[30px] font-semibold leading-[1.14] mobile:text-[25px]">Squarespace Website Designer Portfolio</h2>
@@ -14,7 +14,7 @@ export function PortfolioSection() {
         </div>
         <Link href="/portfolio" className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-lg bg-blue px-[22px] text-[15px] font-bold text-white transition hover:bg-blue-hover">VIEW MORE WORK <ArrowRight size={14} /></Link>
       </div>
-      <div className="grid grid-cols-3 gap-7 tablet:grid-cols-2 mobile:gap-2.5">
+      <div className="grid grid-cols-3 gap-7 tablet:grid-cols-2 mobile:grid-cols-1 mobile:gap-2.5">
         {projects.map((project) => (
           <Link href="/portfolio" className="min-w-0 rounded-lg border border-line bg-gradient-to-br from-white to-[#fbfcff] p-3.5 text-center shadow-card mobile:p-[11px]" key={project.name}>
             <ImageFrame className="h-[250px] mobile:h-[105px]" image={project.image} imageAlt={project.alt} />
@@ -30,7 +30,7 @@ export function PortfolioSection() {
 
 export function FeaturedProjectSection() {
   return (
-    <section className="grid grid-cols-2 items-center gap-9 bg-white px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-7 mobile:px-5 mobile:py-[60px]">
+    <section className="grid grid-cols-2 items-center gap-9 bg-white px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-7 mobile:grid-cols-1 mobile:gap-7 mobile:px-5 mobile:py-[60px]">
       <div className="max-w-[520px]">
         <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">FEATURED CUSTOM WEB DESIGN PROJECT</span>
         <h2 className="mb-2.5 mt-2.5 text-[clamp(36px,4vw,54px)] font-semibold leading-tight">A digital home for a brand with a story to tell.</h2>

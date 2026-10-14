@@ -15,7 +15,7 @@ export function Header() {
         <Link href="/" className="inline-flex w-max items-center" aria-label="Looksbay Studio home">
           <Image src="/looksbay-logo.jpg" alt="Looksbay" width={1941} height={544} priority className="h-auto w-[170px] mobile:w-[145px]" />
         </Link>
-        <nav className="flex h-full items-center gap-7 mobile:hidden" aria-label="Main navigation">
+        <nav className="flex h-full items-center gap-7 tablet:hidden mobile:hidden" aria-label="Main navigation">
           <Link className="inline-flex h-full items-center text-[17px] font-medium text-[#2e2f32] transition-colors hover:text-blue" href="/">Home</Link>
           <Link className="inline-flex h-full items-center text-[17px] font-medium text-[#2e2f32] transition-colors hover:text-blue" href="/templates">Templates</Link>
           <div className="group/nav flex h-full items-center">
@@ -37,10 +37,10 @@ export function Header() {
           <Link className="inline-flex h-full items-center text-[17px] font-medium text-[#2e2f32] transition-colors hover:text-blue" href="/portfolio">Portfolio</Link>
           <Link className="inline-flex h-full items-center text-[17px] font-medium text-[#2e2f32] transition-colors hover:text-blue" href="/contact">Contact</Link>
         </nav>
-        <Link href="/contact" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[10px] bg-gradient-to-br from-[#0a62eb] to-[#0d4dbd] px-[22px] text-[17px] font-bold text-white transition hover:-translate-y-px hover:from-[#0d5fe5] hover:to-[#0b44a9] mobile:hidden">Book a call <ArrowRight size={15} /></Link>
-        <details className="group hidden mobile:block">
+        <Link href="/contact" className="inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-[10px] bg-gradient-to-br from-[#0a62eb] to-[#0d4dbd] px-[22px] text-[17px] font-bold text-white transition hover:-translate-y-px hover:from-[#0d5fe5] hover:to-[#0b44a9] tablet:hidden mobile:hidden">Book a call <ArrowRight size={15} /></Link>
+        <details className="group hidden tablet:block mobile:block">
           <summary className="grid size-10 cursor-pointer list-none place-items-center [&::-webkit-details-marker]:hidden" aria-label="Open navigation menu"><Menu size={22} className="group-open:hidden" /><X size={22} className="hidden group-open:block" /></summary>
-          <nav className="absolute inset-x-0 top-full z-20 grid gap-1 border-t border-line bg-white p-4 shadow-lg" aria-label="Mobile navigation">
+          <nav className="absolute inset-x-0 top-full z-20 hidden gap-1 border-t border-line bg-white p-4 shadow-lg group-open:grid" aria-label="Mobile navigation">
             {[['Home', '/'], ['Templates', '/templates'], ['Services', '/services'], ['Portfolio', '/portfolio'], ['Contact', '/contact']].map(([name, href]) => <Link className="flex items-center justify-between py-3 text-base" href={href} key={href}>{name}<ArrowRight size={16} /></Link>)}
           </nav>
         </details>

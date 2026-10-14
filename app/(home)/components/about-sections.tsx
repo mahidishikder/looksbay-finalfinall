@@ -4,7 +4,7 @@ import { ImageFrame } from "../../components";
 
 export function PackageSection() {
   return (
-    <section className="grid grid-cols-2 items-center gap-14 bg-paper px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-[27px] mobile:px-[18px] mobile:py-[60px]">
+    <section className="grid grid-cols-2 items-center gap-14 bg-paper px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-[27px] mobile:grid-cols-1 mobile:gap-[27px] mobile:px-[18px] mobile:py-[60px]">
       <div className="relative grid min-h-[300px] place-items-center mobile:min-h-[250px]">
         <div className="w-[84%] rotate-[-3deg] rounded-t-[10px] border-[5px] border-b-[14px] border-[#292929] bg-[#222] p-[10px] shadow-[0_14px_27px_rgba(0,0,0,.15)]">
           <div className="h-[206px] overflow-hidden bg-white mobile:h-[168px]"><img className="h-full w-full object-cover" src="https://images.unsplash.com/photo-1467232004584-a241de8bcf5d?auto=format&fit=crop&w=900&q=85" alt="Squarespace website package preview" /></div>
@@ -39,7 +39,7 @@ export function StudioQuoteSection() {
 
 export function ExpertSection() {
   return (
-    <section className="grid grid-cols-[.88fr_1.12fr] items-center gap-11 bg-[linear-gradient(110deg,#f5f5f7_0_39%,#fff_39%_100%)] px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-[27px] mobile:py-[60px]">
+    <section className="grid grid-cols-[.88fr_1.12fr] items-center gap-11 bg-[linear-gradient(110deg,#f5f5f7_0_39%,#fff_39%_100%)] px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-[27px] mobile:grid-cols-1 mobile:gap-[27px] mobile:py-[60px]">
       <div className="mx-auto h-[320px] w-full max-w-[470px] tablet:h-[300px] mobile:h-[250px]"><ImageFrame className="rounded" image="photo-1580489944761-15a19d654956" imageAlt="Looksbay website designer working with a client" /></div>
       <div>
         <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">A SMALL, SPECIALIST STUDIO</span>

@@ -5,7 +5,7 @@ const config: Config = {
   theme: {
     screens: {
       mobile: { max: "560px" },
-      tablet: { max: "800px" },
+      tablet: { min: "561px", max: "800px" },
       desktop: "801px",
     },
     extend: {
