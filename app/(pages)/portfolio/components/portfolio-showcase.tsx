@@ -3,14 +3,9 @@
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { ImageFrame } from "./components";
+import { ImageFrame } from "@/app/shared/components/site-components";
+import { projects } from "../data";
 
-const projects = [
-  { name: "Sunday Supply", kind: "Independent retail", industry: "E-commerce", image: "photo-1441986300917-64674bd600d8", alt: "Bright independent clothing boutique with considered window displays", description: "A considered digital shop for the small things that make an ordinary day feel special.", tags: ["Squarespace 7.1", "Custom design"] },
-  { name: "Still Life Studio", kind: "Creative practice", industry: "Creative", image: "photo-1497366811353-6870744d04b2", alt: "Naturally lit independent creative studio", description: "A welcoming, picture-led home for the people and stories behind the work.", tags: ["Squarespace 7.1", "Brand & website"] },
-  { name: "The Good Practice", kind: "Wellness studio", industry: "Wellness", image: "photo-1540555700478-4be289fbecef", alt: "Quiet light-filled spa and wellness studio", description: "A gentle online first impression that feels like walking into the real studio.", tags: ["Squarespace 7.1", "SEO"] },
-  { name: "Oona Objects", kind: "Independent brand", industry: "E-commerce", image: "photo-1483985988355-763728e1935b", alt: "Editorial fashion campaign for an independent considered brand", description: "An editorial storefront with a little more space for the things worth keeping.", tags: ["Squarespace 7.1", "E-commerce"] },
-];
 const filters = ["Everything", "Creative", "Wellness", "E-commerce"];
 
 export default function PortfolioShowcase() {

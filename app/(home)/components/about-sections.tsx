@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { ImageFrame } from "../../components";
+import { ImageFrame } from "@/app/shared/components/site-components";
 
 export function PackageSection() {
   return (

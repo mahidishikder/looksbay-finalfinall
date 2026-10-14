@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, CodeXml, Layers2, Menu, RefreshCw, Search, Sparkles, X } from "lucide-react";
-import { services } from "./data";
+import { services } from "../data/services";
 
 const serviceIcons = { layers: Layers2, code: CodeXml, refresh: RefreshCw, search: Search, sparkles: Sparkles };
 

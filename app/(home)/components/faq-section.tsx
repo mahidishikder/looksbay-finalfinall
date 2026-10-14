@@ -1,24 +1,55 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { faqs } from "../data";
 
 export function FAQSection() {
   return (
-    <section className="bg-paper px-5 py-[100px] mobile:px-[18px] mobile:py-[60px]">
-      <div className="mb-6 text-center">
-        <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">GOOD QUESTIONS</span>
-        <h2 className="mb-0 mt-1.5 text-[30px] font-semibold leading-[1.14] mobile:text-[25px]">Frequently Asked Questions</h2>
+    <section className="bg-paper relative overflow-hidden px-5 py-[120px] mobile:px-[18px] mobile:py-[70px]">
+      {/* Background Subtle Gradient Glow */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue/5 blur-[120px]" />
+
+      <div className="relative z-10 mx-auto max-w-[820px]">
+        {/* Section Header */}
+        <div className="mb-12 text-center">
+          <span className="inline-block text-[13px] font-bold uppercase tracking-[.18em] text-blue">
+            GOOD QUESTIONS
+          </span>
+          <h2 className="mb-0 mt-2 text-[36px] font-extrabold tracking-tight text-ink mobile:text-[28px]">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        {/* FAQ Accordions */}
+        <div className="space-y-4">
+          {faqs.map(([question, answer]) => (
+            <details
+              className="group rounded-2xl border border-line bg-white/70 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-blue/40 hover:bg-white hover:shadow-md"
+              key={question}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden mobile:text-base">
+                <span>{question}</span>
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue/10 text-blue transition-all duration-300 group-open:rotate-45 group-open:bg-blue group-open:text-white">
+                  <Plus className="h-5 w-5" />
+                </span>
+              </summary>
+              <p className="mb-0 mt-4 max-w-[720px] text-[15px] leading-[1.65] text-muted mobile:text-sm">
+                {answer}
+              </p>
+            </details>
+          ))}
+        </div>
+
+        {/* Footer Link */}
+        <p className="mt-10 text-center text-base font-medium text-muted">
+          More questions?{" "}
+          <Link
+            className="font-semibold text-blue underline underline-offset-4 transition-opacity hover:opacity-80"
+            href="/contact"
+          >
+            Let’s talk.
+          </Link>
+        </p>
       </div>
-      <div className="mx-auto max-w-[720px]">
-        {faqs.map(([question, answer]) => (
-          <details className="border-b border-line group" key={question}>
-            <summary className="flex min-h-[47px] cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
-              {question}<span className="text-xl text-blue transition-transform group-open:rotate-45">+</span>
-            </summary>
-            <p className="mb-[15px] mt-0 max-w-[640px] text-sm leading-[1.6] text-muted">{answer}</p>
-          </details>
-        ))}
-      </div>
-      <p className="mt-5 text-center text-sm text-muted">More questions? <Link className="text-blue underline" href="/contact">Let’s talk.</Link></p>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { ImageFrame } from "../../components";
+import { ImageFrame } from "@/app/shared/components/site-components";
 import { articles } from "../data";
 
 export function BlogSection() {

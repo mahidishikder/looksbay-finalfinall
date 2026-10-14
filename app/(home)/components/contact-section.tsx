@@ -1,4 +1,4 @@
-import InquiryForm from "../../inquiry-form";
+import InquiryForm from "@/app/(pages)/contact/components/inquiry-form";
 
 export function ContactSection() {
   return (

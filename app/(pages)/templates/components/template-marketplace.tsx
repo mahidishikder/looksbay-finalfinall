@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { ArrowRight, Search, X } from "lucide-react";
-import { ImageFrame } from "./components";
-import { templates, type Template } from "./data";
+import { ImageFrame } from "@/app/shared/components/site-components";
+import { templates, type Template } from "../data";
 
 const filters = ["All templates", "Therapists", "Coaches", "Consultants", "Photographers", "Small business", "Law firms", "Wellness", "E-commerce"];
 

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
   ArrowRight,
   BadgeCheck,
@@ -12,30 +11,16 @@ import {
   Search,
   Sparkles,
 } from "lucide-react";
-import { NewsletterCTA, PageIntro } from "../components";
-import { services } from "../data";
-import InquiryForm from "../inquiry-form";
-import PortfolioShowcase from "../portfolio-showcase";
-import ServicesPlanner from "../services-planner";
-import TemplateMarketplace from "../template-marketplace";
+import { NewsletterCTA, PageIntro } from "@/app/shared/components/site-components";
+import { services } from "@/app/shared/data/services";
+import ServicesPlanner from "./components/services-planner";
 
-const pageDetails: Record<string, { title: string; description: string }> = {
-  templates: {
-    title: "Squarespace website templates, made to feel like you.",
-    description: "Thoughtful Squarespace 7.1 templates for good people with good ideas. Find your starting point, then make it yours.",
-  },
-  services: {
-    title: "A better website. A more human process.",
-    description: "Considered Squarespace websites, thoughtful SEO, and the kind of small details that make a big difference.",
-  },
-  portfolio: {
-    title: "A few ideas, brought to life.",
-    description: "Explore the creative directions, thoughtful details, and Squarespace websites our small specialist studio loves to make.",
-  },
-  contact: {
-    title: "Let’s make a good thing together.",
-    description: "A custom website, a little more clarity, or just a good place to start. We’d love to hear what you have in mind.",
-  },
+const description =
+  "Considered Squarespace websites, thoughtful SEO, and the kind of small details that make a big difference.";
+
+export const metadata: Metadata = {
+  title: "Services — Squarespace studio",
+  description,
 };
 
 const serviceIcons = {
@@ -46,21 +31,14 @@ const serviceIcons = {
   sparkles: Sparkles,
 } as const;
 
-export async function generateStaticParams() {
-  return Object.keys(pageDetails).map((slug) => ({ slug }));
-}
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
-  return pageDetails[slug]
-    ? { title: `${slug[0].toUpperCase()}${slug.slice(1)} — Squarespace studio`, description: pageDetails[slug].description }
-    : {};
-}
-
-function ServicesPage() {
+export default function ServicesPage() {
   return (
     <>
-      <PageIntro eyebrow="SOME THINGS ARE BETTER TOGETHER" title={<>A good website.<br /><span className="bg-gradient-to-r from-blue via-[#7257ff] to-[#d94d9a] bg-clip-text text-transparent">A good team.</span></>} description={pageDetails.services.description} />
+      <PageIntro
+        eyebrow="SOME THINGS ARE BETTER TOGETHER"
+        title={<>A good website.<br /><span className="bg-gradient-to-r from-blue via-[#7257ff] to-[#d94d9a] bg-clip-text text-transparent">A good team.</span></>}
+        description={description}
+      />
       <div className="mx-auto w-[min(1480px,calc(100%_-_96px))] pb-[85px] mobile:w-[calc(100%_-_36px)] mobile:pb-[55px]">
         <div className="grid gap-[13px] mobile:gap-[9px]">
           {services.map((service, index) => {
@@ -97,34 +75,4 @@ function ServicesPage() {
       <NewsletterCTA />
     </>
   );
-}
-
-export default async function StudioPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const page = pageDetails[slug];
-  if (!page) notFound();
-
-  if (slug === "templates") {
-    return <><PageIntro eyebrow="THE LOOKS BAY EDIT" title={<>A very good place<br />to <span className="bg-gradient-to-r from-blue via-[#7257ff] to-[#d94d9a] bg-clip-text text-transparent">start.</span></>} description={page.description} /><TemplateMarketplace /></>;
-  }
-  if (slug === "services") return <ServicesPage />;
-  if (slug === "portfolio") {
-    return <><PageIntro eyebrow="A FEW THINGS WE LOVE" title={<>Work made with<br /><span className="bg-gradient-to-r from-blue via-[#7257ff] to-[#d94d9a] bg-clip-text text-transparent">feeling.</span></>} description={page.description} /><PortfolioShowcase /><NewsletterCTA /></>;
-  }
-  if (slug === "contact") {
-    return (
-      <>
-        <PageIntro eyebrow="WELL, HELLO THERE" title={<>Let’s talk about<br /><span className="bg-gradient-to-r from-blue via-[#7257ff] to-[#d94d9a] bg-clip-text text-transparent">what’s next.</span></>} description={page.description} />
-        <section className="mx-auto grid w-[min(1000px,calc(100%_-_48px))] grid-cols-1 gap-[22px] pb-[70px] mobile:w-[calc(100%_-_36px)] mobile:pb-[54px]">
-          <div className="grid grid-cols-2 gap-6 rounded-xl border border-line bg-white p-6 mobile:grid-cols-1">
-            <div className="grid gap-2"><span className="text-sm text-muted">A little note, anytime</span><a className="text-lg font-semibold text-blue" href="mailto:hello@looksbay.com">hello@looksbay.com</a></div>
-            <div className="grid gap-2"><span className="text-sm text-muted">We’re a remote-first studio</span><a className="text-lg font-semibold text-blue" href="https://instagram.com" target="_blank" rel="noreferrer">Find us on Instagram ↗</a></div>
-          </div>
-          <InquiryForm />
-        </section>
-      </>
-    );
-  }
-
-  return notFound();
 }
