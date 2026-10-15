@@ -26,15 +26,15 @@ export default function TemplateMarketplace() {
         </div>
         <span className="whitespace-nowrap text-sm text-muted" aria-live="polite">{visibleTemplates.length} {visibleTemplates.length === 1 ? "design" : "designs"}</span>
       </div>
-      <label className="ml-auto mb-6 flex min-h-[42px] w-full max-w-[316px] items-center gap-2 rounded-lg border border-line bg-white px-3 text-muted transition focus-within:border-blue focus-within:ring-[3px] focus-within:ring-blue/15">
+      <label className="ml-auto mb-6 flex min-h-[42px] w-full max-w-[316px] items-center gap-2 rounded-[10px] border border-line bg-white px-3 text-muted transition focus-within:border-blue focus-within:ring-[3px] focus-within:ring-blue/15">
         <Search size={15} aria-hidden="true" /><span className="sr-only">Search templates</span>
         <input className="h-[35px] w-full border-0 bg-transparent text-sm text-ink outline-none placeholder:text-muted" type="search" placeholder="Search by name or industry" value={search} onChange={(event) => setSearch(event.target.value)} />
         <button className="grid size-7 shrink-0 place-items-center text-muted" type="button" aria-label="Clear search" onClick={() => setSearch("")}><X size={15} /></button>
       </label>
       <div className="grid grid-cols-3 gap-x-[19px] gap-y-[31px] tablet:grid-cols-2 mobile:grid-cols-1">
         {visibleTemplates.length ? visibleTemplates.map((template) => (
-          <article className="rounded-[13px] border border-ink/5 bg-white p-2.5 transition hover:-translate-y-[3px] hover:shadow-[0_12px_35px_rgba(29,29,31,.09)]" key={template.name}>
-            <div className="group relative aspect-[1.15] overflow-hidden rounded-[7px] bg-[#e8e6e1]">
+          <article className="rounded-[10px] border border-black/[0.08] bg-white p-3 transition hover:-translate-y-[3px] hover:shadow-[0_12px_35px_rgba(29,29,31,.09)]" key={template.name}>
+            <div className="group relative aspect-[1.35] overflow-hidden rounded-[10px] bg-[#e8e6e1]">
               <ImageFrame image={template.image} imageAlt={template.imageAlt} imagePosition={template.imagePosition} />
               <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-[7px] text-sm">{template.category}</span>
               {template.previousPrice && <span className="absolute right-3 top-3 rounded-full bg-[#edf4eb] px-2.5 py-[7px] text-sm text-[#3f6940]">Save 25%</span>}
@@ -46,18 +46,18 @@ export default function TemplateMarketplace() {
             </div>
             <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-line px-1 pt-2.5">
               <div className="flex flex-wrap gap-[5px]">{template.tags.slice(0, 2).map((tag) => <span className="rounded-full bg-paper px-2 py-[5px] text-xs text-muted" key={tag}>{tag}</span>)}</div>
-              <a className="inline-flex items-center gap-[5px] whitespace-nowrap text-sm text-blue" href={`/contact?template=${encodeURIComponent(template.name)}`}>Choose template <ArrowRight size={13} /></a>
+              <a className="inline-flex min-h-10 items-center justify-center gap-[5px] whitespace-nowrap rounded-full bg-[#eef5ff] px-3 text-sm font-medium text-blue transition hover:bg-blue hover:text-white" href={`/contact?template=${encodeURIComponent(template.name)}`}>Choose template <ArrowRight size={13} /></a>
             </div>
           </article>
         )) : <div className="col-span-full grid min-h-[150px] place-items-center text-muted">No templates match just yet. Try another search.</div>}
       </div>
-      <dialog className="fixed inset-0 m-auto max-h-[min(680px,calc(100dvh_-_40px))] w-[min(560px,calc(100vw_-_36px))] overflow-visible rounded-[14px] bg-white p-0 shadow-[0_22px_90px_rgba(0,0,0,.22)] backdrop:bg-black/50 backdrop:backdrop-blur-sm" ref={previewDialog} onClose={() => setPreview(null)} aria-labelledby="preview-title">
-        <button className="absolute right-3 top-3 z-10 grid size-[35px] place-items-center rounded-full border border-ink/5 bg-white/95 text-ink" type="button" aria-label="Close template preview" onClick={() => previewDialog.current?.close()}><X size={18} /></button>
-        {preview && <div><ImageFrame className="h-[min(310px,40dvh)] rounded-t-[14px]" image={preview.image} imageAlt={preview.imageAlt} imagePosition={preview.imagePosition} /><div className="p-6">
+      <dialog className="fixed inset-0 m-auto max-h-[min(760px,calc(100dvh_-_40px))] w-[min(700px,calc(100vw_-_36px))] overflow-hidden rounded-[10px] border-0 bg-white p-0 shadow-[0_22px_90px_rgba(0,0,0,.22)] backdrop:bg-black/50 backdrop:backdrop-blur-sm" ref={previewDialog} onClose={() => setPreview(null)} aria-labelledby="preview-title">
+        <button className="absolute right-3 top-3 z-10 grid size-[35px] place-items-center border border-ink/5 bg-white/95 text-ink" type="button" aria-label="Close template preview" onClick={() => previewDialog.current?.close()}><X size={18} /></button>
+        {preview && <div><ImageFrame className="h-[min(430px,48dvh)]" image={preview.image} imageAlt={preview.imageAlt} imagePosition={preview.imagePosition} /><div className="p-6">
           <span className="inline-flex items-center gap-2 text-sm font-semibold text-muted"><span className="size-[7px] rounded-full bg-blue" />SQUARESPACE 7.1 · {preview.category.toUpperCase()}</span>
           <h2 className="mb-1.5 mt-2.5 text-[27px] font-semibold" id="preview-title">{preview.name}</h2><p className="mb-3 mt-0 text-base text-muted">{preview.description}</p>
           <div className="flex flex-wrap gap-[5px]">{preview.tags.map((tag) => <span className="rounded-full bg-paper px-2 py-[5px] text-xs text-muted" key={tag}>{tag}</span>)}</div>
-          <div className="mt-[19px] flex items-center justify-between border-t border-line pt-4"><strong className="text-xl">${preview.price}</strong><a href={`/contact?template=${encodeURIComponent(preview.name)}`} className="inline-flex min-h-12 items-center gap-2.5 rounded-[10px] bg-blue px-[22px] font-semibold text-white">Make it yours <ArrowRight size={15} /></a></div>
+          <div className="mt-[19px] flex items-center justify-between border-t border-line pt-4"><strong className="text-xl">${preview.price}</strong><a href={`/contact?template=${encodeURIComponent(preview.name)}`} className="inline-flex min-h-12 items-center gap-2.5 rounded-full bg-blue px-[22px] font-semibold text-white">Make it yours <ArrowRight size={15} /></a></div>
         </div></div>}
       </dialog>
       <p className="mb-0 mt-5 text-center text-base text-muted">Every template is designed for Squarespace 7.1 and Fluid Engine. One purchase, yours to keep.</p>

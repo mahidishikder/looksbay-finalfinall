@@ -67,11 +67,11 @@ export function IntroBenefitsSection() {
             return (
               <div 
                 key={idx}
-                className="group relative flex min-h-[290px] w-full flex-col justify-between rounded-3xl border border-black/[0.08] bg-[#F5F5F7] p-9 transition-all duration-300 hover:border-[#2761EB]/40 hover:bg-white hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)]"
+                className="group relative flex min-h-[290px] w-full flex-col justify-between rounded-[10px] border border-black/[0.08] bg-[#F5F5F7] p-9 transition-all duration-300 hover:border-[#2761EB]/40 hover:bg-white hover:shadow-[0_20px_40px_rgba(0,0,0,0.05)]"
               >
                 <div>
                   {/* Live Gradient Icon Box */}
-                  <div className="relative mb-7 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white p-3.5 shadow-[0_4px_14px_rgba(0,0,0,0.05)] border border-black/[0.04]">
+                  <div className="relative mb-7 inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-[10px] bg-white p-3.5 shadow-[0_4px_14px_rgba(0,0,0,0.05)] border border-black/[0.04]">
                     
                     {/* Continuous Breathing/Pulse Glow */}
                     <span className="absolute inset-0 -z-10 animate-pulse rounded-2xl bg-[radial-gradient(circle,#2997FF_0%,#EC4899_50%,transparent_100%)] opacity-20 blur-md transition-opacity duration-300 group-hover:opacity-50" />

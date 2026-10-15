@@ -66,7 +66,7 @@ export function PortfolioSection() {
         {portfolioDemos.map((demo) => (
           <article
             key={demo.name}
-            className="group relative flex min-h-[620px] flex-col items-center justify-between overflow-hidden rounded-none bg-[#F5F5F7] pt-12 pb-0 text-center transition-all duration-500 hover:bg-[#F0F0F2] mobile:min-h-[480px] mobile:pt-8"
+            className="group relative flex min-h-[680px] flex-col items-center justify-between overflow-hidden rounded-[10px] bg-[#F5F5F7] pt-12 pb-0 text-center transition-all duration-500 hover:bg-[#F0F0F2] mobile:min-h-[520px] mobile:pt-8"
           >
             {/* Top Text & Action Buttons */}
             <div className="z-10 flex flex-col items-center px-6">
@@ -95,8 +95,8 @@ export function PortfolioSection() {
             </div>
 
             {/* Bottom Larger Website Image Mockup Showcase */}
-            <div className="relative mt-8 w-full max-w-[780px] px-4 md:px-8 transition-transform duration-500 ease-out group-hover:scale-[1.02]">
-              <div className="overflow-hidden rounded-t-2xl shadow-[0_25px_50px_rgba(0,0,0,0.12)] border-t border-x border-black/10 bg-white">
+            <div className="relative mt-8 w-full max-w-[920px] px-4 md:px-6 transition-transform duration-500 ease-out group-hover:scale-[1.02]">
+              <div className="overflow-hidden rounded-t-[10px] border-t border-x border-black/10 bg-white shadow-[0_25px_50px_rgba(0,0,0,0.12)]">
                 <img
                   className="h-full w-full object-cover object-top"
                   src={demo.image}
@@ -144,11 +144,11 @@ export function FeaturedProjectSection() {
           <div className="pointer-events-none absolute h-[280px] w-[280px] rounded-full bg-[#2761EB]/10 blur-[90px]" />
 
           {/* Desktop Frame Mockup */}
-          <div className="relative w-[82%] rotate-[-2deg] rounded-2xl border border-black/10 bg-[#FFFFFF] p-3 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.18)] transition-transform duration-500 hover:rotate-0">
+          <div className="relative w-[82%] rotate-[-2deg] rounded-[10px] border border-black/10 bg-[#FFFFFF] p-3 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.18)] transition-transform duration-500 hover:rotate-0">
             <span className="block px-2 py-3 text-[18px] font-extrabold tracking-tight text-[#1D1D1F] mobile:text-[15px]">
               GOOD THINGS<br />GROW HERE.
             </span>
-            <div className="h-[180px] overflow-hidden rounded-xl bg-[#EBECEE] mobile:h-[130px]">
+            <div className="h-[180px] overflow-hidden rounded-[10px] bg-[#EBECEE] mobile:h-[130px]">
               <img 
                 className="h-full w-full object-cover transition-transform duration-700 hover:scale-105" 
                 src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=600&q=80" 

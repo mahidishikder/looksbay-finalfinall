@@ -18,11 +18,11 @@ export default function InquiryForm() {
     }
   }, []);
 
-  const fieldClassName = "mt-1.5 min-h-[46px] w-full rounded-md border border-line bg-white px-3 text-base text-ink outline-none transition placeholder:text-muted focus:border-blue focus:ring-[3px] focus:ring-blue/15";
+  const fieldClassName = "mt-1.5 min-h-[46px] w-full rounded-[10px] border border-line bg-white px-3 text-base text-ink outline-none transition placeholder:text-muted focus:border-blue focus:ring-[3px] focus:ring-blue/15";
   const labelClassName = "text-sm font-medium text-ink";
 
   return (
-    <form className="mx-auto w-full max-w-[900px] bg-white p-8 mobile:p-4" action="mailto:hello@looksbay.com" method="post" encType="text/plain">
+    <form className="mx-auto w-full rounded-[10px] border border-black/[0.08] bg-[#F5F5F7] p-8 mobile:p-5" action="mailto:hello@looksbay.com" method="post" encType="text/plain">
       <div className="mb-6">
         <span className="inline-flex items-center gap-2 text-sm font-semibold text-muted"><span className="size-[7px] rounded-full bg-blue" />A little introduction</span>
         <h2 className="mb-1.5 mt-3 text-[26px] font-semibold">Let’s get to know your project.</h2>
@@ -38,7 +38,7 @@ export default function InquiryForm() {
         <div className="grid gap-1.5 mobile:col-span-1 col-span-2"><label className={labelClassName} htmlFor="contact-file">Have a brief? (Optional)</label><input className={fieldClassName} id="contact-file" name="Project brief" type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" /></div>
         <p className="col-span-2 m-0 text-sm leading-[1.5] text-muted mobile:col-span-1">Sending your inquiry opens your email app with your project details. You can attach a brief to the email before sending.</p>
       </div>
-      <button type="submit" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2.5 rounded-[10px] bg-blue px-[22px] font-semibold text-white transition hover:bg-blue-hover">Say hello <span aria-hidden="true">→</span></button>
+      <button type="submit" className="mt-5 inline-flex min-h-12 items-center justify-center gap-2.5 rounded-full bg-blue px-[22px] font-semibold text-white transition hover:bg-blue-hover">Say hello <span aria-hidden="true">→</span></button>
     </form>
   );
 }

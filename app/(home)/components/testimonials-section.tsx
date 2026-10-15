@@ -65,7 +65,7 @@ export function TestimonialsSection() {
             {testimonials.map((item, idx) => (
               <div
                 key={idx}
-                className={`flex min-h-[420px] flex-col justify-between ${item.bgColor} p-8 text-left transition-all duration-300 rounded-none hover:shadow-lg`}
+                className={`flex min-h-[420px] flex-col justify-between rounded-[10px] ${item.bgColor} p-8 text-left transition-all duration-300 hover:shadow-lg`}
               >
                 <div>
                   {/* Company/Brand Name */}

@@ -12,6 +12,10 @@
     @apply cursor-pointer;
   }
 
+  button {
+    @apply rounded-full;
+  }
+
   ::selection {
     background: #cce4ff;
     color: #1d1d1f;

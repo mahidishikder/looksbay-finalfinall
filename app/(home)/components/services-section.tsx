@@ -24,7 +24,7 @@ const servicesData = [
 
 export function ServicesSection() {
   return (
-    <section className="relative overflow-hidden bg-[#EBF1FC] px-6 py-[100px] mobile:px-[18px] mobile:py-[60px]">
+    <section className="relative overflow-hidden bg-[#F5F5F7] px-6 py-[100px] mobile:px-[18px] mobile:py-[60px]">
       {/* Background Soft Glow behind Header */}
       <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(39,97,235,0.06)_0%,rgba(0,0,0,0)_70%)] blur-[120px]" />
 
@@ -45,11 +45,11 @@ export function ServicesSection() {
             return (
               <article 
                 key={service.cardTitle}
-                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-white transition-all duration-300 hover:border-[#2761EB]/30 hover:shadow-[0_12px_28px_rgba(39,97,235,0.08)]"
+                className="group flex flex-col justify-between overflow-hidden rounded-[10px] border border-black/[0.08] bg-white transition-all duration-300 hover:border-[#2761EB]/30 hover:shadow-[0_12px_28px_rgba(39,97,235,0.08)]"
               >
                 <div>
                   {/* Top Image Container */}
-                  <div className="relative flex h-[280px] w-full items-center justify-center bg-[#EBECEE] px-6 py-6 transition-colors duration-300 group-hover:bg-[#E5E7EB] mobile:h-[220px]">
+                  <div className="relative flex h-[320px] w-full items-center justify-center bg-[#F5F5F7] px-6 py-6 transition-colors duration-300 group-hover:bg-[#EBECEE] mobile:h-[250px]">
                     <img 
                       src={service.image} 
                       alt={service.cardTitle}

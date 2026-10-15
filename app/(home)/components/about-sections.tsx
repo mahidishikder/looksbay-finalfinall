@@ -21,7 +21,7 @@ export function PackageSection() {
           <li className="flex items-center gap-2 text-[15px] text-muted"><Check className="shrink-0 text-blue" size={16} aria-hidden="true" />Search-ready page structure and metadata</li>
           <li className="flex items-center gap-2 text-[15px] text-muted"><Check className="shrink-0 text-blue" size={16} aria-hidden="true" />Training and a thoughtful launch handover</li>
         </ul>
-        <Link href="/services" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg bg-blue px-[22px] text-[15px] font-bold text-white transition hover:bg-blue-hover">EXPLORE THE PACKAGE <ArrowRight size={14} /></Link>
+        <Link href="/services" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-blue px-[22px] text-[15px] font-bold text-white transition hover:bg-blue-hover">EXPLORE THE PACKAGE <ArrowRight size={14} /></Link>
       </div>
     </section>
   );
@@ -40,7 +40,7 @@ export function StudioQuoteSection() {
 export function ExpertSection() {
   return (
     <section className="grid grid-cols-[.88fr_1.12fr] items-center gap-11 bg-[linear-gradient(110deg,#f5f5f7_0_39%,#fff_39%_100%)] px-[max(24px,calc((100%_-_1480px)/2))] py-[100px] tablet:grid-cols-1 tablet:gap-[27px] mobile:grid-cols-1 mobile:gap-[27px] mobile:py-[60px]">
-      <div className="mx-auto h-[320px] w-full max-w-[470px] tablet:h-[300px] mobile:h-[250px]"><ImageFrame className="rounded" image="photo-1580489944761-15a19d654956" imageAlt="Looksbay website designer working with a client" /></div>
+      <div className="mx-auto h-[320px] w-full max-w-[470px] overflow-hidden rounded-[10px] tablet:h-[300px] mobile:h-[250px]"><ImageFrame image="photo-1580489944761-15a19d654956" imageAlt="Looksbay website designer working with a client" /></div>
       <div>
         <span className="inline-block text-[15px] font-bold tracking-[.12em] text-blue">A SMALL, SPECIALIST STUDIO</span>
         <h2 className="mb-[11px] mt-2 text-[30px] font-semibold leading-[1.14] mobile:text-[25px]">Expert Squarespace Website Designer</h2>
@@ -48,9 +48,9 @@ export function ExpertSection() {
         <p className="my-[9px] text-sm leading-[1.6] text-muted">We believe a good website should be beautiful, easy to use, and practical to manage. Every decision is made with your people and your business in mind.</p>
         <Link href="/services" className="mt-1 inline-flex items-center gap-2 text-[15px] font-semibold tracking-[.05em] text-blue">READ MORE ABOUT OUR APPROACH <ArrowRight size={14} /></Link>
         <div className="mt-[18px] flex flex-wrap gap-[9px]">
-          <span className="min-w-[100px] border border-line p-3 text-[9px] leading-[1.5] text-muted">SQUARESPACE<br /><strong className="text-xs text-ink">Circle</strong> member</span>
-          <span className="min-w-[100px] border border-line p-3 text-[9px] leading-[1.5] text-muted">5.0 / 5<br /><strong className="text-xs text-ink">Client-rated</strong></span>
-          <span className="min-w-[100px] border border-line p-3 text-[9px] leading-[1.5] text-muted">INDEPENDENT<br /><strong className="text-xs text-ink">Studio</strong></span>
+          <span className="min-w-[100px] rounded-[10px] border border-line p-3 text-[9px] leading-[1.5] text-muted">SQUARESPACE<br /><strong className="text-xs text-ink">Circle</strong> member</span>
+          <span className="min-w-[100px] rounded-[10px] border border-line p-3 text-[9px] leading-[1.5] text-muted">5.0 / 5<br /><strong className="text-xs text-ink">Client-rated</strong></span>
+          <span className="min-w-[100px] rounded-[10px] border border-line p-3 text-[9px] leading-[1.5] text-muted">INDEPENDENT<br /><strong className="text-xs text-ink">Studio</strong></span>
         </div>
       </div>
     </section>
