@@ -1,38 +1,57 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { faqs } from "../data";
 
 export function FAQSection() {
-  return (
-    <section className="bg-paper relative overflow-hidden px-5 py-[120px] mobile:px-[18px] mobile:py-[70px]">
-      {/* Background Subtle Gradient Glow */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue/5 blur-[120px]" />
+  const [allOpen, setAllOpen] = useState(false);
 
-      <div className="relative z-10 mx-auto max-w-[820px]">
-        {/* Section Header */}
-        <div className="mb-12 text-center">
-          <span className="inline-block text-[13px] font-bold uppercase tracking-[.18em] text-blue">
-            GOOD QUESTIONS
-          </span>
-          <h2 className="mb-0 mt-2 text-[36px] font-extrabold tracking-tight text-ink mobile:text-[28px]">
-            Frequently Asked Questions
-          </h2>
+  return (
+    <section className="bg-[#FAFAFC] py-24 md:py-32 px-6 lg:px-12">
+      {/* Container width max-w-[1480px] */}
+      <div className="mx-auto w-full max-w-[1480px]">
+        
+        {/* Header Section */}
+        <div className="mb-14 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+          <div>
+            <p className="mb-3 text-[14px] font-semibold uppercase tracking-[0.25em] text-[#2761EB]">
+              Good Questions
+            </p>
+            <h2 className="text-[42px] font-extrabold tracking-tight text-[#1D1D1F] sm:text-[54px] md:text-[64px] leading-[1.04]">
+              Questions? Answers.
+            </h2>
+          </div>
+          
+          {/* Expand All Toggle Link */}
+          <div className="shrink-0 pb-1">
+            <button
+              type="button"
+              onClick={() => setAllOpen(!allOpen)}
+              className="inline-flex items-center gap-2 text-[15px] font-semibold text-[#2761EB] hover:underline"
+            >
+              <span>{allOpen ? "Collapse all" : "Expand all"}</span>
+              <ChevronDown className={`h-4 w-4 transition-transform duration-300 ${allOpen ? "rotate-180" : ""}`} />
+            </button>
+          </div>
         </div>
 
-        {/* FAQ Accordions */}
-        <div className="space-y-4">
+        {/* Accordions with Larger Typography */}
+        <div className="border-t border-black/10">
           {faqs.map(([question, answer]) => (
             <details
-              className="group rounded-2xl border border-line bg-white/70 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-blue/40 hover:bg-white hover:shadow-md"
+              open={allOpen ? true : undefined}
+              className="group border-b border-black/10 py-7 transition-colors duration-200"
               key={question}
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-5 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden mobile:text-base">
-                <span>{question}</span>
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue/10 text-blue transition-all duration-300 group-open:rotate-45 group-open:bg-blue group-open:text-white">
-                  <Plus className="h-5 w-5" />
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-8 text-[21px] sm:text-[24px] md:text-[26px] font-bold tracking-tight text-[#1D1D1F] [&::-webkit-details-marker]:hidden hover:text-[#2761EB] transition-colors">
+                <span className="leading-[1.25]">{question}</span>
+                <span className="shrink-0 text-[#86868B] transition-transform duration-300 group-open:rotate-180 group-open:text-[#1D1D1F]">
+                  <ChevronDown className="h-6 w-6" />
                 </span>
               </summary>
-              <p className="mb-0 mt-4 max-w-[720px] text-[15px] leading-[1.65] text-muted mobile:text-sm">
+              <p className="mb-0 mt-5 max-w-[1200px] text-[17px] sm:text-[18px] leading-[1.65] text-[#515154]">
                 {answer}
               </p>
             </details>
@@ -40,15 +59,16 @@ export function FAQSection() {
         </div>
 
         {/* Footer Link */}
-        <p className="mt-10 text-center text-base font-medium text-muted">
-          More questions?{" "}
+        <p className="mt-14 text-left text-[17px] font-normal text-[#6E6E73]">
+          Still have questions?{" "}
           <Link
-            className="font-semibold text-blue underline underline-offset-4 transition-opacity hover:opacity-80"
+            className="font-semibold text-[#2761EB] hover:underline"
             href="/contact"
           >
             Let’s talk.
           </Link>
         </p>
+
       </div>
     </section>
   );

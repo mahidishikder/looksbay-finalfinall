@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
 const servicesData = [
   {
@@ -23,58 +24,64 @@ const servicesData = [
 
 export function ServicesSection() {
   return (
-    <section className="bg-[#F5F5F7] px-6 py-[100px] mobile:px-[18px] mobile:py-[60px]">
-      {/* Section Header */}
-      <div className="mb-14 text-center">
-        <span className="inline-block text-[14px] font-bold tracking-[.14em] text-[#2761EB] uppercase">
-          MADE FOR YOUR NEXT CHAPTER
-        </span>
-        <h2 className="mb-0 mt-2 text-[36px] font-bold tracking-tight text-[#1D1D1F] mobile:text-[28px]">
-          Squarespace Website Services
-        </h2>
-      </div>
+    <section className="relative overflow-hidden bg-[#EBF1FC] px-6 py-[100px] mobile:px-[18px] mobile:py-[60px]">
+      {/* Background Soft Glow behind Header */}
+      <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[700px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle,rgba(39,97,235,0.06)_0%,rgba(0,0,0,0)_70%)] blur-[120px]" />
 
-      {/* 3 Columns Grid */}
-      <div className="mx-auto grid max-w-[1480px] grid-cols-3 gap-8 tablet:grid-cols-2 mobile:grid-cols-1 mobile:gap-6">
-        {servicesData.map((service) => {
-          return (
-            <article 
-              key={service.cardTitle}
-              className="flex flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-white"
-            >
-              <div>
-                {/* Top Image Container */}
-                <div className="relative flex h-[280px] w-full items-center justify-center bg-[#EBECEE] px-6 py-6 mobile:h-[220px]">
-                  <img 
-                    src={service.image} 
-                    alt={service.cardTitle}
-                    className="h-full w-full object-contain"
-                  />
+      <div className="relative z-10 mx-auto max-w-[1480px]">
+        {/* Section Header with Gradient Title */}
+        <div className="mb-14 text-center">
+          <p className="mb-2 text-[13px] font-semibold tracking-[0.25em] text-[#2761EB] uppercase">
+            MADE FOR YOUR NEXT CHAPTER
+          </p>
+          <h2 className="mb-0 text-[36px] font-extrabold tracking-tight text-[#1D1D1F] sm:text-[42px] md:text-[48px] leading-[1.08] mobile:text-[28px]">
+            Squarespace Website Services
+          </h2>
+        </div>
+
+        {/* 3 Columns Grid */}
+        <div className="grid grid-cols-3 gap-8 tablet:grid-cols-2 mobile:grid-cols-1 mobile:gap-6">
+          {servicesData.map((service) => {
+            return (
+              <article 
+                key={service.cardTitle}
+                className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-black/5 bg-white transition-all duration-300 hover:border-[#2761EB]/30 hover:shadow-[0_12px_28px_rgba(39,97,235,0.08)]"
+              >
+                <div>
+                  {/* Top Image Container */}
+                  <div className="relative flex h-[280px] w-full items-center justify-center bg-[#EBECEE] px-6 py-6 transition-colors duration-300 group-hover:bg-[#E5E7EB] mobile:h-[220px]">
+                    <img 
+                      src={service.image} 
+                      alt={service.cardTitle}
+                      className="h-full w-full object-contain pointer-events-none select-none"
+                    />
+                  </div>
+
+                  {/* Card Content Header & Body */}
+                  <div className="px-8 pt-7 pb-2 text-center mobile:px-6">
+                    <h3 className="mb-3 text-[22px] font-bold tracking-tight text-[#1D1D1F]">
+                      {service.cardTitle}
+                    </h3>
+                    <p className="m-0 text-[15px] leading-[1.65] text-[#56555d]">
+                      {service.description}
+                    </p>
+                  </div>
                 </div>
 
-                {/* Card Content Header & Body */}
-                <div className="px-8 pt-7 pb-2 text-center mobile:px-6">
-                  <h3 className="mb-3 text-[22px] font-bold tracking-tight text-[#1D1D1F]">
-                    {service.cardTitle}
-                  </h3>
-                  <p className="m-0 text-[15px] leading-[1.65] text-[#56555d]">
-                    {service.description}
-                  </p>
+                {/* Bottom Live Action Button */}
+                <div className="px-8 pb-8 pt-6 text-center mobile:px-6 mobile:pb-6">
+                  <Link 
+                    href={service.href} 
+                    className="group/btn inline-flex items-center justify-center gap-2 rounded-full border border-[#2761EB]/30 bg-[#2761EB]/5 px-8 py-3.5 text-[14px] font-bold uppercase tracking-[0.05em] text-[#2761EB] backdrop-blur-md transition-all duration-300 hover:border-[#2761EB] hover:bg-[#2761EB] hover:text-white hover:shadow-[0_8px_20px_rgba(39,97,235,0.25)]"
+                  >
+                    <span>VIEW SERVICE</span>
+                    <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </Link>
                 </div>
-              </div>
-
-              {/* Bottom Button Action */}
-              <div className="px-8 pb-8 pt-6 text-center mobile:px-6 mobile:pb-6">
-                <Link 
-                  href={service.href} 
-                  className="inline-flex items-center justify-center rounded-full bg-[#2761EB] px-8 py-3.5 text-[14px] font-bold uppercase tracking-[0.05em] text-white"
-                >
-                  VIEW SERVICE
-                </Link>
-              </div>
-            </article>
-          );
-        })}
+              </article>
+            );
+          })}
+        </div>
       </div>
     </section>
   );
