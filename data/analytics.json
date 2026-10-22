@@ -1,48 +1,5 @@
 {
-  "daily": {
-    "2026-10-16": {
-      "visitors": 43,
-      "pageviews": 129,
-      "visitorIds": []
-    },
-    "2026-10-17": {
-      "visitors": 44,
-      "pageviews": 133,
-      "visitorIds": []
-    },
-    "2026-10-18": {
-      "visitors": 51,
-      "pageviews": 153,
-      "visitorIds": []
-    },
-    "2026-10-19": {
-      "visitors": 56,
-      "pageviews": 182,
-      "visitorIds": []
-    },
-    "2026-10-20": {
-      "visitors": 64,
-      "pageviews": 201,
-      "visitorIds": []
-    },
-    "2026-10-21": {
-      "visitors": 68,
-      "pageviews": 206,
-      "visitorIds": []
-    },
-    "2026-10-22": {
-      "visitors": 77,
-      "pageviews": 244,
-      "visitorIds": []
-    }
-  },
-  "pages": {
-    "/": 342,
-    "/templates": 284,
-    "/services/custom-developer": 196,
-    "/services/squarespace-seo": 142,
-    "/portfolio": 165,
-    "/contact": 88
-  },
+  "daily": {},
+  "pages": {},
   "recent": []
 }
