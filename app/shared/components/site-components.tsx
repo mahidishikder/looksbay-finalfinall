@@ -210,7 +210,10 @@ export function Footer() {
         <div className="mt-8 flex w-full items-center justify-between border-t border-line py-4 text-[13px] text-muted mobile:flex-col mobile:gap-1.5">
           <span>© 2026 Looksbay Studio. All rights reserved.</span>
           <a className="transition-colors hover:text-blue" href="mailto:hello@looksbay.com">hello@looksbay.com</a>
-          <span>Made thoughtfully, in Squarespace.</span>
+          <div className="flex items-center gap-3">
+            <span>Made thoughtfully, in Squarespace.</span>
+            <Link href="/admin" className="text-black/30 hover:text-[#0077ED] transition-colors" title="Admin Portal">Admin</Link>
+          </div>
         </div>
       </div>
     </footer>

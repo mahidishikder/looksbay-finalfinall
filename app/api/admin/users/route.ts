@@ -16,6 +16,18 @@ function getStoredUsers(): any[] {
   }
 }
 
+function saveUsers(users: any[]) {
+  try {
+    const dataDir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2), "utf-8");
+  } catch (error) {
+    console.error("Error writing subscribers file:", error);
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format");
@@ -48,4 +60,23 @@ export async function GET(request: Request) {
     count: users.length,
     users,
   });
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("id");
+
+    if (!userId) {
+      return NextResponse.json({ error: "User ID required" }, { status: 400 });
+    }
+
+    let users = getStoredUsers();
+    users = users.filter((u) => u.id !== userId);
+    saveUsers(users);
+
+    return NextResponse.json({ message: "User deleted successfully", count: users.length });
+  } catch (error) {
+    return NextResponse.json({ error: "Failed to delete user" }, { status: 500 });
+  }
 }
