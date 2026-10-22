@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { ArrowRight, X } from "lucide-react";
+import { ArrowRight, X, User } from "lucide-react";
 import { menuCards } from "../data/menu-cards";
+import { useAuth } from "../context/auth-context";
 
 const navigationLinks = [
   ["Home", "/"],
@@ -15,6 +16,7 @@ const navigationLinks = [
 ];
 
 export function MobileNavigation() {
+  const { user, openAuth, logout } = useAuth();
   const [isMounted, setIsMounted] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showServices, setShowServices] = useState(false);
@@ -140,7 +142,38 @@ export function MobileNavigation() {
             </div>
           </div>
 
-          <div className="pt-6">
+          <div className="space-y-3 pt-6 border-t border-black/5 mt-4">
+            {!user ? (
+              <button
+                type="button"
+                onClick={() => {
+                  closeMenu();
+                  openAuth("login");
+                }}
+                className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full border border-black/10 bg-[#f5f5f7] text-base font-bold text-[#1d1d1f] transition-all hover:bg-white"
+              >
+                <User size={18} />
+                <span>Log In / Sign Up</span>
+              </button>
+            ) : (
+              <div className="flex items-center justify-between rounded-2xl bg-[#f5f5f7] p-3">
+                <div className="truncate pr-2">
+                  <p className="text-xs font-bold text-[#1d1d1f] truncate">{user.name}</p>
+                  <p className="text-[11px] text-[#86868b] truncate">{user.email}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    closeMenu();
+                  }}
+                  className="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-100"
+                >
+                  Sign Out
+                </button>
+              </div>
+            )}
+
             <Link
               href="/contact"
               className="flex min-h-[56px] w-full items-center justify-center rounded-full bg-[#0077ed] text-base font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#0062c4]"

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Facebook, Instagram, Linkedin, ChevronDown, ArrowRight } from "lucide-react";
 import { MobileNavigation } from "./mobile-navigation";
+import { HeaderAuth } from "./header-auth";
 import { menuCards } from "../data/menu-cards";
 
 function SocialLinks({ className = "" }: { className?: string }) {
@@ -155,10 +156,8 @@ export function Header() {
           </nav>
         </div>
        
-        <div className="desktop-header-only desktop-header-actions flex items-center gap-12 pl-2 tablet:hidden mobile:hidden">
-          <div className="flex items-center rounded-[16px] border border-[#e7edf7] bg-[#f5f7fb] p-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.9)]">
-            <SocialLinks />
-          </div>
+        <div className="desktop-header-only desktop-header-actions flex items-center gap-5 pl-2 tablet:hidden mobile:hidden">
+          <HeaderAuth />
           <Link href="/contact" className="inline-flex min-h-[52px] shrink-0 items-center justify-center whitespace-nowrap rounded-full bg-[#0077ED] px-[22px] text-[17px] font-bold text-white transition hover:bg-[#0062C4]">Book a call</Link>
         </div>
 
