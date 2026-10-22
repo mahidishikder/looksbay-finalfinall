@@ -1,5 +1,21 @@
 {
-  "daily": {},
-  "pages": {},
-  "recent": []
+  "daily": {
+    "2026-10-22": {
+      "visitors": 1,
+      "pageviews": 1,
+      "visitorIds": [
+        "v_42pg0zqmvjdrkko"
+      ]
+    }
+  },
+  "pages": {
+    "/contact": 1
+  },
+  "recent": [
+    {
+      "path": "/contact",
+      "timestamp": "2026-10-22T10:10:41.609Z",
+      "referrer": "Direct"
+    }
+  ]
 }

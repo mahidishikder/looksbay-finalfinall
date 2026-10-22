@@ -1,57 +1,5 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const DATA_FILE = path.join(process.cwd(), "data", "analytics.json");
-
-interface AnalyticsData {
-  daily: {
-    [date: string]: {
-      visitors: number;
-      pageviews: number;
-      visitorIds: string[];
-    };
-  };
-  pages: {
-    [pathname: string]: number;
-  };
-  recent: {
-    path: string;
-    timestamp: string;
-    referrer?: string;
-  }[];
-}
-
-function getStoredAnalytics(): AnalyticsData {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      const dataDir = path.dirname(DATA_FILE);
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      const initial: AnalyticsData = { daily: {}, pages: {}, recent: [] };
-      fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2), "utf-8");
-      return initial;
-    }
-
-    const content = fs.readFileSync(DATA_FILE, "utf-8");
-    return JSON.parse(content || "{}");
-  } catch (error) {
-    return { daily: {}, pages: {}, recent: [] };
-  }
-}
-
-function saveAnalytics(data: AnalyticsData) {
-  try {
-    const dataDir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), "utf-8");
-  } catch (error) {
-    console.error("Error saving analytics:", error);
-  }
-}
+import { getAnalyticsData, saveAnalyticsData } from "@/lib/db";
 
 export async function POST(request: Request) {
   try {
@@ -72,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ignored: true });
     }
 
-    const data = getStoredAnalytics();
+    const data = await getAnalyticsData();
     if (!data.daily) data.daily = {};
     if (!data.pages) data.pages = {};
     if (!data.recent) data.recent = [];
@@ -87,10 +35,10 @@ export async function POST(request: Request) {
       };
     }
 
-    // 100% Real Pageview Increment
+    // Real Pageview Increment
     data.daily[today].pageviews += 1;
 
-    // 100% Real Unique Visitor Check
+    // Real Unique Visitor Check
     const cleanVid = visitorId || "v_real_" + Date.now().toString(36);
     if (!data.daily[today].visitorIds) data.daily[today].visitorIds = [];
     if (!data.daily[today].visitorIds.includes(cleanVid)) {
@@ -98,10 +46,10 @@ export async function POST(request: Request) {
       data.daily[today].visitors += 1;
     }
 
-    // 100% Real Page Route Count
+    // Real Page Route Count
     data.pages[pagePath] = (data.pages[pagePath] || 0) + 1;
 
-    // 100% Real Recent Visitor Log
+    // Real Recent Visitor Log
     data.recent.unshift({
       path: pagePath,
       timestamp: new Date().toISOString(),
@@ -109,7 +57,7 @@ export async function POST(request: Request) {
     });
     if (data.recent.length > 50) data.recent.pop();
 
-    saveAnalytics(data);
+    await saveAnalyticsData(data);
 
     return NextResponse.json({
       success: true,

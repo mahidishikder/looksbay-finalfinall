@@ -1,26 +1,9 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-
-const DATA_FILE = path.join(process.cwd(), "data", "analytics.json");
+import { getAnalyticsData } from "@/lib/db";
 
 export async function GET() {
   try {
-    if (!fs.existsSync(DATA_FILE)) {
-      return NextResponse.json({
-        todayVisitors: 0,
-        todayPageviews: 0,
-        yesterdayVisitors: 0,
-        totalVisitors: 0,
-        totalPageviews: 0,
-        dailyTrend: [],
-        topPages: [],
-        recentVisits: [],
-      });
-    }
-
-    const content = fs.readFileSync(DATA_FILE, "utf-8");
-    const data = JSON.parse(content || "{}");
+    const data = await getAnalyticsData();
 
     const todayKey = new Date().toISOString().split("T")[0];
     const yesterday = new Date();

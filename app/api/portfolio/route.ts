@@ -1,41 +1,9 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import { projects as defaultProjects, type Project } from "@/app/(pages)/portfolio/data";
-
-const DATA_FILE = path.join(process.cwd(), "data", "portfolio.json");
-
-function getStoredProjects(): Project[] {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      const dataDir = path.dirname(DATA_FILE);
-      if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-      }
-      fs.writeFileSync(DATA_FILE, JSON.stringify(defaultProjects, null, 2), "utf-8");
-      return defaultProjects;
-    }
-    const content = fs.readFileSync(DATA_FILE, "utf-8");
-    return JSON.parse(content || "[]");
-  } catch (error) {
-    return defaultProjects;
-  }
-}
-
-function saveProjects(items: Project[]) {
-  try {
-    const dataDir = path.dirname(DATA_FILE);
-    if (!fs.existsSync(dataDir)) {
-      fs.mkdirSync(dataDir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE, JSON.stringify(items, null, 2), "utf-8");
-  } catch (error) {
-    console.error("Error saving portfolio projects:", error);
-  }
-}
+import { getPortfolioItems, addPortfolioItem, deletePortfolioItem } from "@/lib/db";
+import type { Project } from "@/app/(pages)/portfolio/data";
 
 export async function GET() {
-  const items = getStoredProjects();
+  const items = await getPortfolioItems();
   return NextResponse.json({ count: items.length, projects: items });
 }
 
@@ -48,7 +16,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Project name and image URL are required" }, { status: 400 });
     }
 
-    const items = getStoredProjects();
     const newProject: Project = {
       name: name.trim(),
       kind: kind || "Custom Squarespace Website",
@@ -60,8 +27,7 @@ export async function POST(request: Request) {
       hearts: hearts || 500 + Math.floor(Math.random() * 400),
     };
 
-    items.unshift(newProject);
-    saveProjects(items);
+    await addPortfolioItem(newProject);
 
     return NextResponse.json({ message: "Portfolio project created successfully", project: newProject }, { status: 201 });
   } catch (error) {
@@ -78,9 +44,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Project name is required" }, { status: 400 });
     }
 
-    let items = getStoredProjects();
-    items = items.filter((p) => p.name.toLowerCase() !== projectName.toLowerCase());
-    saveProjects(items);
+    await deletePortfolioItem(projectName);
+    const items = await getPortfolioItems();
 
     return NextResponse.json({ message: "Project deleted successfully", count: items.length });
   } catch (error) {
