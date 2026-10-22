@@ -1,0 +1,481 @@
+export type TemplateData = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string;
+  description: string;
+  price: string;
+  originalPrice: string;
+  customizationPrice: string;
+  categories: string[];
+  image: string;
+  alt: string;
+  demoUrl: string;
+  accentColor: string;
+  pagesIncluded: string[];
+  features: {
+    title: string;
+    description: string;
+  }[];
+  mockups: {
+    desktop: string;
+    mobile: string;
+    tablet: string;
+    gallery: { name: string; image: string }[];
+  };
+};
+
+export const allTemplates: TemplateData[] = [
+  {
+    id: "robins",
+    slug: "robins",
+    name: "Robins",
+    tagline: "Ultra-chic editorial website template for high-end designers and visual artists.",
+    description:
+      "Robins is designed for creatives who command premium rates. Built on Squarespace 7.1 Fluid Engine with graceful typography, asymmetrical grids, and seamless mobile responsiveness.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Designer", "Creative", "Photography", "Social Media"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Robins Squarespace website template demo",
+    demoUrl: "https://robins-template.squarespace.com",
+    accentColor: "#E0F2FE",
+    pagesIncluded: [
+      "Home — Editorial Landing Page",
+      "About — Founder & Studio Story",
+      "Services & Packages",
+      "Portfolio — Case Studies Grid",
+      "Single Project Detail Page",
+      "Shop — Digital Products & Merch",
+      "Journal / Blog & Article Page",
+      "Contact & Project Inquiry Form",
+      "Custom 404 & Social Bio Link",
+    ],
+    features: [
+      {
+        title: "Squarespace 7.1 Fluid Engine",
+        description: "Full drag-and-drop flexibility. Move blocks anywhere on the grid without touching a single line of code.",
+      },
+      {
+        title: "Pre-Injected Custom CSS",
+        description: "Includes bespoke hover micro-animations, glassmorphism cards, and refined typography styling.",
+      },
+      {
+        title: "100% Mobile Optimized",
+        description: "Handcrafted responsive layouts tuned for iOS Safari, Chrome, and all tablet viewports.",
+      },
+      {
+        title: "6-Month Extended Free Trial",
+        description: "Take up to 6 months to build and launch (normally only 14 days) courtesy of our Circle Platinum Partner status.",
+      },
+      {
+        title: "20% Off Squarespace Plan",
+        description: "Enjoy an automatic 20% discount on your first year of any Squarespace annual subscription.",
+      },
+      {
+        title: "Step-by-Step Video Training",
+        description: "Comprehensive recorded tutorials showing you exactly how to customize images, copy, colors, and domains.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [
+        {
+          name: "Homepage Layout",
+          image:
+            "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+        },
+        {
+          name: "About & Story Page",
+          image:
+            "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=1000w",
+        },
+        {
+          name: "Services & Pricing Tiers",
+          image:
+            "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+        },
+      ],
+    },
+  },
+  {
+    id: "perfectionist",
+    slug: "perfectionist",
+    name: "Perfectionist",
+    tagline: "Minimalist luxury aesthetic for modern coaches, creatives, and visual studios.",
+    description:
+      "Perfectionist delivers clean lines, generous breathing room, and structured conversion flows. Ideal for consultants, photographers, and studios looking to highlight their craft.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Designer", "Photography", "Startup", "Coaching"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Perfectionist Squarespace website template demo",
+    demoUrl: "https://perfectionist-template.squarespace.com",
+    accentColor: "#FEF08A",
+    pagesIncluded: [
+      "Home — Clean Studio Portfolio",
+      "About — Philosophy & Mission",
+      "Services — Signature Offerings",
+      "Case Studies Grid",
+      "Resources & Freebies",
+      "Blog & Editorial Notes",
+      "Contact & Booking Form",
+      "Custom Instagram Link in Bio",
+    ],
+    features: [
+      {
+        title: "Fluid Engine 7.1 Architecture",
+        description: "Zero restrictions. Drag photos, text blocks, and buttons anywhere on screen.",
+      },
+      {
+        title: "Conversion-Focused Booking",
+        description: "Pre-integrated with Acuity Scheduling, Calendly, and Squarespace native forms.",
+      },
+      {
+        title: "SEO Pre-Configured",
+        description: "Structured heading hierarchy, schema markup tags, and fast image optimization.",
+      },
+      {
+        title: "Circle Partner Perks",
+        description: "6 months extended building time + 20% off your annual Squarespace subscription.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [
+        {
+          name: "Home Showcase",
+          image:
+            "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+        },
+      ],
+    },
+  },
+  {
+    id: "launchday",
+    slug: "launchday",
+    name: "Launchday",
+    tagline: "High-impact sales page and course launch template built for creators and startups.",
+    description:
+      "Engineered specifically to convert cold traffic into buyers. Includes dedicated long-form sales pages, video testimonials, tiered pricing tables, and FAQ accordions.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Sales Pages", "Startup", "Finance", "Course Creator"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Launchday Squarespace website template demo",
+    demoUrl: "https://launchday-template.squarespace.com",
+    accentColor: "#FCE7F3",
+    pagesIncluded: [
+      "Home — Product Launch Landing",
+      "Sales Page — Long-form Offer",
+      "Curriculum & Module Breakdown",
+      "Pricing Tiers & Checkout",
+      "Wall of Love / Reviews",
+      "About the Instructor / Founder",
+      "Contact & FAQ",
+    ],
+    features: [
+      {
+        title: "High-Converting Sales Structure",
+        description: "Proven copy prompts and layout psychology tested across digital products.",
+      },
+      {
+        title: "Stripe & PayPal Integration",
+        description: "Accept credit cards, Apple Pay, and installments with zero Squarespace transaction fees.",
+      },
+      {
+        title: "Fluid Engine Drag & Drop",
+        description: "Reorder sales blocks, timers, and testimonials in seconds.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "stories",
+    slug: "stories",
+    name: "Stories",
+    tagline: "Editorial storytelling experience for modern wedding planners and interior designers.",
+    description:
+      "A soulful, magazine-style layout celebrating visual narratives, intimate photography, and client testimonials.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Blogging", "Interior Design", "Wedding", "Course Creator"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Stories Squarespace website template demo",
+    demoUrl: "https://stories-template.squarespace.com",
+    accentColor: "#EDE9FE",
+    pagesIncluded: [
+      "Home — Magazine Cover Style",
+      "About the Team",
+      "Full Services & Inquiries",
+      "Gallery Showcase",
+      "Journal & Blog Feed",
+      "Contact",
+    ],
+    features: [
+      {
+        title: "Editorial Typography",
+        description: "Curated serif & sans-serif pairings creating instant luxury appeal.",
+      },
+      {
+        title: "Full Responsive Layout",
+        description: "Photos automatically reflow into gorgeous vertical storytelling on mobile screens.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "good-vibes",
+    slug: "good-vibes",
+    name: "Good Vibes",
+    tagline: "Vibrant and welcoming template for wellness clinics, therapists, and holistic coaches.",
+    description:
+      "Warm, calming color palette, soothing layouts, and effortless navigation designed to put clients immediately at ease.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Wellness", "Therapist", "Coaching", "Non-profit"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Good Vibes Squarespace website template demo",
+    demoUrl: "https://goodvibes-template.squarespace.com",
+    accentColor: "#DCFCE7",
+    pagesIncluded: [
+      "Home — Calming Welcoming Experience",
+      "About the Practice & Credentials",
+      "Services & Modalities",
+      "FAQ & Insurance Info",
+      "Booking & Schedule",
+      "Contact",
+    ],
+    features: [
+      {
+        title: "Acuity Booking Integration",
+        description: "Let clients schedule appointments directly into your calendar.",
+      },
+      {
+        title: "HIPAA & Privacy Notice Layouts",
+        description: "Pre-formatted legal disclaimer and privacy policy sections.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "social-motion",
+    slug: "social-motion",
+    name: "Social Motion",
+    tagline: "Dynamic, video-friendly template for social media agencies and content creators.",
+    description:
+      "Bold headings, interactive reel embeds, testimonial sliders, and transparent package pricing tables.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Social Media", "E-Commerce", "Photography", "Designer"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Social Motion Squarespace website template demo",
+    demoUrl: "https://socialmotion-template.squarespace.com",
+    accentColor: "#FFEDD5",
+    pagesIncluded: [
+      "Home — Dynamic Video Showcase",
+      "Services & Retainers",
+      "Case Studies & Metrics",
+      "Client Results",
+      "Shop / Presets",
+      "Contact",
+    ],
+    features: [
+      {
+        title: "Video Reel Integrations",
+        description: "Autoplay background loops and responsive video embeds that load fast.",
+      },
+      {
+        title: "Metrics & Stats Badges",
+        description: "Highlight follower growth, impressions, and ROI for prospective clients.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "vanguard",
+    slug: "vanguard",
+    name: "Vanguard",
+    tagline: "Corporate prestige and authoritative trust for legal firms, finance, and advisory practices.",
+    description:
+      "Deep navy tones, structured practice area grids, attorney bio cards, and quick consultation request flows.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Lawyer", "Finance", "Consultancy", "Real Estate"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Vanguard Squarespace website template demo",
+    demoUrl: "https://vanguard-template.squarespace.com",
+    accentColor: "#E0F2FE",
+    pagesIncluded: [
+      "Home — Authoritative Firm Overview",
+      "Practice Areas",
+      "Our Partners & Team",
+      "Case Results & Insights",
+      "Consultation Booking",
+      "Contact",
+    ],
+    features: [
+      {
+        title: "Enterprise Confidence",
+        description: "Built to convey immediate credibility, discretion, and track record.",
+      },
+      {
+        title: "Encrypted Inquiries",
+        description: "Connect securely with Google Workspace, HubSpot, or custom CRM.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "haven",
+    slug: "haven",
+    name: "Haven",
+    tagline: "Warm, architectural elegance for real estate developers and luxury property consultants.",
+    description:
+      "Showcase luxury listings, neighbourhood guides, and client success stories with high-resolution gallery sliders.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Real Estate", "Interior Design", "Lawyer", "Consultancy"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Haven Squarespace website template demo",
+    demoUrl: "https://haven-template.squarespace.com",
+    accentColor: "#FEF08A",
+    pagesIncluded: [
+      "Home — Property Showcase",
+      "Featured Listings Grid",
+      "Property Detail Page",
+      "About the Agent / Brokerage",
+      "Neighbourhood Guides",
+      "Contact & Valuation Request",
+    ],
+    features: [
+      {
+        title: "MLS & Property Integration",
+        description: "Clean card layouts designed for quick virtual tours and listing specs.",
+      },
+      {
+        title: "Valuation Lead Capture",
+        description: "Built-in lead magnets to collect prospective seller inquiries.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+  {
+    id: "common-ground",
+    slug: "common-ground",
+    name: "Common Ground",
+    tagline: "Purpose-driven design for non-profits, foundations, and community impact organizations.",
+    description:
+      "Highlight missions, donation drives, volunteer onboarding, and annual impact reports with inspiring visual clarity.",
+    price: "180.00",
+    originalPrice: "225.00",
+    customizationPrice: "580.00",
+    categories: ["Non-profit", "Consultancy", "Wellness", "Therapist"],
+    image:
+      "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=750w",
+    alt: "Common Ground Squarespace website template demo",
+    demoUrl: "https://commonground-template.squarespace.com",
+    accentColor: "#FCE7F3",
+    pagesIncluded: [
+      "Home — Mission & Story",
+      "Our Impact & Annual Metrics",
+      "Get Involved / Volunteer",
+      "Donate / Sponsor",
+      "Blog & News",
+      "Contact",
+    ],
+    features: [
+      {
+        title: "Donation Engine Ready",
+        description: "Easily accept one-time or recurring contributions with Donorbox or Squarespace payments.",
+      },
+      {
+        title: "Volunteer Onboarding",
+        description: "Streamlined forms for community signups and newsletter subscriptions.",
+      },
+    ],
+    mockups: {
+      desktop:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1500w",
+      mobile:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/928774f4-b66c-4833-9a06-5c2bcc2726a6/vivienne-squarespace-template-cover.jpg?format=750w",
+      tablet:
+        "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/744cada9-9614-4053-b913-94168433649a/social-motion-squarespace-template-cover.jpg?format=1000w",
+      gallery: [],
+    },
+  },
+];

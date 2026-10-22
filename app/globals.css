@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply m-0 bg-paper font-sans text-base leading-[1.7] text-ink antialiased;
+  }
+
+  button,
+  select {
+    @apply cursor-pointer;
+  }
+
+  button {
+    @apply rounded-full;
+  }
+
+  ::selection {
+    background: #cce4ff;
+    color: #1d1d1f;
+  }
+}
+
+.gradient-heading {
+  background-image: linear-gradient(100deg, #092a40 0%, #5c87aa 100%);
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.apple-gradient-heading {
+  background: linear-gradient(90deg, #0077ed 0%, #8e52f6 32%, #f43f5e 68%, #ff6b00 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+.site-container {
+  width: min(1480px, calc(100% - 48px));
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 560px) {
+  .site-container {
+    width: calc(100% - 32px);
+  }
+}
+
+@keyframes mobile-menu-item-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.mobile-menu-item {
+  animation: mobile-menu-item-enter 420ms both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-menu-item {
+    animation: none;
+  }
+}
+
+@media (min-width: 801px) and (max-width: 1100px) {
+  .desktop-header-actions {
+    display: none;
+  }
+
+  .desktop-header-nav {
+    gap: 16px;
+    transform: none;
+  }
+
+  .desktop-header-nav > a,
+  .desktop-header-nav .group\/nav > a {
+    font-size: 15px;
+  }
+}

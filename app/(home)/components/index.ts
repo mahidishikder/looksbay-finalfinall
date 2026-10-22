@@ -1,0 +1,10 @@
+export { AgencySection } from "./about-sections";
+export { BlogSection } from "./blog-section";
+export { ContactSection } from "./contact-section";
+export { FAQSection } from "./faq-section";
+export { HeroSection } from "./hero-section";
+export { IntroBenefitsSection } from "./intro-benefits-section";
+export { PortfolioProjectsSection } from "./portfolio-projects-section";
+export { FeaturedProjectSection, SquarespaceTemplatesSection } from "./squarespace-templates-section";
+export { ServicesSection } from "./services-section";
+export { TestimonialsSection } from "./testimonials-section";
