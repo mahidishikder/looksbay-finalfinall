@@ -25,6 +25,16 @@ import {
   Activity,
   ArrowUpRight,
   ShieldCheck,
+  MessageCircle,
+  Table as TableIcon,
+  LayoutGrid,
+  Eye,
+  Check,
+  Phone,
+  MessageSquare,
+  Clock,
+  DollarSign,
+  FileText,
 } from "lucide-react";
 import { allTemplates as defaultTemplates } from "@/app/shared/data/templates-data";
 
@@ -40,9 +50,12 @@ interface Inquiry {
   id: string;
   name: string;
   email: string;
+  whatsapp?: string;
+  phone?: string;
   project: string;
   budget: string;
   message: string;
+  template?: string;
   status: "New" | "Contacted" | "Proposal Sent" | "Closed";
   createdAt: string;
 }
@@ -103,6 +116,11 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Inquiries view & filter state
+  const [inquiryFilterStatus, setInquiryFilterStatus] = useState<string>("all");
+  const [inquiryViewMode, setInquiryViewMode] = useState<"table" | "cards">("table");
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
 
   // Modals state
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
@@ -253,11 +271,32 @@ export default function AdminDashboardPage() {
       const res = await fetch(`/api/contact?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setInquiries((prev) => prev.filter((i) => i.id !== id));
+        if (selectedInquiry?.id === id) setSelectedInquiry(null);
         showToast("Inquiry removed");
       }
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const copyInquiryEmails = () => {
+    const emails = inquiries.map((i) => i.email).filter(Boolean).join(", ");
+    if (!emails) {
+      showToast("No client emails to copy");
+      return;
+    }
+    navigator.clipboard.writeText(emails);
+    showToast("Client emails copied to clipboard");
+  };
+
+  const copyTextToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    showToast(`${label} copied to clipboard`);
+  };
+
+  const formatCleanPhone = (phone?: string) => {
+    if (!phone) return "";
+    return phone.replace(/[^0-9]/g, "");
   };
 
   const handleAddLead = async (e: React.FormEvent) => {
@@ -436,13 +475,21 @@ export default function AdminDashboardPage() {
 
   // Filtered inquiries
   const filteredInquiries = inquiries.filter((inq) => {
-    const q = searchQuery.toLowerCase();
-    return (
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
       inq.name.toLowerCase().includes(q) ||
       inq.email.toLowerCase().includes(q) ||
+      (inq.whatsapp && inq.whatsapp.toLowerCase().includes(q)) ||
+      (inq.phone && inq.phone.toLowerCase().includes(q)) ||
       inq.project.toLowerCase().includes(q) ||
-      inq.status.toLowerCase().includes(q)
-    );
+      inq.message.toLowerCase().includes(q) ||
+      inq.status.toLowerCase().includes(q);
+
+    const matchesStatus =
+      inquiryFilterStatus === "all" || inq.status === inquiryFilterStatus;
+
+    return matchesSearch && matchesStatus;
   });
 
   // Scale for real chart
@@ -1060,37 +1107,120 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Recent Leads */}
-              <div className="rounded-2xl border border-white/[0.08] bg-[#111624] p-5">
-                <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
-                  <h3 className="text-sm font-bold text-white">Recent Member Sign-ups</h3>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab("leads")}
-                    className="text-xs font-semibold text-[#0077ED] hover:underline"
-                  >
-                    View All
-                  </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Recent Member Sign-ups */}
+                <div className="rounded-2xl border border-white/[0.08] bg-[#111624] p-5">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Users size={15} className="text-[#0077ED]" />
+                      <h3 className="text-sm font-bold text-white">Recent Member Sign-ups</h3>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("leads")}
+                      className="text-xs font-semibold text-[#0077ED] hover:underline"
+                    >
+                      View All
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {subscribers.slice(0, 5).map((u) => (
+                      <div
+                        key={u.id}
+                        className="flex items-center justify-between rounded-lg bg-[#090D16] p-2.5 border border-white/[0.04]"
+                      >
+                        <div>
+                          <p className="text-xs font-bold text-white">{u.name}</p>
+                          <p className="text-[11px] text-[#0077ED]">{u.email}</p>
+                        </div>
+                        <span className="text-[10px] text-[#637085]">
+                          {new Date(u.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                    {subscribers.length === 0 && (
+                      <p className="text-xs text-[#637085] py-2">No registered leads yet.</p>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  {subscribers.slice(0, 5).map((u) => (
-                    <div
-                      key={u.id}
-                      className="flex items-center justify-between rounded-lg bg-[#090D16] p-2.5 border border-white/[0.04]"
-                    >
-                      <div>
-                        <p className="text-xs font-bold text-white">{u.name}</p>
-                        <p className="text-[11px] text-[#0077ED]">{u.email}</p>
-                      </div>
-                      <span className="text-[10px] text-[#637085]">
-                        {new Date(u.createdAt).toLocaleDateString()}
-                      </span>
+                {/* Recent Client Inquiries */}
+                <div className="rounded-2xl border border-white/[0.08] bg-[#111624] p-5">
+                  <div className="flex items-center justify-between border-b border-white/[0.06] pb-3 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Inbox size={15} className="text-emerald-400" />
+                      <h3 className="text-sm font-bold text-white">Latest Client Inquiries</h3>
                     </div>
-                  ))}
-                  {subscribers.length === 0 && (
-                    <p className="text-xs text-[#637085] py-2">No registered leads yet.</p>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("inquiries")}
+                      className="text-xs font-semibold text-[#0077ED] hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>Inquiries Table ({inquiries.length})</span>
+                      <ArrowUpRight size={12} />
+                    </button>
+                  </div>
+
+                  <div className="space-y-2">
+                    {inquiries.slice(0, 5).map((inq) => {
+                      const cleanPhone = formatCleanPhone(inq.whatsapp || inq.phone);
+                      return (
+                        <div
+                          key={inq.id}
+                          className="flex items-center justify-between rounded-lg bg-[#090D16] p-2.5 border border-white/[0.04] hover:border-white/10 transition"
+                        >
+                          <div className="min-w-0 pr-2">
+                            <div className="flex items-center gap-2">
+                              <p className="text-xs font-bold text-white truncate">{inq.name}</p>
+                              <span
+                                className={`rounded px-1.5 py-0.2 text-[9px] font-bold ${
+                                  inq.status === "New"
+                                    ? "bg-blue-500/20 text-[#0077ED]"
+                                    : inq.status === "Contacted"
+                                    ? "bg-amber-500/20 text-amber-400"
+                                    : "bg-emerald-500/20 text-emerald-400"
+                                }`}
+                              >
+                                {inq.status}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px]">
+                              <span className="text-[#8E9BB0] truncate">{inq.project}</span>
+                              <span className="text-emerald-400 font-medium">({inq.budget})</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {cleanPhone && (
+                              <a
+                                href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${inq.name}, following up from Looksbay Studio regarding your ${inq.project} inquiry.`)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Chat on WhatsApp"
+                                className="grid size-7 place-items-center rounded-lg bg-[#25D366]/15 text-[#25D366] hover:bg-[#25D366] hover:text-white transition"
+                              >
+                                <MessageCircle size={13} />
+                              </a>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedInquiry(inq);
+                                setActiveTab("inquiries");
+                              }}
+                              className="rounded-lg bg-white/[0.06] hover:bg-white/10 px-2 py-1 text-[11px] font-medium text-white transition"
+                            >
+                              Details
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {inquiries.length === 0 && (
+                      <p className="text-xs text-[#637085] py-2">No client inquiries received yet.</p>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1179,102 +1309,541 @@ export default function AdminDashboardPage() {
 
           {/* TAB: INQUIRIES */}
           {activeTab === "inquiries" && (
-            <div className="space-y-4 animate-fade-in">
+            <div className="space-y-5 animate-fade-in">
+              {/* Header Box */}
               <div className="rounded-2xl border border-white/[0.08] bg-[#111624] p-5 sm:p-6 shadow-sm">
-                <div className="border-b border-white/[0.06] pb-4 mb-5 flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/[0.06] pb-4 mb-5">
                   <div>
-                    <h2 className="text-base font-bold text-white tracking-tight">Client Inquiries</h2>
-                    <span className="text-xs text-[#8E9BB0]">{inquiries.length} submissions</span>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base font-bold text-white tracking-tight">Client Inquiries &amp; Leads</h2>
+                      <span className="rounded-full bg-[#0077ED]/20 text-[#0077ED] border border-[#0077ED]/30 px-2 py-0.5 text-[11px] font-bold">
+                        {inquiries.length} submissions
+                      </span>
+                    </div>
+                    <span className="text-xs text-[#8E9BB0] mt-0.5 block">
+                      Direct client submissions from contact forms with verified WhatsApp and Email channels.
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={fetchData}
-                    className="text-xs font-semibold text-[#0077ED] hover:underline"
-                  >
-                    Refresh
-                  </button>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {filteredInquiries.map((inq) => (
-                    <div
-                      key={inq.id}
-                      className="rounded-xl border border-white/[0.08] bg-[#0D121F] p-4 flex flex-col justify-between"
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={copyInquiryEmails}
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/[0.08] transition"
                     >
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                              inq.status === "New"
-                                ? "bg-blue-500/20 text-[#0077ED]"
-                                : inq.status === "Contacted"
-                                ? "bg-amber-500/20 text-amber-400"
-                                : "bg-emerald-500/20 text-emerald-400"
-                            }`}
-                          >
-                            {inq.status}
-                          </span>
-                          <span className="text-[10px] text-[#637085]">
-                            {new Date(inq.createdAt).toLocaleDateString()}
-                          </span>
-                        </div>
+                      <Copy size={13} />
+                      <span>Copy Emails</span>
+                    </button>
 
-                        <h3 className="text-sm font-bold text-white">{inq.name}</h3>
-                        <a href={`mailto:${inq.email}`} className="text-xs text-[#0077ED] font-medium block">
-                          {inq.email}
-                        </a>
+                    <a
+                      href="/api/contact?format=csv"
+                      download
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/[0.08] transition"
+                    >
+                      <Download size={13} />
+                      <span>CSV Export</span>
+                    </a>
 
-                        <div className="mt-2 flex gap-2 text-[10px] text-[#8E9BB0]">
-                          <span className="rounded bg-white/[0.04] border border-white/10 px-1.5 py-0.5 font-medium">
-                            {inq.project}
-                          </span>
-                          <span className="rounded bg-white/[0.04] border border-white/10 px-1.5 py-0.5 font-medium text-emerald-400">
-                            {inq.budget}
-                          </span>
-                        </div>
-
-                        <p className="mt-2 text-xs text-[#8E9BB0] leading-relaxed line-clamp-2">
-                          {inq.message}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 pt-2.5 border-t border-white/[0.06] flex items-center justify-between">
-                        <select
-                          value={inq.status}
-                          onChange={(e) => updateInquiryStatus(inq.id, e.target.value as any)}
-                          className="rounded-lg border border-white/10 bg-[#090D16] text-white px-2 py-1 text-[11px] font-medium"
-                        >
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Proposal Sent">Proposal Sent</option>
-                          <option value="Closed">Closed</option>
-                        </select>
-
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={`mailto:${inq.email}`}
-                            className="inline-flex items-center gap-1 rounded-lg bg-[#0077ED] px-2.5 py-1 text-[11px] font-semibold text-white"
-                          >
-                            <Mail size={11} />
-                            <span>Reply</span>
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() => deleteInquiry(inq.id)}
-                            className="p-1 text-[#8E9BB0] hover:text-red-400"
-                          >
-                            <Trash2 size={12} />
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {filteredInquiries.length === 0 && (
-                    <div className="col-span-2 py-6 text-center text-[#637085] text-xs">
-                      No client inquiries received yet.
-                    </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={fetchData}
+                      title="Refresh inquiries"
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#0077ED] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#0062C4] transition"
+                    >
+                      <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+                      <span>Refresh</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Metrics Row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+                  <div className="rounded-xl border border-white/[0.08] bg-[#0A0E18] p-3.5">
+                    <span className="text-[11px] font-medium text-[#8E9BB0]">Total Inquiries</span>
+                    <p className="text-2xl font-black text-white mt-0.5">{inquiries.length}</p>
+                    <span className="text-[10px] text-[#637085] mt-1 block">All registered inquiries</span>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.08] bg-[#0A0E18] p-3.5">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-medium text-[#8E9BB0]">New / Action Needed</span>
+                      <span className="size-2 rounded-full bg-[#0077ED] animate-pulse" />
+                    </div>
+                    <p className="text-2xl font-black text-[#0077ED] mt-0.5">
+                      {inquiries.filter((i) => i.status === "New").length}
+                    </p>
+                    <span className="text-[10px] text-[#637085] mt-1 block">Awaiting first response</span>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.08] bg-[#0A0E18] p-3.5">
+                    <span className="text-[11px] font-medium text-[#8E9BB0]">In Discussion</span>
+                    <p className="text-2xl font-black text-amber-400 mt-0.5">
+                      {inquiries.filter((i) => i.status === "Contacted" || i.status === "Proposal Sent").length}
+                    </p>
+                    <span className="text-[10px] text-[#637085] mt-1 block">Contacted or proposal sent</span>
+                  </div>
+
+                  <div className="rounded-xl border border-white/[0.08] bg-[#0A0E18] p-3.5">
+                    <span className="text-[11px] font-medium text-[#8E9BB0]">Converted / Closed</span>
+                    <p className="text-2xl font-black text-emerald-400 mt-0.5">
+                      {inquiries.filter((i) => i.status === "Closed").length}
+                    </p>
+                    <span className="text-[10px] text-[#637085] mt-1 block">Deals finalized</span>
+                  </div>
+                </div>
+
+                {/* Filters & Search Toolbar */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-5">
+                  {/* Status Filter Tabs */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { id: "all", label: "All", count: inquiries.length },
+                      {
+                        id: "New",
+                        label: "New",
+                        count: inquiries.filter((i) => i.status === "New").length,
+                        activeColor: "bg-blue-500/20 text-[#0077ED] border-[#0077ED]/40",
+                      },
+                      {
+                        id: "Contacted",
+                        label: "Contacted",
+                        count: inquiries.filter((i) => i.status === "Contacted").length,
+                        activeColor: "bg-amber-500/20 text-amber-400 border-amber-500/40",
+                      },
+                      {
+                        id: "Proposal Sent",
+                        label: "Proposal Sent",
+                        count: inquiries.filter((i) => i.status === "Proposal Sent").length,
+                        activeColor: "bg-purple-500/20 text-purple-400 border-purple-500/40",
+                      },
+                      {
+                        id: "Closed",
+                        label: "Closed",
+                        count: inquiries.filter((i) => i.status === "Closed").length,
+                        activeColor: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
+                      },
+                    ].map((tab) => {
+                      const isActive = inquiryFilterStatus === tab.id;
+                      return (
+                        <button
+                          key={tab.id}
+                          type="button"
+                          onClick={() => setInquiryFilterStatus(tab.id)}
+                          className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-semibold transition ${
+                            isActive
+                              ? tab.activeColor || "bg-[#0077ED] text-white border-[#0077ED]"
+                              : "border-white/10 bg-[#090D16] text-[#8E9BB0] hover:text-white hover:bg-white/[0.04]"
+                          }`}
+                        >
+                          <span>{tab.label}</span>
+                          <span className={`text-[10px] rounded-full px-1.5 py-0.2 ${isActive ? "bg-white/20" : "bg-white/[0.06]"}`}>
+                            {tab.count}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Search and View Mode */}
+                  <div className="flex items-center gap-2">
+                    <div className="relative w-full sm:w-64">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8E9BB0]">
+                        <Search size={14} />
+                      </span>
+                      <input
+                        type="text"
+                        placeholder="Search name, email, WhatsApp..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-[#090D16] py-1.5 pl-9 pr-3 text-xs text-white placeholder:text-[#637085] focus:border-[#0077ED] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center rounded-xl border border-white/10 bg-[#090D16] p-0.5">
+                      <button
+                        type="button"
+                        onClick={() => setInquiryViewMode("table")}
+                        title="Table View"
+                        className={`rounded-lg p-1.5 transition ${
+                          inquiryViewMode === "table"
+                            ? "bg-[#0077ED] text-white"
+                            : "text-[#8E9BB0] hover:text-white"
+                        }`}
+                      >
+                        <TableIcon size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setInquiryViewMode("cards")}
+                        title="Cards View"
+                        className={`rounded-lg p-1.5 transition ${
+                          inquiryViewMode === "cards"
+                            ? "bg-[#0077ED] text-white"
+                            : "text-[#8E9BB0] hover:text-white"
+                        }`}
+                      >
+                        <LayoutGrid size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* TABLE VIEW */}
+                {inquiryViewMode === "table" && (
+                  <div className="overflow-x-auto rounded-xl border border-white/[0.08]">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#0A0E18] border-b border-white/[0.08] text-[#8E9BB0] font-semibold">
+                        <tr>
+                          <th className="py-3 px-4">Client Name &amp; Date</th>
+                          <th className="py-3 px-4">Contact (Email &amp; WhatsApp)</th>
+                          <th className="py-3 px-4">Project &amp; Budget</th>
+                          <th className="py-3 px-4 max-w-[280px]">Project Description</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/[0.05]">
+                        {filteredInquiries.map((inq) => {
+                          const cleanPhone = formatCleanPhone(inq.whatsapp || inq.phone);
+                          const initials = inq.name
+                            .split(" ")
+                            .map((p) => p[0])
+                            .slice(0, 2)
+                            .join("")
+                            .toUpperCase();
+
+                          return (
+                            <tr
+                              key={inq.id}
+                              className="hover:bg-white/[0.02] transition duration-150 group"
+                            >
+                              {/* Client Name & Date */}
+                              <td className="py-3 px-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-[#0077ED] to-indigo-600 text-white font-bold text-xs shadow-xs shrink-0">
+                                    {initials || "C"}
+                                  </div>
+                                  <div>
+                                    <p className="font-bold text-white text-xs leading-snug group-hover:text-[#0077ED] transition">
+                                      {inq.name}
+                                    </p>
+                                    <span className="text-[10px] text-[#637085] flex items-center gap-1 mt-0.5">
+                                      <Clock size={10} />
+                                      <span>{new Date(inq.createdAt).toLocaleDateString()}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Email & WhatsApp */}
+                              <td className="py-3 px-4">
+                                <div className="space-y-1">
+                                  {/* Email */}
+                                  <div className="flex items-center gap-1.5">
+                                    <Mail size={12} className="text-[#0077ED] shrink-0" />
+                                    <a
+                                      href={`mailto:${inq.email}`}
+                                      className="text-white hover:text-[#0077ED] font-medium truncate max-w-[180px]"
+                                    >
+                                      {inq.email}
+                                    </a>
+                                    <button
+                                      type="button"
+                                      onClick={() => copyTextToClipboard(inq.email, "Email")}
+                                      title="Copy email"
+                                      className="text-[#637085] hover:text-white transition"
+                                    >
+                                      <Copy size={11} />
+                                    </button>
+                                  </div>
+
+                                  {/* WhatsApp */}
+                                  <div className="flex items-center gap-1.5">
+                                    <MessageCircle size={12} className="text-[#25D366] shrink-0" />
+                                    {cleanPhone ? (
+                                      <>
+                                        <a
+                                          href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${inq.name}! Looksbay Studio reaching out regarding your ${inq.project} inquiry.`)}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-[#25D366] hover:underline font-medium text-[11px]"
+                                        >
+                                          {inq.whatsapp || inq.phone}
+                                        </a>
+                                        <button
+                                          type="button"
+                                          onClick={() => copyTextToClipboard(inq.whatsapp || inq.phone || "", "WhatsApp number")}
+                                          title="Copy number"
+                                          className="text-[#637085] hover:text-white transition"
+                                        >
+                                          <Copy size={11} />
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <span className="text-[11px] text-[#637085]">Not specified</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* Project & Budget */}
+                              <td className="py-3 px-4">
+                                <div>
+                                  <span className="inline-block rounded-md bg-white/[0.05] border border-white/10 px-2 py-0.5 text-[11px] font-semibold text-white">
+                                    {inq.project}
+                                  </span>
+                                  <div className="mt-1 flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                                    <DollarSign size={11} className="-mr-0.5" />
+                                    <span>{inq.budget}</span>
+                                  </div>
+                                  {inq.template && (
+                                    <span className="text-[10px] text-[#8E9BB0] block mt-0.5 truncate max-w-[140px]">
+                                      Template: {inq.template}
+                                    </span>
+                                  )}
+                                </div>
+                              </td>
+
+                              {/* Project Description */}
+                              <td className="py-3 px-4 max-w-[280px]">
+                                <p className="text-xs text-[#8E9BB0] leading-relaxed line-clamp-2">
+                                  {inq.message}
+                                </p>
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedInquiry(inq)}
+                                  className="text-[11px] text-[#0077ED] font-semibold hover:underline mt-0.5 inline-flex items-center gap-0.5"
+                                >
+                                  <span>View details</span>
+                                  <Eye size={10} />
+                                </button>
+                              </td>
+
+                              {/* Status Dropdown */}
+                              <td className="py-3 px-4">
+                                <select
+                                  value={inq.status}
+                                  onChange={(e) => updateInquiryStatus(inq.id, e.target.value as any)}
+                                  className={`rounded-lg border px-2.5 py-1 text-xs font-bold bg-[#090D16] cursor-pointer outline-none transition ${
+                                    inq.status === "New"
+                                      ? "text-[#0077ED] border-[#0077ED]/40 bg-[#0077ED]/10"
+                                      : inq.status === "Contacted"
+                                      ? "text-amber-400 border-amber-500/40 bg-amber-500/10"
+                                      : inq.status === "Proposal Sent"
+                                      ? "text-purple-400 border-purple-500/40 bg-purple-500/10"
+                                      : "text-emerald-400 border-emerald-500/40 bg-emerald-500/10"
+                                  }`}
+                                >
+                                  <option value="New">● New</option>
+                                  <option value="Contacted">● Contacted</option>
+                                  <option value="Proposal Sent">● Proposal Sent</option>
+                                  <option value="Closed">● Closed</option>
+                                </select>
+                              </td>
+
+                              {/* Actions */}
+                              <td className="py-3 px-4 text-right">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  {cleanPhone && (
+                                    <a
+                                      href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${inq.name}! Looksbay Studio reaching out regarding your ${inq.project} inquiry.`)}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      title="Open WhatsApp Chat"
+                                      className="grid size-7 place-items-center rounded-lg bg-[#25D366]/15 text-[#25D366] hover:bg-[#25D366] hover:text-white transition"
+                                    >
+                                      <MessageCircle size={13} />
+                                    </a>
+                                  )}
+
+                                  <a
+                                    href={`mailto:${inq.email}?subject=${encodeURIComponent(`Looksbay Studio: Follow up on ${inq.project}`)}`}
+                                    title="Send Email"
+                                    className="grid size-7 place-items-center rounded-lg bg-[#0077ED]/15 text-[#0077ED] hover:bg-[#0077ED] hover:text-white transition"
+                                  >
+                                    <Mail size={13} />
+                                  </a>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedInquiry(inq)}
+                                    title="View full brief"
+                                    className="grid size-7 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-[#8E9BB0] hover:text-white hover:bg-white/[0.08] transition"
+                                  >
+                                    <Eye size={13} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => deleteInquiry(inq.id)}
+                                    title="Delete inquiry"
+                                    className="grid size-7 place-items-center rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 transition"
+                                  >
+                                    <Trash2 size={13} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+
+                        {filteredInquiries.length === 0 && (
+                          <tr>
+                            <td colSpan={6} className="py-10 text-center">
+                              <Inbox size={28} className="mx-auto text-[#637085] mb-2" />
+                              <p className="text-xs font-semibold text-white">No inquiries found</p>
+                              <p className="text-[11px] text-[#637085] mt-0.5">
+                                Try clearing search query or changing status filters.
+                              </p>
+                              {(searchQuery || inquiryFilterStatus !== "all") && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setSearchQuery("");
+                                    setInquiryFilterStatus("all");
+                                  }}
+                                  className="mt-3 inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-semibold text-[#0077ED] hover:bg-white/[0.08]"
+                                >
+                                  Reset Filters
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {/* CARDS VIEW */}
+                {inquiryViewMode === "cards" && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {filteredInquiries.map((inq) => {
+                      const cleanPhone = formatCleanPhone(inq.whatsapp || inq.phone);
+                      const initials = inq.name
+                        .split(" ")
+                        .map((p) => p[0])
+                        .slice(0, 2)
+                        .join("")
+                        .toUpperCase();
+
+                      return (
+                        <div
+                          key={inq.id}
+                          className="rounded-xl border border-white/[0.08] bg-[#0D121F] p-4 flex flex-col justify-between hover:border-white/20 transition"
+                        >
+                          <div>
+                            {/* Card Top */}
+                            <div className="flex items-center justify-between mb-3">
+                              <span
+                                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                  inq.status === "New"
+                                    ? "bg-blue-500/20 text-[#0077ED]"
+                                    : inq.status === "Contacted"
+                                    ? "bg-amber-500/20 text-amber-400"
+                                    : inq.status === "Proposal Sent"
+                                    ? "bg-purple-500/20 text-purple-400"
+                                    : "bg-emerald-500/20 text-emerald-400"
+                                }`}
+                              >
+                                {inq.status}
+                              </span>
+                              <span className="text-[10px] text-[#637085]">
+                                {new Date(inq.createdAt).toLocaleDateString()}
+                              </span>
+                            </div>
+
+                            {/* Client Header */}
+                            <div className="flex items-center gap-2.5 mb-2.5">
+                              <div className="grid size-8 place-items-center rounded-xl bg-gradient-to-br from-[#0077ED] to-indigo-600 text-white font-bold text-xs shadow-xs shrink-0">
+                                {initials || "C"}
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="text-sm font-bold text-white truncate">{inq.name}</h3>
+                                <a href={`mailto:${inq.email}`} className="text-xs text-[#0077ED] hover:underline font-medium block truncate">
+                                  {inq.email}
+                                </a>
+                              </div>
+                            </div>
+
+                            {/* WhatsApp Badge */}
+                            {cleanPhone && (
+                              <div className="mb-2.5 flex items-center justify-between rounded-lg bg-[#25D366]/10 border border-[#25D366]/20 px-2.5 py-1 text-xs">
+                                <div className="flex items-center gap-1.5 text-[#25D366] font-semibold text-[11px]">
+                                  <MessageCircle size={13} />
+                                  <span>{inq.whatsapp || inq.phone}</span>
+                                </div>
+                                <a
+                                  href={`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`Hi ${inq.name}! Looksbay Studio reaching out regarding your ${inq.project} inquiry.`)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] font-bold text-[#25D366] hover:underline"
+                                >
+                                  Chat →
+                                </a>
+                              </div>
+                            )}
+
+                            {/* Project & Budget Pills */}
+                            <div className="mb-2.5 flex flex-wrap gap-1.5 text-[10px]">
+                              <span className="rounded bg-white/[0.05] border border-white/10 px-2 py-0.5 font-medium text-white">
+                                {inq.project}
+                              </span>
+                              <span className="rounded bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 font-semibold text-emerald-400">
+                                {inq.budget}
+                              </span>
+                            </div>
+
+                            {/* Message Preview */}
+                            <p className="text-xs text-[#8E9BB0] leading-relaxed line-clamp-3 bg-[#080C14] rounded-lg p-2.5 border border-white/[0.04]">
+                              {inq.message}
+                            </p>
+                          </div>
+
+                          {/* Card Footer Actions */}
+                          <div className="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                            <select
+                              value={inq.status}
+                              onChange={(e) => updateInquiryStatus(inq.id, e.target.value as any)}
+                              className="rounded-lg border border-white/10 bg-[#090D16] text-white px-2 py-1 text-[11px] font-medium"
+                            >
+                              <option value="New">New</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="Proposal Sent">Proposal Sent</option>
+                              <option value="Closed">Closed</option>
+                            </select>
+
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                type="button"
+                                onClick={() => setSelectedInquiry(inq)}
+                                title="View full inquiry"
+                                className="grid size-7 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-[#8E9BB0] hover:text-white"
+                              >
+                                <Eye size={12} />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => deleteInquiry(inq.id)}
+                                title="Delete"
+                                className="grid size-7 place-items-center rounded-lg text-[#8E9BB0] hover:text-red-400"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {filteredInquiries.length === 0 && (
+                      <div className="col-span-full py-10 text-center">
+                        <Inbox size={28} className="mx-auto text-[#637085] mb-2" />
+                        <p className="text-xs font-semibold text-white">No inquiries found</p>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1616,6 +2185,210 @@ export default function AdminDashboardPage() {
                 Save Lead
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: View Full Client Inquiry Details */}
+      {selectedInquiry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-[640px] max-h-[92vh] overflow-y-auto rounded-2xl bg-[#111624] text-white p-6 sm:p-7 shadow-2xl border border-white/10">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/10 pb-4 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-[#0077ED] to-indigo-600 text-white font-black text-sm shadow-md">
+                  {selectedInquiry.name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "C"}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">
+                    {selectedInquiry.name}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5 text-xs text-[#8E9BB0]">
+                    <span>ID: {selectedInquiry.id}</span>
+                    <span>•</span>
+                    <span>{new Date(selectedInquiry.createdAt).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedInquiry(null)}
+                className="grid size-8 place-items-center rounded-lg border border-white/10 bg-white/[0.04] text-[#8E9BB0] hover:text-white hover:bg-white/[0.08] transition"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 mb-5">
+              {formatCleanPhone(selectedInquiry.whatsapp || selectedInquiry.phone) && (
+                <a
+                  href={`https://wa.me/${formatCleanPhone(selectedInquiry.whatsapp || selectedInquiry.phone)}?text=${encodeURIComponent(`Hi ${selectedInquiry.name}! This is Looksbay Studio following up regarding your ${selectedInquiry.project} inquiry.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-[#25D366] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#20BD5A]"
+                >
+                  <MessageCircle size={15} />
+                  <span>Chat on WhatsApp</span>
+                </a>
+              )}
+
+              <a
+                href={`mailto:${selectedInquiry.email}?subject=${encodeURIComponent(`Looksbay Studio: Follow up on ${selectedInquiry.project}`)}`}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-[#0077ED] px-4 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0062C4]"
+              >
+                <Mail size={15} />
+                <span>Send Email</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const summary = `Client: ${selectedInquiry.name}\nEmail: ${selectedInquiry.email}\nWhatsApp: ${selectedInquiry.whatsapp || "N/A"}\nProject: ${selectedInquiry.project}\nBudget: ${selectedInquiry.budget}\nStatus: ${selectedInquiry.status}\nDate: ${new Date(selectedInquiry.createdAt).toLocaleString()}\n\nRequirements:\n${selectedInquiry.message}`;
+                  copyTextToClipboard(summary, "Inquiry summary");
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-semibold text-[#8E9BB0] hover:text-white hover:bg-white/[0.08] transition"
+              >
+                <Copy size={13} />
+                <span>Copy Summary</span>
+              </button>
+            </div>
+
+            {/* Details Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+              {/* Email */}
+              <div className="rounded-xl border border-white/[0.06] bg-[#090D16] p-3">
+                <span className="text-[10px] font-semibold text-[#8E9BB0] uppercase tracking-wider block mb-1">
+                  Email Address
+                </span>
+                <div className="flex items-center justify-between">
+                  <a
+                    href={`mailto:${selectedInquiry.email}`}
+                    className="text-xs font-bold text-[#0077ED] hover:underline truncate"
+                  >
+                    {selectedInquiry.email}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => copyTextToClipboard(selectedInquiry.email, "Email")}
+                    className="text-[#637085] hover:text-white p-1"
+                  >
+                    <Copy size={12} />
+                  </button>
+                </div>
+              </div>
+
+              {/* WhatsApp */}
+              <div className="rounded-xl border border-white/[0.06] bg-[#090D16] p-3">
+                <span className="text-[10px] font-semibold text-[#8E9BB0] uppercase tracking-wider block mb-1">
+                  WhatsApp Number
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#25D366] truncate">
+                    {selectedInquiry.whatsapp || selectedInquiry.phone || "Not specified"}
+                  </span>
+                  {(selectedInquiry.whatsapp || selectedInquiry.phone) && (
+                    <button
+                      type="button"
+                      onClick={() => copyTextToClipboard(selectedInquiry.whatsapp || selectedInquiry.phone || "", "WhatsApp number")}
+                      className="text-[#637085] hover:text-white p-1"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Project Type */}
+              <div className="rounded-xl border border-white/[0.06] bg-[#090D16] p-3">
+                <span className="text-[10px] font-semibold text-[#8E9BB0] uppercase tracking-wider block mb-1">
+                  Project Scope
+                </span>
+                <p className="text-xs font-bold text-white">
+                  {selectedInquiry.project}
+                </p>
+                {selectedInquiry.template && (
+                  <span className="text-[11px] text-[#8E9BB0] block mt-0.5">
+                    Template: {selectedInquiry.template}
+                  </span>
+                )}
+              </div>
+
+              {/* Budget */}
+              <div className="rounded-xl border border-white/[0.06] bg-[#090D16] p-3">
+                <span className="text-[10px] font-semibold text-[#8E9BB0] uppercase tracking-wider block mb-1">
+                  Investment Budget
+                </span>
+                <p className="text-xs font-bold text-emerald-400">
+                  {selectedInquiry.budget}
+                </p>
+              </div>
+            </div>
+
+            {/* Status Changer */}
+            <div className="mb-5 rounded-xl border border-white/[0.06] bg-[#090D16] p-3.5 flex items-center justify-between">
+              <div>
+                <span className="text-xs font-bold text-white block">Lead Status</span>
+                <span className="text-[11px] text-[#8E9BB0]">Update lead stage in pipeline</span>
+              </div>
+              <select
+                value={selectedInquiry.status}
+                onChange={(e) => {
+                  const newStatus = e.target.value as Inquiry["status"];
+                  updateInquiryStatus(selectedInquiry.id, newStatus);
+                  setSelectedInquiry({ ...selectedInquiry, status: newStatus });
+                }}
+                className={`rounded-xl border px-3 py-1.5 text-xs font-bold bg-[#111624] outline-none cursor-pointer ${
+                  selectedInquiry.status === "New"
+                    ? "text-[#0077ED] border-[#0077ED]/40 bg-[#0077ED]/10"
+                    : selectedInquiry.status === "Contacted"
+                    ? "text-amber-400 border-amber-500/40 bg-amber-500/10"
+                    : selectedInquiry.status === "Proposal Sent"
+                    ? "text-purple-400 border-purple-500/40 bg-purple-500/10"
+                    : "text-emerald-400 border-emerald-500/40 bg-emerald-500/10"
+                }`}
+              >
+                <option value="New">● New Lead</option>
+                <option value="Contacted">● Contacted</option>
+                <option value="Proposal Sent">● Proposal Sent</option>
+                <option value="Closed">● Closed / Won</option>
+              </select>
+            </div>
+
+            {/* Full Message / Description */}
+            <div className="mb-6">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8E9BB0] block mb-2">
+                Project Description &amp; Client Requirements
+              </span>
+              <div className="rounded-xl border border-white/[0.08] bg-[#080C14] p-4 text-xs sm:text-sm text-[#D5DDE8] leading-relaxed whitespace-pre-wrap max-h-56 overflow-y-auto">
+                {selectedInquiry.message}
+              </div>
+            </div>
+
+            {/* Modal Bottom Footer */}
+            <div className="flex items-center justify-between border-t border-white/10 pt-4">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`Are you sure you want to delete inquiry from ${selectedInquiry.name}?`)) {
+                    deleteInquiry(selectedInquiry.id);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/30 bg-red-500/10 px-3.5 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/20 transition"
+              >
+                <Trash2 size={13} />
+                <span>Delete Inquiry</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedInquiry(null)}
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white hover:bg-white/[0.08] transition"
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
