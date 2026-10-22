@@ -150,10 +150,12 @@ export function MobileNavigation() {
                   closeMenu();
                   openAuth("login");
                 }}
-                className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full border border-black/10 bg-[#f5f5f7] text-[16px] font-bold text-[#1d1d1f] transition-all hover:bg-white"
+                className="flex min-h-[52px] w-full items-center justify-center gap-3 rounded-full border border-[#0077ED]/35 bg-white text-[16px] font-bold text-[#0077ED] shadow-xs transition-all hover:bg-[#0077ED]/5"
               >
-                <User size={20} strokeWidth={2.2} />
-                <span>Log In / Sign Up</span>
+                <span className="grid size-8 place-items-center rounded-full bg-[#0077ED] text-white shadow-xs">
+                  <User size={18} strokeWidth={2.4} />
+                </span>
+                <span>Log In</span>
               </button>
             ) : (
               <div className="flex items-center justify-between rounded-2xl bg-[#f5f5f7] p-3">

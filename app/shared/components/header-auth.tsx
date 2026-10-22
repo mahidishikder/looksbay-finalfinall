@@ -24,12 +24,12 @@ export function HeaderAuth() {
       <button
         type="button"
         onClick={() => openAuth("login")}
-        className="group inline-flex items-center gap-2.5 rounded-full border border-black/10 bg-[#f5f5f7] py-2 pl-2 pr-4 text-[15px] font-semibold text-[#1d1d1f] shadow-xs transition-all hover:border-[#0077ed]/40 hover:bg-white hover:text-[#0077ed] hover:shadow-sm active:scale-95"
+        className="group inline-flex items-center gap-2.5 rounded-full border border-[#0077ED]/35 bg-white py-1.5 pl-1.5 pr-4 text-[15px] font-bold text-[#0077ED] shadow-[0_2px_8px_rgba(0,119,237,0.08)] transition-all hover:border-[#0077ED] hover:bg-[#0077ED]/[0.04] hover:shadow-[0_4px_14px_rgba(0,119,237,0.15)] active:scale-95"
       >
-        <span className="grid size-8 place-items-center rounded-full bg-white text-[#1d1d1f] shadow-xs transition-colors group-hover:bg-[#0077ed] group-hover:text-white">
-          <User size={18} strokeWidth={2.2} />
+        <span className="grid size-8 place-items-center rounded-full bg-[#0077ED] text-white shadow-xs transition-transform group-hover:scale-105">
+          <User size={18} strokeWidth={2.4} />
         </span>
-        <span className="font-semibold tracking-tight">Log In</span>
+        <span className="font-bold tracking-tight">Log In</span>
       </button>
     );
   }
