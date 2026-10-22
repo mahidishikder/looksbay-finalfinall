@@ -33,31 +33,31 @@ export function LoginForm() {
       setSuccess(true);
       setTimeout(() => {
         router.push("/templates");
-      }, 1000);
+      }, 800);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {error && (
-        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-xs text-red-600">
+        <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-2.5 text-xs text-red-600 font-medium">
           {error}
         </div>
       )}
       {success && (
-        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-xs text-emerald-700">
+        <div className="flex items-center gap-2 rounded-xl bg-emerald-50 border border-emerald-200 px-4 py-2.5 text-xs text-emerald-700 font-medium">
           <CheckCircle2 size={16} />
-          <span>Welcome back! Redirecting...</span>
+          <span>Signed in successfully.</span>
         </div>
       )}
 
       <div>
-        <label className="block text-xs font-bold uppercase tracking-wider text-[#515154] mb-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-[#515154] mb-1.5">
           Email Address
         </label>
         <div className="relative">
           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868b]">
-            <Mail size={18} />
+            <Mail size={17} />
           </span>
           <input
             type="email"
@@ -65,25 +65,25 @@ export function LoginForm() {
             placeholder="name@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-black/10 bg-[#fbfbfd] py-3 pl-10 pr-4 text-sm text-[#1d1d1f] transition-all placeholder:text-[#a1a1a6] focus:border-[#0077ed] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0077ed]/20"
+            className="w-full rounded-xl border border-black/10 bg-[#fbfbfd] py-3 pl-10 pr-4 text-sm text-[#1d1d1f] placeholder:text-[#a1a1a6] focus:border-[#0077ed] focus:bg-white focus:outline-none transition-all"
           />
         </div>
       </div>
 
       <div>
-        <label className="block text-xs font-bold uppercase tracking-wider text-[#515154] mb-1.5">
+        <label className="block text-xs font-semibold uppercase tracking-wider text-[#515154] mb-1.5">
           Password
         </label>
         <div className="relative">
           <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#86868b]">
-            <Lock size={18} />
+            <Lock size={17} />
           </span>
           <input
             type="password"
-            placeholder="Enter your password"
+            placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-black/10 bg-[#fbfbfd] py-3 pl-10 pr-4 text-sm text-[#1d1d1f] transition-all placeholder:text-[#a1a1a6] focus:border-[#0077ed] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0077ed]/20"
+            className="w-full rounded-xl border border-black/10 bg-[#fbfbfd] py-3 pl-10 pr-4 text-sm text-[#1d1d1f] placeholder:text-[#a1a1a6] focus:border-[#0077ed] focus:bg-white focus:outline-none transition-all"
           />
         </div>
       </div>
@@ -91,23 +91,10 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#0077ed] py-3.5 text-sm font-bold text-white shadow-md transition-all hover:bg-[#0062c4] active:scale-[0.99] disabled:opacity-60"
+        className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-xl bg-[#0077ed] py-3.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0062c4] active:scale-[0.99] disabled:opacity-60"
       >
-        <span>{loading ? "Authenticating..." : "Sign In"}</span>
+        <span>{loading ? "Signing in..." : "Sign In"}</span>
         <ArrowRight size={16} />
-      </button>
-
-      <button
-        type="button"
-        onClick={() => {
-          setEmail("vip@looksbay.com");
-          login("vip@looksbay.com");
-          setSuccess(true);
-          setTimeout(() => router.push("/templates"), 800);
-        }}
-        className="w-full text-center text-xs font-semibold text-[#0077ed] hover:underline pt-2"
-      >
-        Quick 1-Click VIP Demo Login
       </button>
     </form>
   );

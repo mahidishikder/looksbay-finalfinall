@@ -150,9 +150,9 @@ export function MobileNavigation() {
                   closeMenu();
                   openAuth("login");
                 }}
-                className="flex min-h-[50px] w-full items-center justify-center gap-2 rounded-full border border-black/10 bg-[#f5f5f7] text-base font-bold text-[#1d1d1f] transition-all hover:bg-white"
+                className="flex min-h-[52px] w-full items-center justify-center gap-2.5 rounded-full border border-black/10 bg-[#f5f5f7] text-[16px] font-bold text-[#1d1d1f] transition-all hover:bg-white"
               >
-                <User size={18} />
+                <User size={20} strokeWidth={2.2} />
                 <span>Log In / Sign Up</span>
               </button>
             ) : (
