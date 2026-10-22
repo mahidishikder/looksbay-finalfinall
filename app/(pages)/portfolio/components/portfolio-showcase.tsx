@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart } from "lucide-react";
-import { projects, type Project } from "../data";
+import { projects as initialProjects, type Project } from "../data";
 
 const projectBackgrounds = ["#e8f0fe", "#fdf4e7", "#f3e8ff", "#eef7f5"];
 
@@ -36,14 +36,26 @@ const categories = [
 ];
 
 export default function PortfolioShowcase() {
+  const [projectList, setProjectList] = useState<Project[]>(initialProjects);
   const [activeCategory, setActiveCategory] = useState("All Projects");
   const [likedProjects, setLikedProjects] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetch("/api/portfolio")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.projects && Array.isArray(data.projects)) {
+          setProjectList(data.projects);
+        }
+      })
+      .catch((err) => console.error("Error loading portfolio:", err));
+  }, []);
 
   const toggleLike = (name: string) => {
     setLikedProjects((prev) => ({ ...prev, [name]: !prev[name] }));
   };
 
-  const filteredProjects = projects.filter((project) => {
+  const filteredProjects = projectList.filter((project) => {
     if (activeCategory === "All Projects") return true;
     return project.industry === activeCategory;
   });

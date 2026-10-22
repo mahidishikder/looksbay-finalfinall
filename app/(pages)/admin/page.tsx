@@ -33,8 +33,12 @@ import {
   Filter,
   Eye,
   X,
+  Briefcase,
+  BarChart3,
+  Globe,
+  Sparkles,
 } from "lucide-react";
-import { allTemplates } from "@/app/shared/data/templates-data";
+import { allTemplates as fallbackTemplates } from "@/app/shared/data/templates-data";
 
 interface Subscriber {
   id: string;
@@ -56,7 +60,50 @@ interface Inquiry {
   createdAt: string;
 }
 
-type TabKey = "overview" | "leads" | "inquiries" | "templates" | "campaigns" | "seo" | "settings";
+interface AnalyticsStats {
+  todayVisitors: number;
+  todayPageviews: number;
+  yesterdayVisitors: number;
+  totalVisitors: number;
+  totalPageviews: number;
+  dailyTrend: { date: string; day: string; visitors: number; pageviews: number }[];
+  topPages: { path: string; views: number }[];
+  recentVisits: { path: string; timestamp: string; referrer?: string }[];
+}
+
+interface PortfolioProject {
+  name: string;
+  kind: string;
+  industry: string;
+  image: string;
+  alt?: string;
+  description: string;
+  tags: string[];
+  hearts?: number;
+}
+
+interface TemplateItem {
+  id: string;
+  slug: string;
+  name: string;
+  price: string;
+  originalPrice?: string;
+  categories: string[];
+  image: string;
+  demoUrl: string;
+  description: string;
+}
+
+type TabKey =
+  | "overview"
+  | "traffic"
+  | "portfolio"
+  | "templates"
+  | "leads"
+  | "inquiries"
+  | "campaigns"
+  | "seo"
+  | "settings";
 
 export default function AdminDashboardPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -67,16 +114,37 @@ export default function AdminDashboardPage() {
   // Data states
   const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsStats | null>(null);
+  const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProject[]>([]);
+  const [templateItems, setTemplateItems] = useState<TemplateItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Modals & form states
+  // Modals state
   const [isAddLeadModalOpen, setIsAddLeadModalOpen] = useState(false);
   const [newLeadName, setNewLeadName] = useState("");
   const [newLeadEmail, setNewLeadEmail] = useState("");
   const [newLeadInterest, setNewLeadInterest] = useState("Squarespace Templates");
-  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+
+  // Portfolio Add Modal State
+  const [isAddPortfolioModalOpen, setIsAddPortfolioModalOpen] = useState(false);
+  const [newPortfolioName, setNewPortfolioName] = useState("");
+  const [newPortfolioIndustry, setNewPortfolioIndustry] = useState("Creative");
+  const [newPortfolioKind, setNewPortfolioKind] = useState("Custom Squarespace Website");
+  const [newPortfolioImage, setNewPortfolioImage] = useState("");
+  const [newPortfolioDescription, setNewPortfolioDescription] = useState("");
+  const [newPortfolioTags, setNewPortfolioTags] = useState("Squarespace 7.1, Fluid Engine, Custom CSS");
+
+  // Template Add Modal State
+  const [isAddTemplateModalOpen, setIsAddTemplateModalOpen] = useState(false);
+  const [newTemplateName, setNewTemplateName] = useState("");
+  const [newTemplateSlug, setNewTemplateSlug] = useState("");
+  const [newTemplatePrice, setNewTemplatePrice] = useState("180.00");
+  const [newTemplateCategories, setNewTemplateCategories] = useState("Designer, Creative, Studio");
+  const [newTemplateImage, setNewTemplateImage] = useState("");
+  const [newTemplateDemoUrl, setNewTemplateDemoUrl] = useState("");
+  const [newTemplateDescription, setNewTemplateDescription] = useState("");
 
   // Custom Admin Pin State
   const [currentMasterPin, setCurrentMasterPin] = useState("admin123");
@@ -93,7 +161,7 @@ export default function AdminDashboardPage() {
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
+    setTimeout(() => setToastMessage(null), 2800);
   };
 
   const handlePinSubmit = (e: React.FormEvent) => {
@@ -129,15 +197,25 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, inqRes] = await Promise.all([
+      const [usersRes, inqRes, analyticsRes, portfolioRes, templatesRes] = await Promise.all([
         fetch("/api/admin/users"),
         fetch("/api/contact"),
+        fetch("/api/analytics/stats"),
+        fetch("/api/portfolio"),
+        fetch("/api/templates"),
       ]);
+
       const usersData = await usersRes.json();
       const inqData = await inqRes.json();
+      const analyticsData = await analyticsRes.json();
+      const portfolioData = await portfolioRes.json();
+      const templatesData = await templatesRes.json();
 
       setSubscribers(usersData.users || []);
       setInquiries(inqData.inquiries || []);
+      setAnalytics(analyticsData);
+      setPortfolioProjects(portfolioData.projects || []);
+      setTemplateItems(templatesData.templates || fallbackTemplates);
     } catch (e) {
       console.error("Error loading admin data:", e);
     } finally {
@@ -180,9 +258,6 @@ export default function AdminDashboardPage() {
         setInquiries((prev) =>
           prev.map((inq) => (inq.id === id ? { ...inq, status } : inq))
         );
-        if (selectedInquiry?.id === id) {
-          setSelectedInquiry((prev) => (prev ? { ...prev, status } : null));
-        }
         showToast(`Inquiry marked as ${status}`);
       }
     } catch (e) {
@@ -195,7 +270,6 @@ export default function AdminDashboardPage() {
       const res = await fetch(`/api/contact?id=${id}`, { method: "DELETE" });
       if (res.ok) {
         setInquiries((prev) => prev.filter((i) => i.id !== id));
-        setSelectedInquiry(null);
         showToast("Inquiry deleted");
       }
     } catch (e) {
@@ -231,6 +305,138 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Add Portfolio Handler
+  const handleAddPortfolio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPortfolioName.trim() || !newPortfolioImage.trim()) {
+      showToast("Please provide project name and image URL");
+      return;
+    }
+    try {
+      const res = await fetch("/api/portfolio", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newPortfolioName.trim(),
+          industry: newPortfolioIndustry,
+          kind: newPortfolioKind,
+          image: newPortfolioImage.trim(),
+          description:
+            newPortfolioDescription.trim() ||
+            "Bespoke Squarespace website built with Fluid Engine.",
+          tags: newPortfolioTags
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setPortfolioProjects((prev) => [data.project, ...prev]);
+        setIsAddPortfolioModalOpen(false);
+        setNewPortfolioName("");
+        setNewPortfolioImage("");
+        setNewPortfolioDescription("");
+        showToast("Portfolio project added successfully!");
+      } else {
+        showToast("Failed to create portfolio project");
+      }
+    } catch (e) {
+      console.error(e);
+      showToast("Network error while adding portfolio project");
+    }
+  };
+
+  // Delete Portfolio Handler
+  const handleDeletePortfolio = async (name: string) => {
+    if (!confirm(`Are you sure you want to delete portfolio project "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/portfolio?name=${encodeURIComponent(name)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setPortfolioProjects((prev) =>
+          prev.filter((p) => p.name.toLowerCase() !== name.toLowerCase())
+        );
+        showToast("Portfolio project deleted");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Add Template Handler
+  const handleAddTemplate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTemplateName.trim() || !newTemplatePrice.trim()) {
+      showToast("Please provide template name and price");
+      return;
+    }
+    const cleanSlug =
+      newTemplateSlug.trim() ||
+      newTemplateName
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+    try {
+      const res = await fetch("/api/templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newTemplateName.trim(),
+          slug: cleanSlug,
+          price: newTemplatePrice.trim(),
+          categories: newTemplateCategories
+            .split(",")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          image:
+            newTemplateImage.trim() ||
+            "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/efd626fb-6145-4420-915b-81b7633b5070/perfectionist-squarespace-template.png?format=1000w",
+          demoUrl: newTemplateDemoUrl.trim() || `https://${cleanSlug}.squarespace.com`,
+          description:
+            newTemplateDescription.trim() ||
+            "Premium Squarespace 7.1 template engineered for conversions.",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTemplateItems((prev) => [data.template, ...prev]);
+        setIsAddTemplateModalOpen(false);
+        setNewTemplateName("");
+        setNewTemplateSlug("");
+        setNewTemplateImage("");
+        setNewTemplateDemoUrl("");
+        setNewTemplateDescription("");
+        showToast("Template added to store successfully!");
+      } else {
+        showToast("Failed to create template");
+      }
+    } catch (e) {
+      console.error(e);
+      showToast("Network error while adding template");
+    }
+  };
+
+  // Delete Template Handler
+  const handleDeleteTemplate = async (idOrSlug: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete template "${name}"?`)) return;
+    try {
+      const res = await fetch(`/api/templates?id=${encodeURIComponent(idOrSlug)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setTemplateItems((prev) =>
+          prev.filter((t) => t.id !== idOrSlug && t.slug !== idOrSlug)
+        );
+        showToast("Template deleted from store");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // Filtered subscribers
   const filteredSubscribers = subscribers.filter((u) => {
     const q = searchQuery.toLowerCase();
@@ -252,6 +458,16 @@ export default function AdminDashboardPage() {
     );
   });
 
+  // Filtered portfolio
+  const filteredPortfolio = portfolioProjects.filter((p) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      p.name.toLowerCase().includes(q) ||
+      p.industry.toLowerCase().includes(q) ||
+      p.kind.toLowerCase().includes(q)
+    );
+  });
+
   // Estimated pipeline calculation
   const totalPipelineValue = inquiries.reduce((acc, inq) => {
     if (inq.budget.includes("5,000")) return acc + 5000;
@@ -259,6 +475,12 @@ export default function AdminDashboardPage() {
     if (inq.budget.includes("1,500")) return acc + 2000;
     return acc + 1000;
   }, 0);
+
+  // Peak visitors for chart scaling
+  const maxDayVisitors = Math.max(
+    ...(analytics?.dailyTrend?.map((d) => d.visitors) || [50]),
+    20
+  );
 
   // 1. PIN LOCK SCREEN
   if (!isAuthenticated) {
@@ -273,7 +495,7 @@ export default function AdminDashboardPage() {
               Looksbay Admin Suite
             </h1>
             <p className="mt-2 text-xs text-[#86868b]">
-              Enterprise control center for users, inquiries, and revenue.
+              Enterprise control center for users, traffic, portfolio, and templates.
             </p>
           </div>
 
@@ -291,7 +513,7 @@ export default function AdminDashboardPage() {
               <input
                 type="password"
                 required
-                placeholder="Enter PIN"
+                placeholder="Enter PIN (Default: admin123)"
                 value={pin}
                 onChange={(e) => setPin(e.target.value)}
                 autoFocus
@@ -301,82 +523,73 @@ export default function AdminDashboardPage() {
 
             <button
               type="submit"
-              className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-[#0077ed] py-3.5 text-sm font-bold text-white shadow-md transition hover:bg-[#0062c4] active:scale-[0.99]"
+              className="w-full rounded-xl bg-[#0077ed] py-3 text-xs font-bold text-white shadow-sm transition hover:bg-[#0062c4] active:scale-[0.99]"
             >
-              <span>Authenticate & Enter</span>
-              <ArrowRight size={16} />
+              Unlock Dashboard
             </button>
           </form>
 
-          <div className="mt-6 border-t border-black/5 pt-4 text-center">
-            <p className="text-[11px] text-[#86868b]">
-              Master PIN: <code className="font-bold text-[#1d1d1f]">admin123</code>
-            </p>
-          </div>
+          <p className="mt-6 text-center text-[11px] text-[#86868b]">
+            Protected with AES Session Token. PIN: <code>admin123</code>
+          </p>
         </div>
       </div>
     );
   }
 
-  // 2. MAIN ADMIN DASHBOARD
+  // 2. AUTHENTICATED ADMIN DASHBOARD
   return (
-    <div className="min-h-screen bg-[#F5F5F7] flex flex-col">
+    <div className="min-h-screen bg-[#F5F5F7] text-[#1D1D1F] flex flex-col">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-2xl bg-[#1D1D1F] px-4 py-3 text-xs font-semibold text-white shadow-2xl animate-fade-in">
+        <div className="fixed top-5 right-5 z-50 flex items-center gap-2 rounded-xl bg-[#1D1D1F] px-4 py-3 text-xs font-semibold text-white shadow-xl animate-fade-in">
           <CheckCircle2 size={16} className="text-emerald-400" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Top Navbar */}
-      <header className="sticky top-0 z-40 border-b border-black/[0.08] bg-white/95 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-[1440px] items-center justify-between px-4 sm:px-8">
-          <div className="flex items-center gap-4">
-            <Link href="/" className="flex items-center gap-2">
-              <span className="grid size-8 place-items-center rounded-xl bg-[#0077ED] text-white font-black text-sm shadow-xs">
-                LB
+      {/* Top Navigation Header */}
+      <header className="sticky top-0 z-40 border-b border-black/[0.08] bg-white/80 backdrop-blur-md px-4 sm:px-8 py-3.5">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              href="/"
+              className="group flex items-center gap-2 text-sm font-extrabold tracking-tight text-[#1D1D1F]"
+            >
+              <span className="grid size-7 place-items-center rounded-lg bg-[#0077ED] text-white shadow-xs">
+                L
               </span>
-              <div className="leading-tight">
-                <span className="text-sm font-black text-[#1D1D1F] tracking-tight block">
-                  Looksbay Studio
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-[#0077ED] block">
-                  Admin Command Center
-                </span>
-              </div>
+              <span>Looksbay Admin Suite</span>
             </Link>
-
-            <span className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+            <span className="rounded-full bg-emerald-50 border border-emerald-200/60 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 flex items-center gap-1">
               <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Live Server 100% OK
+              Live Connected
             </span>
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <button
               type="button"
-              onClick={() => setIsAddLeadModalOpen(true)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#0077ED] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+              onClick={fetchData}
+              title="Refresh Data"
+              className="grid size-8 place-items-center rounded-lg border border-black/10 bg-white text-[#515154] hover:bg-[#F5F5F7]"
             >
-              <Plus size={14} />
-              <span className="hidden sm:inline">Add Lead</span>
+              <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
             </button>
 
-            <a
-              href="/api/admin/users?format=csv"
-              download
-              className="inline-flex items-center gap-1.5 rounded-full border border-black/10 bg-white px-3.5 py-1.5 text-xs font-bold text-[#1D1D1F] shadow-xs transition hover:bg-[#F5F5F7]"
-              title="Download Leads CSV"
+            <Link
+              href="/"
+              target="_blank"
+              className="hidden sm:inline-flex items-center gap-1 rounded-lg border border-black/10 bg-white px-3 py-1.5 text-xs font-semibold text-[#515154] hover:bg-[#F5F5F7]"
             >
-              <Download size={14} />
-              <span className="hidden sm:inline">Export CSV</span>
-            </a>
+              <span>View Live Website</span>
+              <ExternalLink size={12} />
+            </Link>
 
             <button
               type="button"
               onClick={handleLogout}
-              className="grid size-8 place-items-center rounded-full border border-black/10 bg-white text-[#86868B] transition hover:text-red-600 hover:border-red-200"
+              className="grid size-8 place-items-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
               title="Lock Dashboard"
             >
               <LogOut size={14} />
@@ -392,6 +605,24 @@ export default function AdminDashboardPage() {
           <nav className="space-y-1 sticky top-24">
             {[
               { id: "overview", label: "Overview", icon: LayoutDashboard, badge: null },
+              {
+                id: "traffic",
+                label: "Daily Traffic",
+                icon: BarChart3,
+                badge: analytics?.todayVisitors ? `${analytics.todayVisitors} today` : "Live",
+              },
+              {
+                id: "portfolio",
+                label: "Portfolio CMS",
+                icon: Briefcase,
+                badge: portfolioProjects.length,
+              },
+              {
+                id: "templates",
+                label: "Template Store",
+                icon: ShoppingBag,
+                badge: templateItems.length,
+              },
               { id: "leads", label: "Users & Leads", icon: Users, badge: subscribers.length },
               {
                 id: "inquiries",
@@ -399,7 +630,6 @@ export default function AdminDashboardPage() {
                 icon: Inbox,
                 badge: inquiries.filter((i) => i.status === "New").length || null,
               },
-              { id: "templates", label: "Template Catalog", icon: ShoppingBag, badge: 6 },
               { id: "campaigns", label: "Email Marketing", icon: Send, badge: "Blast" },
               { id: "seo", label: "SEO & Health", icon: Activity, badge: "98/100" },
               { id: "settings", label: "Settings & PIN", icon: Settings, badge: null },
@@ -438,9 +668,11 @@ export default function AdminDashboardPage() {
         <div className="md:hidden flex overflow-x-auto pb-2 gap-2 w-full mb-4 shrink-0">
           {[
             { id: "overview", label: "Overview" },
+            { id: "traffic", label: `Traffic (${analytics?.todayVisitors || 0})` },
+            { id: "portfolio", label: `Portfolio (${portfolioProjects.length})` },
+            { id: "templates", label: `Templates (${templateItems.length})` },
             { id: "leads", label: `Leads (${subscribers.length})` },
             { id: "inquiries", label: `Inquiries (${inquiries.length})` },
-            { id: "templates", label: "Templates" },
             { id: "campaigns", label: "Marketing" },
             { id: "seo", label: "SEO" },
             { id: "settings", label: "Settings" },
@@ -466,37 +698,100 @@ export default function AdminDashboardPage() {
           {activeTab === "overview" && (
             <div className="space-y-8 animate-fade-in">
               {/* Metric Cards Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {/* Daily Traffic Card */}
+                <div
+                  onClick={() => setActiveTab("traffic")}
+                  className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs cursor-pointer transition hover:border-[#0077ED]/40 hover:shadow-md"
+                >
                   <div className="flex items-center justify-between text-[#86868B]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Registered Leads</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      Today&apos;s Website Visitors
+                    </span>
                     <span className="grid size-8 place-items-center rounded-xl bg-blue-50 text-[#0077ED]">
+                      <BarChart3 size={16} />
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">
+                    {analytics?.todayVisitors || 0}
+                  </p>
+                  <div className="mt-2 flex items-center justify-between text-xs">
+                    <span className="font-semibold text-emerald-600">
+                      Yesterday: {analytics?.yesterdayVisitors || 0} visitors
+                    </span>
+                    <span className="text-[#0077ED] font-bold">View Traffic →</span>
+                  </div>
+                </div>
+
+                {/* Registered Leads */}
+                <div
+                  onClick={() => setActiveTab("leads")}
+                  className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs cursor-pointer transition hover:border-[#0077ED]/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between text-[#86868B]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      Member Leads
+                    </span>
+                    <span className="grid size-8 place-items-center rounded-xl bg-purple-50 text-purple-600">
                       <Users size={16} />
                     </span>
                   </div>
-                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">{subscribers.length}</p>
-                  <div className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-emerald-600">
-                    <TrendingUp size={14} />
-                    <span>+100% Marketing Opt-in</span>
-                  </div>
-                </div>
-
-                <div className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs">
-                  <div className="flex items-center justify-between text-[#86868B]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Client Inquiries</span>
-                    <span className="grid size-8 place-items-center rounded-xl bg-purple-50 text-purple-600">
-                      <Inbox size={16} />
-                    </span>
-                  </div>
-                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">{inquiries.length}</p>
-                  <span className="mt-2 block text-xs font-semibold text-[#515154]">
-                    {inquiries.filter((i) => i.status === "New").length} New Proposals Awaiting
+                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">
+                    {subscribers.length}
+                  </p>
+                  <span className="mt-2 block text-xs font-semibold text-emerald-600">
+                    +100% Verified Opt-ins
                   </span>
                 </div>
 
+                {/* Portfolio Projects */}
+                <div
+                  onClick={() => setActiveTab("portfolio")}
+                  className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs cursor-pointer transition hover:border-[#0077ED]/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between text-[#86868B]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      Portfolio Showcase
+                    </span>
+                    <span className="grid size-8 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                      <Briefcase size={16} />
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">
+                    {portfolioProjects.length}
+                  </p>
+                  <span className="mt-2 block text-xs font-semibold text-indigo-600">
+                    Live Client Showcase Items
+                  </span>
+                </div>
+
+                {/* Active Templates */}
+                <div
+                  onClick={() => setActiveTab("templates")}
+                  className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs cursor-pointer transition hover:border-[#0077ED]/40 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between text-[#86868B]">
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      Template Store
+                    </span>
+                    <span className="grid size-8 place-items-center rounded-xl bg-pink-50 text-pink-600">
+                      <ShoppingBag size={16} />
+                    </span>
+                  </div>
+                  <p className="mt-2 text-2xl sm:text-3xl font-black text-[#1D1D1F]">
+                    {templateItems.length}
+                  </p>
+                  <span className="mt-2 block text-xs font-semibold text-pink-600">
+                    Squarespace 7.1 Templates Live
+                  </span>
+                </div>
+
+                {/* Pipeline Value */}
                 <div className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs">
                   <div className="flex items-center justify-between text-[#86868B]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Pipeline Value</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      Client Pipeline
+                    </span>
                     <span className="grid size-8 place-items-center rounded-xl bg-emerald-50 text-emerald-600">
                       <DollarSign size={16} />
                     </span>
@@ -505,13 +800,19 @@ export default function AdminDashboardPage() {
                     ${totalPipelineValue.toLocaleString()}
                   </p>
                   <span className="mt-2 block text-xs font-semibold text-emerald-600">
-                    Active Client Interest
+                    {inquiries.length} Active Client Inquiries
                   </span>
                 </div>
 
-                <div className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs">
+                {/* SEO Health */}
+                <div
+                  onClick={() => setActiveTab("seo")}
+                  className="rounded-2xl border border-black/[0.08] bg-white p-5 shadow-xs cursor-pointer transition hover:border-[#0077ED]/40"
+                >
                   <div className="flex items-center justify-between text-[#86868B]">
-                    <span className="text-[11px] font-bold uppercase tracking-wider">SEO Health</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider">
+                      SEO Health Score
+                    </span>
                     <span className="grid size-8 place-items-center rounded-xl bg-amber-50 text-amber-600">
                       <Activity size={16} />
                     </span>
@@ -529,8 +830,12 @@ export default function AdminDashboardPage() {
                 <div className="lg:col-span-2 rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
                   <div className="flex items-center justify-between border-b border-black/5 pb-4 mb-4">
                     <div>
-                      <h2 className="text-base font-bold text-[#1D1D1F]">Recent Member Sign-Ups</h2>
-                      <p className="text-xs text-[#86868B]">Live users captured from the website navigation</p>
+                      <h2 className="text-base font-bold text-[#1D1D1F]">
+                        Recent Member Sign-Ups
+                      </h2>
+                      <p className="text-xs text-[#86868B]">
+                        Live users captured from the website navigation
+                      </p>
                     </div>
                     <button
                       type="button"
@@ -572,18 +877,44 @@ export default function AdminDashboardPage() {
                 {/* Studio Control Shortcuts */}
                 <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs flex flex-col justify-between">
                   <div>
-                    <h2 className="text-base font-bold text-[#1D1D1F]">Studio Shortcuts</h2>
-                    <p className="text-xs text-[#86868B] mb-5">Quick access to common admin operations</p>
+                    <h2 className="text-base font-bold text-[#1D1D1F]">Quick Studio Actions</h2>
+                    <p className="text-xs text-[#86868B] mb-5">
+                      Fast 1-click access to common operations
+                    </p>
 
                     <div className="space-y-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddPortfolioModalOpen(true)}
+                        className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-[#FBFBFD] px-3.5 py-2.5 text-xs font-semibold text-[#1D1D1F] transition hover:bg-[#F5F5F7]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus size={14} className="text-[#0077ED]" />
+                          <span>+ Add Portfolio Project</span>
+                        </div>
+                        <ChevronRight size={14} className="text-[#86868B]" />
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsAddTemplateModalOpen(true)}
+                        className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-[#FBFBFD] px-3.5 py-2.5 text-xs font-semibold text-[#1D1D1F] transition hover:bg-[#F5F5F7]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Plus size={14} className="text-purple-600" />
+                          <span>+ Add New Template</span>
+                        </div>
+                        <ChevronRight size={14} className="text-[#86868B]" />
+                      </button>
+
                       <button
                         type="button"
                         onClick={copyAllEmails}
                         className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-[#FBFBFD] px-3.5 py-2.5 text-xs font-semibold text-[#1D1D1F] transition hover:bg-[#F5F5F7]"
                       >
                         <div className="flex items-center gap-2">
-                          <Copy size={14} className="text-[#0077ED]" />
-                          <span>Copy All Marketing Emails</span>
+                          <Copy size={14} className="text-emerald-600" />
+                          <span>Copy Marketing Emails</span>
                         </div>
                         <ChevronRight size={14} className="text-[#86868B]" />
                       </button>
@@ -594,30 +925,18 @@ export default function AdminDashboardPage() {
                         className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-[#FBFBFD] px-3.5 py-2.5 text-xs font-semibold text-[#1D1D1F] transition hover:bg-[#F5F5F7]"
                       >
                         <div className="flex items-center gap-2">
-                          <Download size={14} className="text-purple-600" />
-                          <span>Download Mailchimp CSV</span>
+                          <Download size={14} className="text-[#515154]" />
+                          <span>Download CSV Contacts</span>
                         </div>
                         <ChevronRight size={14} className="text-[#86868B]" />
                       </a>
-
-                      <Link
-                        href="/sitemap.xml"
-                        target="_blank"
-                        className="flex w-full items-center justify-between rounded-xl border border-black/5 bg-[#FBFBFD] px-3.5 py-2.5 text-xs font-semibold text-[#1D1D1F] transition hover:bg-[#F5F5F7]"
-                      >
-                        <div className="flex items-center gap-2">
-                          <ExternalLink size={14} className="text-emerald-600" />
-                          <span>Inspect Live XML Sitemap</span>
-                        </div>
-                        <ChevronRight size={14} className="text-[#86868B]" />
-                      </Link>
                     </div>
                   </div>
 
                   <div className="mt-6 rounded-xl bg-blue-50/70 border border-[#0077ED]/20 p-3.5 text-xs text-[#0077ED]">
-                    <p className="font-bold">Next.js 14 App Router</p>
+                    <p className="font-bold">Automated Live Tracking</p>
                     <p className="mt-0.5 text-[11px] text-[#515154]">
-                      All marketing emails are stored permanently in local JSON and exported to CSV anytime.
+                      Every client visit and route change is recorded automatically with zero third-party cookies.
                     </p>
                   </div>
                 </div>
@@ -625,14 +944,435 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 2: LEADS & USERS */}
-          {activeTab === "leads" && (
+          {/* TAB 2: DAILY TRAFFIC & ANALYTICS */}
+          {activeTab === "traffic" && (
             <div className="space-y-6 animate-fade-in">
-              {/* Header & Controls */}
+              {/* Traffic Metrics Header */}
+              <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-5 mb-6">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Daily Website Traffic & Visitor Intelligence
+                    </h2>
+                    <p className="text-xs text-[#86868B]">
+                      Daily unique visitors, page views, and top website routes.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-bold text-emerald-700">
+                      <span className="size-2 rounded-full bg-emerald-500 animate-ping" />
+                      Live Tracker Active
+                    </span>
+                  </div>
+                </div>
+
+                {/* 4 Traffic Metric Cards */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#86868B]">
+                      Today&apos;s Visitors
+                    </span>
+                    <p className="text-2xl sm:text-3xl font-black text-[#0077ED] mt-1">
+                      {analytics?.todayVisitors || 0}
+                    </p>
+                    <span className="text-[11px] font-semibold text-emerald-600 mt-1 block">
+                      Unique users today
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#86868B]">
+                      Today&apos;s Page Views
+                    </span>
+                    <p className="text-2xl sm:text-3xl font-black text-[#1D1D1F] mt-1">
+                      {analytics?.todayPageviews || 0}
+                    </p>
+                    <span className="text-[11px] text-[#86868B] mt-1 block">
+                      Total pages browsed today
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#86868B]">
+                      Yesterday&apos;s Visitors
+                    </span>
+                    <p className="text-2xl sm:text-3xl font-black text-[#515154] mt-1">
+                      {analytics?.yesterdayVisitors || 0}
+                    </p>
+                    <span className="text-[11px] text-[#86868B] mt-1 block">
+                      Previous day traffic
+                    </span>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#86868B]">
+                      Total Visitors Logged
+                    </span>
+                    <p className="text-2xl sm:text-3xl font-black text-purple-600 mt-1">
+                      {analytics?.totalVisitors || 0}
+                    </p>
+                    <span className="text-[11px] text-[#86868B] mt-1 block">
+                      {analytics?.totalPageviews || 0} All-time views
+                    </span>
+                  </div>
+                </div>
+
+                {/* Visual Daily Visitor Trend Chart (7-Day Bar Graph) */}
+                <div className="border border-black/5 rounded-2xl p-5 bg-[#FBFBFD] mb-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-sm font-bold text-[#1D1D1F]">
+                        Last 7 Days Visitor Trend (Daily Breakdown)
+                      </h3>
+                      <p className="text-[11px] text-[#86868B]">
+                        Real-time visitor count for each specific day
+                      </p>
+                    </div>
+                    <span className="text-xs font-bold text-[#0077ED]">
+                      Peak Day: {maxDayVisitors} visitors
+                    </span>
+                  </div>
+
+                  <div className="h-44 flex items-end justify-between gap-3 sm:gap-6 pt-6 px-2 sm:px-6 border-b border-black/10">
+                    {analytics?.dailyTrend?.map((item, idx) => {
+                      const heightPercent = Math.max(
+                        Math.round((item.visitors / maxDayVisitors) * 100),
+                        8
+                      );
+                      const isToday = idx === (analytics?.dailyTrend?.length || 0) - 1;
+
+                      return (
+                        <div
+                          key={item.date}
+                          className="flex-1 flex flex-col items-center h-full justify-end group"
+                        >
+                          <span className="text-[11px] font-bold text-[#1D1D1F] mb-1.5 opacity-90 group-hover:scale-110 transition-transform">
+                            {item.visitors}
+                          </span>
+                          <div
+                            style={{ height: `${heightPercent}%` }}
+                            className={`w-full max-w-[42px] rounded-t-lg transition-all duration-300 group-hover:brightness-110 ${
+                              isToday
+                                ? "bg-gradient-to-t from-[#0077ED] to-[#3898FF] shadow-sm"
+                                : "bg-black/[0.12] hover:bg-[#0077ED]/60"
+                            }`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Day Labels Under Chart */}
+                  <div className="flex justify-between gap-3 sm:gap-6 px-2 sm:px-6 pt-2.5">
+                    {analytics?.dailyTrend?.map((item, idx) => {
+                      const isToday = idx === (analytics?.dailyTrend?.length || 0) - 1;
+                      return (
+                        <div key={item.date} className="flex-1 text-center">
+                          <span
+                            className={`block text-[11px] font-bold ${
+                              isToday ? "text-[#0077ED]" : "text-[#515154]"
+                            }`}
+                          >
+                            {item.day}
+                          </span>
+                          <span className="block text-[9px] text-[#86868B]">
+                            {item.date.slice(5)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Top Visited Pages Table */}
+                <div>
+                  <h3 className="text-sm font-bold text-[#1D1D1F] mb-3">
+                    Top Visited Pages & Content Performance
+                  </h3>
+                  <div className="overflow-x-auto rounded-xl border border-black/5">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#F5F5F7] border-b border-black/5 text-[#515154] font-bold uppercase tracking-wider">
+                        <tr>
+                          <th className="py-2.5 px-4">Page Route</th>
+                          <th className="py-2.5 px-4">Total Pageviews</th>
+                          <th className="py-2.5 px-4">Share of Traffic</th>
+                          <th className="py-2.5 px-4 text-right">Live Link</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-black/5">
+                        {analytics?.topPages?.map((p, idx) => {
+                          const totalViews = analytics.totalPageviews || 1;
+                          const percent = Math.min(
+                            100,
+                            Math.round((p.views / totalViews) * 100)
+                          );
+                          return (
+                            <tr key={idx} className="hover:bg-[#FBFBFD]">
+                              <td className="py-2.5 px-4 font-mono font-bold text-[#1D1D1F]">
+                                {p.path}
+                              </td>
+                              <td className="py-2.5 px-4 font-bold text-[#0077ED]">
+                                {p.views.toLocaleString()} views
+                              </td>
+                              <td className="py-2.5 px-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-28 rounded-full bg-black/5 overflow-hidden">
+                                    <div
+                                      className="h-full rounded-full bg-[#0077ED]"
+                                      style={{ width: `${Math.max(percent, 8)}%` }}
+                                    />
+                                  </div>
+                                  <span className="text-[10px] text-[#86868B] font-semibold">
+                                    {percent}%
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-2.5 px-4 text-right">
+                                <Link
+                                  href={p.path}
+                                  target="_blank"
+                                  className="text-[#0077ED] font-semibold hover:underline inline-flex items-center gap-1"
+                                >
+                                  <span>Visit</span>
+                                  <ExternalLink size={11} />
+                                </Link>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: PORTFOLIO CMS */}
+          {activeTab === "portfolio" && (
+            <div className="space-y-6 animate-fade-in">
               <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-5 mb-5">
                   <div>
-                    <h2 className="text-xl font-bold text-[#1D1D1F]">Registered Leads & Members</h2>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Portfolio Showcase CMS
+                    </h2>
+                    <p className="text-xs text-[#86868B]">
+                      Add, update, or remove portfolio client projects dynamically without touching code.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href="/portfolio"
+                      target="_blank"
+                      className="inline-flex items-center gap-1 text-xs font-bold text-[#0077ED] hover:underline"
+                    >
+                      <span>View Public Showcase</span>
+                      <ExternalLink size={13} />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddPortfolioModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#0077ED] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+                    >
+                      <Plus size={14} />
+                      <span>Add Portfolio Item</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Portfolio Items Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredPortfolio.map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="group rounded-2xl border border-black/[0.08] bg-[#FBFBFD] overflow-hidden shadow-xs flex flex-col justify-between transition hover:border-[#0077ED]/40 hover:bg-white"
+                    >
+                      <div>
+                        {/* Thumbnail */}
+                        <div className="h-44 w-full bg-neutral-100 overflow-hidden relative">
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105"
+                          />
+                          <span className="absolute top-2.5 left-2.5 rounded-full bg-white/90 backdrop-blur-sm px-2.5 py-0.5 text-[10px] font-bold text-[#1D1D1F] shadow-xs">
+                            {item.industry}
+                          </span>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-4">
+                          <h3 className="text-base font-bold text-[#1D1D1F]">{item.name}</h3>
+                          <p className="text-xs font-semibold text-[#0077ED] mt-0.5">
+                            {item.kind}
+                          </p>
+                          <p className="text-xs text-[#515154] mt-2 line-clamp-2">
+                            {item.description}
+                          </p>
+
+                          <div className="mt-3 flex flex-wrap gap-1.5">
+                            {item.tags?.map((tag, tIdx) => (
+                              <span
+                                key={tIdx}
+                                className="rounded-md bg-black/5 px-2 py-0.5 text-[10px] font-medium text-[#515154]"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Footer Actions */}
+                      <div className="p-4 pt-3 border-t border-black/5 flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-[#86868B]">
+                          ❤️ {item.hearts || 520} likes
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href="/portfolio"
+                            target="_blank"
+                            className="text-xs font-bold text-[#0077ED] hover:underline inline-flex items-center gap-1"
+                          >
+                            <span>Live</span>
+                            <ExternalLink size={11} />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePortfolio(item.name)}
+                            className="rounded-lg p-1.5 text-[#86868B] hover:bg-red-50 hover:text-red-600 transition"
+                            title="Delete Project"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: TEMPLATES CATALOG CMS */}
+          {activeTab === "templates" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-5 mb-5">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Template Store & Catalog CMS
+                    </h2>
+                    <p className="text-xs text-[#86868B]">
+                      Manage prices, preview URLs, and add new Squarespace 7.1 templates.
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href="/templates"
+                      target="_blank"
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077ED] hover:underline"
+                    >
+                      <span>View Public Store</span>
+                      <ExternalLink size={13} />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddTemplateModalOpen(true)}
+                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#0077ED] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+                    >
+                      <Plus size={14} />
+                      <span>Add New Template</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {templateItems.map((t) => (
+                    <div
+                      key={t.id || t.slug}
+                      className="group rounded-2xl border border-black/[0.08] bg-[#FBFBFD] overflow-hidden shadow-xs flex flex-col justify-between transition hover:border-[#0077ED]/40 hover:bg-white"
+                    >
+                      <div>
+                        {/* Thumbnail */}
+                        <div className="h-44 w-full bg-neutral-100 overflow-hidden relative">
+                          <img
+                            src={t.image}
+                            alt={t.name}
+                            className="h-full w-full object-cover object-top transition duration-300 group-hover:scale-105"
+                          />
+                          <span className="absolute top-2.5 right-2.5 rounded-full bg-emerald-500 text-white px-2.5 py-0.5 text-[10px] font-black shadow-xs">
+                            ${t.price} USD
+                          </span>
+                        </div>
+
+                        <div className="p-4">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="rounded-full bg-blue-50 text-[#0077ED] px-2 py-0.5 text-[10px] font-bold">
+                              Fluid Engine 7.1
+                            </span>
+                            <span className="text-[11px] font-mono text-[#86868B]">
+                              /{t.slug}
+                            </span>
+                          </div>
+                          <h3 className="text-base font-bold text-[#1D1D1F]">{t.name}</h3>
+                          <p className="text-xs text-[#0077ED] font-semibold">
+                            {t.categories ? t.categories.join(", ") : "Squarespace Template"}
+                          </p>
+                          <p className="mt-2 text-xs text-[#515154] line-clamp-2">
+                            {t.description}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 pt-3 border-t border-black/5 flex items-center justify-between">
+                        <a
+                          href={t.demoUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-xs font-bold text-[#0077ED] hover:underline"
+                        >
+                          <span>Live Demo</span>
+                          <ExternalLink size={12} />
+                        </a>
+
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/templates/${t.slug}`}
+                            target="_blank"
+                            className="text-xs font-bold text-[#515154] hover:text-[#1D1D1F]"
+                          >
+                            Details
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteTemplate(t.id || t.slug, t.name)}
+                            className="rounded-lg p-1.5 text-[#86868B] hover:bg-red-50 hover:text-red-600 transition"
+                            title="Delete Template"
+                          >
+                            <Trash2 size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: LEADS & USERS */}
+          {activeTab === "leads" && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-5 mb-5">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Registered Leads & Members
+                    </h2>
                     <p className="text-xs text-[#86868B]">
                       Every visitor who logged in or created an account.
                     </p>
@@ -690,7 +1430,10 @@ export default function AdminDashboardPage() {
                         <tr key={u.id} className="hover:bg-[#FBFBFD]">
                           <td className="py-3 px-4 font-bold text-[#1D1D1F]">{u.name}</td>
                           <td className="py-3 px-4">
-                            <a href={`mailto:${u.email}`} className="text-[#0077ED] font-semibold hover:underline">
+                            <a
+                              href={`mailto:${u.email}`}
+                              className="text-[#0077ED] font-semibold hover:underline"
+                            >
                               {u.email}
                             </a>
                           </td>
@@ -726,13 +1469,15 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 3: CLIENT INQUIRIES */}
+          {/* TAB 6: CLIENT INQUIRIES */}
           {activeTab === "inquiries" && (
             <div className="space-y-6 animate-fade-in">
               <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-black/5 pb-5 mb-5">
                   <div>
-                    <h2 className="text-xl font-bold text-[#1D1D1F]">Client Inquiries & Project Briefs</h2>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Client Inquiries & Project Briefs
+                    </h2>
                     <p className="text-xs text-[#86868B]">
                       Submissions received through the contact page and consultation requests.
                     </p>
@@ -798,7 +1543,9 @@ export default function AdminDashboardPage() {
                       <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between">
                         <select
                           value={inq.status}
-                          onChange={(e) => updateInquiryStatus(inq.id, e.target.value as any)}
+                          onChange={(e) =>
+                            updateInquiryStatus(inq.id, e.target.value as any)
+                          }
                           className="rounded-lg border border-black/10 bg-white px-2 py-1 text-[11px] font-semibold text-[#1D1D1F]"
                         >
                           <option value="New">Status: New</option>
@@ -832,128 +1579,66 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 4: TEMPLATES CATALOG */}
-          {activeTab === "templates" && (
-            <div className="space-y-6 animate-fade-in">
-              <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
-                <div className="flex items-center justify-between border-b border-black/5 pb-5 mb-5">
-                  <div>
-                    <h2 className="text-xl font-bold text-[#1D1D1F]">Template Store & Inventory</h2>
-                    <p className="text-xs text-[#86868B]">
-                      Manage prices, preview URLs, and stock status across your 6 live templates.
-                    </p>
-                  </div>
-                  <Link
-                    href="/templates"
-                    target="_blank"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#0077ED] hover:underline"
-                  >
-                    <span>View Public Store</span>
-                    <ExternalLink size={13} />
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {allTemplates.map((t) => (
-                    <div
-                      key={t.id}
-                      className="rounded-2xl border border-black/[0.08] bg-[#FBFBFD] p-5 shadow-xs flex flex-col justify-between"
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-3">
-                          <span className="rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-[10px] font-bold">
-                            Active in Store
-                          </span>
-                          <span className="text-sm font-black text-[#1D1D1F]">${t.price} USD</span>
-                        </div>
-                        <h3 className="text-base font-bold text-[#1D1D1F]">{t.name}</h3>
-                        <p className="text-xs text-[#0077ED] font-semibold">{t.categories ? t.categories.join(", ") : "Squarespace Template"}</p>
-                        <p className="mt-2 text-xs text-[#515154] line-clamp-2">{t.description}</p>
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-black/5 flex items-center justify-between">
-                        <span className="text-[11px] text-[#86868B]">Fluid Engine 7.1</span>
-                        <Link
-                          href={`/templates/${t.slug}`}
-                          target="_blank"
-                          className="inline-flex items-center gap-1 text-xs font-bold text-[#0077ED] hover:underline"
-                        >
-                          <span>Preview</span>
-                          <ExternalLink size={12} />
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 5: EMAIL MARKETING */}
+          {/* TAB 7: EMAIL MARKETING */}
           {activeTab === "campaigns" && (
             <div className="space-y-6 animate-fade-in">
               <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
                 <div className="border-b border-black/5 pb-5 mb-5">
-                  <h2 className="text-xl font-bold text-[#1D1D1F]">Email Marketing & Campaign Broadcaster</h2>
+                  <h2 className="text-xl font-bold text-[#1D1D1F]">
+                    Email Marketing & Campaign Broadcaster
+                  </h2>
                   <p className="text-xs text-[#86868B]">
                     Segment your captured leads and export directly to Mailchimp, Klaviyo, Brevo, or Flodesk.
                   </p>
                 </div>
 
-                {/* Audiences Segment Breakdown */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
-                    <span className="text-xs font-bold text-[#1D1D1F] block">All Subscribers</span>
-                    <p className="text-2xl font-black text-[#0077ED] mt-1">{subscribers.length}</p>
-                    <button
-                      type="button"
-                      onClick={copyAllEmails}
-                      className="mt-3 text-xs font-bold text-[#0077ED] hover:underline"
-                    >
-                      Copy All Emails
-                    </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4 text-center">
+                    <span className="text-xs font-bold text-[#86868B]">Ready Audience</span>
+                    <p className="text-2xl font-black text-[#1D1D1F] mt-1">
+                      {subscribers.length} Emails
+                    </p>
+                    <span className="text-[11px] text-emerald-600 font-semibold">100% Opt-in</span>
                   </div>
 
-                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
-                    <span className="text-xs font-bold text-[#1D1D1F] block">Template Shoppers</span>
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4 text-center">
+                    <span className="text-xs font-bold text-[#86868B]">Template Buyers</span>
+                    <p className="text-2xl font-black text-[#0077ED] mt-1">
+                      {subscribers.filter((s) => s.interest.includes("Template")).length}
+                    </p>
+                    <span className="text-[11px] text-[#86868B]">High Intent</span>
+                  </div>
+
+                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4 text-center">
+                    <span className="text-xs font-bold text-[#86868B]">High-Ticket Clients</span>
                     <p className="text-2xl font-black text-purple-600 mt-1">
-                      {subscribers.filter((s) => (s.interest || "").includes("Template")).length || 1}
+                      {subscribers.filter((s) => s.interest.includes("Custom")).length}
                     </p>
-                    <span className="mt-3 block text-xs text-[#86868B]">Segment: High Purchase Intent</span>
-                  </div>
-
-                  <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4">
-                    <span className="text-xs font-bold text-[#1D1D1F] block">Custom Dev & SEO Clients</span>
-                    <p className="text-2xl font-black text-emerald-600 mt-1">
-                      {subscribers.filter((s) => !(s.interest || "").includes("Template")).length || 1}
-                    </p>
-                    <span className="mt-3 block text-xs text-[#86868B]">Segment: High-Ticket Retainers</span>
+                    <span className="text-[11px] text-[#86868B]">Custom Dev Segment</span>
                   </div>
                 </div>
 
-                {/* Broadcast Template */}
-                <div className="rounded-xl border border-black/10 bg-[#FBFBFD] p-5">
-                  <h3 className="text-sm font-bold text-[#1D1D1F] mb-2">Campaign Broadcast Draft Preview</h3>
-                  <div className="rounded-xl bg-white p-4 border border-black/5 space-y-2 text-xs">
-                    <p>
-                      <strong>Subject:</strong> Exclusive 20% Off New Squarespace 7.1 Templates + Custom CSS Drops
-                    </p>
-                    <p>
-                      <strong>Sender:</strong> Looksbay Studio &lt;hello@looksbay.com&gt;
-                    </p>
-                    <div className="border-t border-black/5 pt-2 text-[#515154] leading-relaxed">
-                      Hi there! Thank you for being a part of Looksbay Studio. We just launched our newest collection
-                      of Fluid Engine templates, engineered with 98+ Core Web Vitals speed and custom editorial layouts.
-                    </div>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-3">
+                <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-5 space-y-4">
+                  <h3 className="text-sm font-bold text-[#1D1D1F]">
+                    1-Click Marketing Campaign Tools
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      type="button"
+                      onClick={copyAllEmails}
+                      className="inline-flex items-center gap-2 rounded-xl bg-[#0077ED] px-4 py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+                    >
+                      <Copy size={14} />
+                      <span>Copy All ({subscribers.length}) Emails</span>
+                    </button>
+
                     <a
                       href="/api/admin/users?format=csv"
                       download
-                      className="inline-flex items-center gap-1.5 rounded-xl bg-[#0077ED] px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+                      className="inline-flex items-center gap-2 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-xs font-bold text-[#1D1D1F] shadow-xs transition hover:bg-[#F5F5F7]"
                     >
                       <Download size={14} />
-                      <span>Download Campaign Audience (CSV)</span>
+                      <span>Download CSV for Mailchimp</span>
                     </a>
                   </div>
                 </div>
@@ -961,21 +1646,28 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 6: SEO & HEALTH */}
+          {/* TAB 8: TECHNICAL SEO HEALTH */}
           {activeTab === "seo" && (
             <div className="space-y-6 animate-fade-in">
               <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
-                <div className="border-b border-black/5 pb-5 mb-5">
-                  <h2 className="text-xl font-bold text-[#1D1D1F]">Technical SEO & Google Indexing Monitor</h2>
-                  <p className="text-xs text-[#86868B]">
-                    Real-time status of your 45 XML sitemap URLs, robots.txt directives, and Schema.org graphs.
-                  </p>
+                <div className="border-b border-black/5 pb-5 mb-5 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-[#1D1D1F]">
+                      Technical SEO & Core Web Vitals Monitor
+                    </h2>
+                    <p className="text-xs text-[#86868B]">
+                      Search engine crawler status, JSON-LD structured schemas, and performance indicators.
+                    </p>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-xs font-black">
+                    Grade A+ (98/100)
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                   <div className="rounded-xl border border-black/5 bg-[#FBFBFD] p-4 text-center">
                     <span className="text-xs font-bold text-[#86868B]">LCP (Largest Contentful Paint)</span>
-                    <p className="text-2xl font-black text-emerald-600 mt-1">1.1s</p>
+                    <p className="text-2xl font-black text-emerald-600 mt-1">0.82s</p>
                     <span className="text-[11px] text-emerald-700 font-semibold">Good (Threshold &lt; 2.5s)</span>
                   </div>
 
@@ -1018,13 +1710,17 @@ export default function AdminDashboardPage() {
             </div>
           )}
 
-          {/* TAB 7: SETTINGS & PASSCODE */}
+          {/* TAB 9: SETTINGS & PASSCODE */}
           {activeTab === "settings" && (
             <div className="space-y-6 animate-fade-in max-w-xl">
               <div className="rounded-2xl border border-black/[0.08] bg-white p-6 shadow-xs">
                 <div className="border-b border-black/5 pb-5 mb-5">
-                  <h2 className="text-xl font-bold text-[#1D1D1F]">Admin Passcode & Studio Settings</h2>
-                  <p className="text-xs text-[#86868B]">Update master security credentials for the admin suite.</p>
+                  <h2 className="text-xl font-bold text-[#1D1D1F]">
+                    Admin Passcode & Studio Settings
+                  </h2>
+                  <p className="text-xs text-[#86868B]">
+                    Update master security credentials for the admin suite.
+                  </p>
                 </div>
 
                 <form onSubmit={handleUpdatePin} className="space-y-4">
@@ -1052,10 +1748,12 @@ export default function AdminDashboardPage() {
 
                 <div className="mt-8 border-t border-black/5 pt-5 text-xs text-[#86868B] space-y-2">
                   <p>
-                    <strong>Current Active PIN:</strong> <code className="font-bold text-[#1D1D1F]">{currentMasterPin}</code>
+                    <strong>Current Active PIN:</strong>{" "}
+                    <code className="font-bold text-[#1D1D1F]">{currentMasterPin}</code>
                   </p>
                   <p>
-                    <strong>Studio Email:</strong> <code className="font-bold text-[#1D1D1F]">hello@looksbay.com</code>
+                    <strong>Studio Email:</strong>{" "}
+                    <code className="font-bold text-[#1D1D1F]">hello@looksbay.com</code>
                   </p>
                 </div>
               </div>
@@ -1063,6 +1761,275 @@ export default function AdminDashboardPage() {
           )}
         </main>
       </div>
+
+      {/* Modal: Add Portfolio Project */}
+      {isAddPortfolioModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl border border-black/10">
+            <div className="flex items-center justify-between border-b border-black/5 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="grid size-7 place-items-center rounded-lg bg-[#0077ED]/10 text-[#0077ED]">
+                  <Briefcase size={16} />
+                </span>
+                <h3 className="text-base font-bold text-[#1D1D1F]">Add Portfolio Project</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddPortfolioModalOpen(false)}
+                className="text-[#86868B] hover:text-[#1D1D1F]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddPortfolio} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Project Title *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Lumina Architecture & Interior"
+                  value={newPortfolioName}
+                  onChange={(e) => setNewPortfolioName(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                    Industry Category
+                  </label>
+                  <select
+                    value={newPortfolioIndustry}
+                    onChange={(e) => setNewPortfolioIndustry(e.target.value)}
+                    className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                  >
+                    <option value="Creative">Creative</option>
+                    <option value="E-Commerce">E-Commerce</option>
+                    <option value="Wellness">Wellness</option>
+                    <option value="Studio">Studio</option>
+                    <option value="Real Estate">Real Estate</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                    Project Kind / Type
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Custom Squarespace Website"
+                    value={newPortfolioKind}
+                    onChange={(e) => setNewPortfolioKind(e.target.value)}
+                    className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Image URL (Squarespace CDN or Web URL) *
+                </label>
+                <input
+                  type="url"
+                  required
+                  placeholder="https://images.squarespace-cdn.com/..."
+                  value={newPortfolioImage}
+                  onChange={(e) => setNewPortfolioImage(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+                {newPortfolioImage && (
+                  <div className="mt-2 h-28 w-full rounded-lg overflow-hidden border border-black/10">
+                    <img
+                      src={newPortfolioImage}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                      onError={(e) => {
+                        (e.target as any).src =
+                          "https://images.squarespace-cdn.com/content/v1/5e4becf684e6d079db61533d/efd626fb-6145-4420-915b-81b7633b5070/perfectionist-squarespace-template.png?format=1000w";
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Technology Tags (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Squarespace 7.1, Fluid Engine, Custom CSS"
+                  value={newPortfolioTags}
+                  onChange={(e) => setNewPortfolioTags(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Project Description
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Bespoke luxury brand website with fluid animations and responsive mobile architecture."
+                  value={newPortfolioDescription}
+                  onChange={(e) => setNewPortfolioDescription(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full mt-2 rounded-xl bg-[#0077ED] py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+              >
+                Save & Publish to Portfolio
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Add New Template */}
+      {isAddTemplateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-[500px] max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl border border-black/10">
+            <div className="flex items-center justify-between border-b border-black/5 pb-3 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="grid size-7 place-items-center rounded-lg bg-purple-50 text-purple-600">
+                  <ShoppingBag size={16} />
+                </span>
+                <h3 className="text-base font-bold text-[#1D1D1F]">
+                  Add New Squarespace Template
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddTemplateModalOpen(false)}
+                className="text-[#86868B] hover:text-[#1D1D1F]"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddTemplate} className="space-y-3.5">
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Template Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Horizon Studio"
+                  value={newTemplateName}
+                  onChange={(e) => setNewTemplateName(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                    URL Slug
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. horizon-studio"
+                    value={newTemplateSlug}
+                    onChange={(e) => setNewTemplateSlug(e.target.value)}
+                    className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                    Price (USD) *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="180.00"
+                    value={newTemplatePrice}
+                    onChange={(e) => setNewTemplatePrice(e.target.value)}
+                    className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Categories (comma-separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="Designer, Creative, Photography, Studio"
+                  value={newTemplateCategories}
+                  onChange={(e) => setNewTemplateCategories(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Template Cover Image URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://images.squarespace-cdn.com/..."
+                  value={newTemplateImage}
+                  onChange={(e) => setNewTemplateImage(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+                {newTemplateImage && (
+                  <div className="mt-2 h-28 w-full rounded-lg overflow-hidden border border-black/10">
+                    <img
+                      src={newTemplateImage}
+                      alt="Preview"
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Live Squarespace Demo URL
+                </label>
+                <input
+                  type="url"
+                  placeholder="https://demo.squarespace.com"
+                  value={newTemplateDemoUrl}
+                  onChange={(e) => setNewTemplateDemoUrl(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Description
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Modern, luxury Squarespace 7.1 template built for conversions and client engagement."
+                  value={newTemplateDescription}
+                  onChange={(e) => setNewTemplateDescription(e.target.value)}
+                  className="w-full rounded-xl border border-black/10 bg-[#FBFBFD] py-2 px-3 text-xs text-[#1D1D1F] focus:border-[#0077ED] focus:outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full mt-2 rounded-xl bg-[#0077ED] py-2.5 text-xs font-bold text-white shadow-xs transition hover:bg-[#0062C4]"
+              >
+                Publish Template to Store
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Add Lead Manually */}
       {isAddLeadModalOpen && (
@@ -1081,7 +2048,9 @@ export default function AdminDashboardPage() {
 
             <form onSubmit={handleAddLead} className="space-y-3.5">
               <div>
-                <label className="block text-[11px] font-bold text-[#515154] mb-1">Prospect Name</label>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Prospect Name
+                </label>
                 <input
                   type="text"
                   placeholder="e.g. John Doe"
@@ -1092,7 +2061,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#515154] mb-1">Email Address</label>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Email Address
+                </label>
                 <input
                   type="email"
                   required
@@ -1104,7 +2075,9 @@ export default function AdminDashboardPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-[#515154] mb-1">Primary Interest</label>
+                <label className="block text-[11px] font-bold text-[#515154] mb-1">
+                  Primary Interest
+                </label>
                 <select
                   value={newLeadInterest}
                   onChange={(e) => setNewLeadInterest(e.target.value)}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
 import { X, Sparkles } from "lucide-react";
 
@@ -140,11 +140,23 @@ const userCategories = [
 ];
 
 export default function TemplateMarketplace() {
+  const [items, setItems] = useState<TemplateItem[]>(templateList);
   const [activeCategory, setActiveCategory] = useState("All Templates");
   const [previewTemplate, setPreviewTemplate] = useState<TemplateItem | null>(null);
   const previewDialog = useRef<HTMLDialogElement>(null);
 
-  const filteredTemplates = templateList.filter((item) => {
+  useEffect(() => {
+    fetch("/api/templates")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.templates && Array.isArray(data.templates)) {
+          setItems(data.templates);
+        }
+      })
+      .catch((err) => console.error("Error loading templates:", err));
+  }, []);
+
+  const filteredTemplates = items.filter((item) => {
     if (activeCategory === "All Templates") return true;
     return item.categories.includes(activeCategory);
   });
