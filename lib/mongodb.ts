@@ -1,7 +1,19 @@
 import { MongoClient, Db } from "mongodb";
+import dns from "dns";
 
-const uri = process.env.MONGODB_URI || "";
-const options = {};
+// Configure reliable DNS servers to avoid Windows SRV lookup failures
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (e) {}
+
+const uri =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://looksbayAdmin:looksbayAdmin12345@cluster0.xf2ny.mongodb.net/looksbay?retryWrites=true&w=majority";
+
+const options = {
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 5000,
+};
 
 let client: MongoClient | null = null;
 let clientPromise: Promise<MongoClient> | null = null;
@@ -13,9 +25,7 @@ declare global {
 
 export function isMongoConfigured(): boolean {
   return Boolean(
-    process.env.MONGODB_URI &&
-      (process.env.MONGODB_URI.startsWith("mongodb://") ||
-        process.env.MONGODB_URI.startsWith("mongodb+srv://"))
+    uri && (uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://"))
   );
 }
 
@@ -26,18 +36,24 @@ export async function getMongoClient(): Promise<MongoClient | null> {
     if (process.env.NODE_ENV === "development") {
       if (!global._mongoClientPromise) {
         client = new MongoClient(uri, options);
-        global._mongoClientPromise = client.connect();
+        global._mongoClientPromise = client.connect().catch((err) => {
+          global._mongoClientPromise = undefined;
+          throw err;
+        });
       }
       return await global._mongoClientPromise;
     } else {
       if (!clientPromise) {
         client = new MongoClient(uri, options);
-        clientPromise = client.connect();
+        clientPromise = client.connect().catch((err) => {
+          clientPromise = null;
+          throw err;
+        });
       }
       return await clientPromise;
     }
-  } catch (err) {
-    console.error("MongoDB connection failed:", err);
+  } catch (err: any) {
+    console.warn("MongoDB connection fallback to local:", err?.message || err);
     return null;
   }
 }
