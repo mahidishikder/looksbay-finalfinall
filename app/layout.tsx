@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Footer, Header } from "./shared/components/site-components";
-import { AiAssistant } from "./shared/components/ai-assistant";
+import { SiteShell } from "./shared/components/site-shell";
 import { AppProviders } from "./shared/components/app-providers";
 import "./globals.css";
 
@@ -207,10 +206,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       </head>
       <body className="font-sans antialiased bg-paper text-ink selection:bg-[#cce4ff] selection:text-[#1d1d1f]">
         <AppProviders>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <AiAssistant />
+          <SiteShell>{children}</SiteShell>
         </AppProviders>
       </body>
     </html>
