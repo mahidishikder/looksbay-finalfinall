@@ -1,20 +1,11 @@
 [
   {
-    "id": "usr_1792643445131_qvfpk",
-    "name": "Member",
-    "email": "member@looksbay.com",
+    "id": "usr_1792660510856_n3x76",
+    "name": "Mahidishikder",
+    "email": "mahidishikder@gmail.com",
     "interest": "General Member",
     "marketingConsent": true,
     "source": "Looksbay Quick Login",
-    "createdAt": "2026-10-22T04:30:45.131Z"
-  },
-  {
-    "id": "usr_1792649618059_znq5u",
-    "name": "Test Lead",
-    "email": "lead@example.com",
-    "interest": "Squarespace Templates",
-    "marketingConsent": true,
-    "source": "Looksbay Portal Login",
-    "createdAt": "2026-10-22T06:13:38.059Z"
+    "createdAt": "2026-10-22T09:15:10.857Z"
   }
 ]

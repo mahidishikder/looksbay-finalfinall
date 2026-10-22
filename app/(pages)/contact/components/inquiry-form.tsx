@@ -38,8 +38,27 @@ export default function InquiryForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    // Persist to admin database
+    try {
+      fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          project,
+          budget,
+          message,
+          template: selectedTemplate,
+        }),
+      }).catch(console.error);
+    } catch (err) {
+      console.error(err);
+    }
+
     const subject = encodeURIComponent(`Project Inquiry: ${project || "General"} — ${name}`);
     const bodyLines = [
       `Name: ${name}`,

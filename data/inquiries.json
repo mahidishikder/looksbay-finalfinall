@@ -1,0 +1,22 @@
+[
+  {
+    "id": "inq_1",
+    "name": "Sophia Vance",
+    "email": "sophia@vancedesign.co",
+    "project": "Custom Squarespace Development",
+    "budget": "$3,000 - $5,000",
+    "message": "Looking for an expert to build custom fluid engine sections and integrate Momence booking.",
+    "status": "New",
+    "createdAt": "2026-10-22T05:15:37.019Z"
+  },
+  {
+    "id": "inq_2",
+    "name": "Marcus Sterling",
+    "email": "marcus@sterlinglegal.com",
+    "project": "Platform Migration (WordPress)",
+    "budget": "$5,000+",
+    "message": "We need our law firm site migrated from WordPress to Squarespace 7.1 with 301 redirects.",
+    "status": "Contacted",
+    "createdAt": "2026-10-21T09:15:37.019Z"
+  }
+]
