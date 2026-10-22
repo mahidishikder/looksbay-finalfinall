@@ -18,18 +18,26 @@ export const metadata: Metadata = {
   description:
     "Seamless platform migrations into Squarespace 7.1. We transfer content from WordPress, Wix, Shopify, Webflow, and Figma with 100% SEO ranking preservation and zero downtime.",
   keywords: [
-    "figma to squarespace conversion",
-    "wordpress to squarespace migration",
-    "wix to squarespace redesign",
-    "webflow to squarespace transfer",
-    "shopify to squarespace migration",
-    "squarespace acuity scheduling setup",
-    "squarespace momence booking integration",
-    "squarespace member areas configuration",
-    "stripe checkout squarespace",
-    "zapier squarespace automation",
-    "google analytics 4 squarespace integration",
-    "meta pixel setup on squarespace",
+    "Figma to Squarespace conversion",
+    "WordPress to Squarespace migration",
+    "Wix to Squarespace redesign",
+    "Webflow to Squarespace migration",
+    "Shopify to Squarespace transfer",
+    "Squarespace Acuity scheduling setup",
+    "Squarespace Momence booking integration",
+    "Squarespace Member Areas setup",
+    "Squarespace email marketing setup",
+    "Squarespace newsletter integration",
+    "Zapier integration with Squarespace",
+    "Stripe checkout Squarespace",
+    "PayPal gateway Squarespace",
+    "Google Analytics 4 Squarespace setup",
+    "Meta pixel setup on Squarespace",
+    "Squarespace domain connection expert",
+    "Custom form builder Squarespace",
+    "Squarespace CRM connection",
+    "Squarespace multi-language setup",
+    "Third-party widget integration Squarespace",
   ],
   alternates: {
     canonical: "/services/squarespace-migrations",
@@ -51,9 +59,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Squarespace Site Migrations | Looksbay Studio",
+    title: "Squarespace Site Migrations & Integrations | Looksbay Studio",
     description:
-      "Figma to Squarespace, WordPress to Squarespace, and Wix to Squarespace migrations.",
+      "Figma to Squarespace, WordPress to Squarespace, and third-party tech integrations.",
     images: ["/images/service-custom-design.jpg"],
   },
 };
@@ -62,10 +70,10 @@ const serviceSchema = {
   "@context": "https://schema.org",
   "@type": "Service",
   "@id": "https://www.looksbay.com/services/squarespace-migrations#service",
-  name: "Squarespace Platform Migration Services",
-  serviceType: "Website Migration & Platform Transfer",
+  name: "Squarespace Platform Migration & Technical Integration Services",
+  serviceType: "Website Migration & Platform Integration",
   description:
-    "Full-service website migration to Squarespace 7.1 Fluid Engine with 301 URL redirect mapping, database extraction, and 100% SEO link equity preservation.",
+    "Full-service website migration to Squarespace 7.1 Fluid Engine with 301 URL redirect mapping, database extraction, Acuity scheduling, Member Areas, Stripe checkout, GA4, and CRM automation.",
   provider: {
     "@type": "Organization",
     name: "Looksbay Studio",
@@ -104,26 +112,26 @@ const faqSchema = {
     },
     {
       "@type": "Question",
-      name: "Can our blog posts, images, and author archives be transferred to Squarespace?",
+      name: "How do you set up Acuity Scheduling, Momence, and Member Areas on Squarespace?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. We handle automated and manual data migrations for blog articles, featured images, categories, tags, publication dates, and author attributions, ensuring your content history and organic keywords are safely imported.",
+        text: "We configure end-to-end booking funnels for Acuity and Momence including custom calendar styling, intake forms, automated SMS/email reminders, and payment gateways. For Member Areas, we build gated content paywalls with recurring subscription billing.",
       },
     },
     {
       "@type": "Question",
-      name: "Can we integrate custom bookings (Acuity / Momence) and analytics (GA4 / Meta Pixel)?",
+      name: "Can we connect Google Analytics 4, Meta Pixel, and Zapier to Squarespace?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Yes. We configure complete scheduling funnels (Acuity, Momence, Mindbody), connect Stripe for payments, configure Zapier CRM automations, and inject verified Google Analytics 4 and Meta Pixel tracking with custom event conversion triggers.",
+        text: "Yes. We configure server-verified Google Analytics 4, Meta Pixel (Facebook Pixel), Google Tag Manager, and Zapier or Make.com webhooks to push form submissions directly to your CRM (HubSpot, Salesforce, ActiveCampaign).",
       },
     },
     {
       "@type": "Question",
-      name: "Why should we move away from WordPress or Wix to Squarespace?",
+      name: "Can you handle custom domains, multi-language setups, and third-party widgets?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Squarespace eliminates the endless plugin updates, PHP crashes, database bloat, and hosting security vulnerabilities common with WordPress. You get an all-in-one, cloud-hosted platform with 99.9% uptime, built-in SSL, intuitive visual drag-and-drop editing, and zero maintenance headaches.",
+        text: "Yes. We handle custom DNS and domain transfers (GoDaddy, Namecheap, Cloudflare), set up subdirectories for multi-language localization (Weglot integration), and embed third-party interactive widgets, custom forms, and dynamic calculators.",
       },
     },
   ],
@@ -232,6 +240,79 @@ export default function MigrationsPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Enterprise Integrations & Setup Matrix (Keywords 71-85) */}
+      <section className="border-t border-black/[0.06] bg-[#f5f5f7]/60 py-20 tablet:py-28">
+        <div className="site-container">
+          <div className="mx-auto mb-16 max-w-[760px] text-center">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#0077ED]">
+              Ecosystem & Technical Integrations
+            </span>
+            <h2 className="gradient-heading mt-3 text-[clamp(28px,3.8vw,48px)] font-black tracking-tight text-[#1D1D1F]">
+              Seamless Third-Party Connections
+            </h2>
+            <p className="mt-4 text-base sm:text-lg text-[#515154]">
+              We connect Squarespace to your entire operational stack—eliminating silos and automating workflows.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                title: "Acuity & Momence Scheduling",
+                desc: "Full booking system setup with custom CSS calendar styling, automated intake questionnaires, and SMS reminders.",
+                badge: "Scheduling",
+              },
+              {
+                title: "Squarespace Member Areas",
+                desc: "Monetize exclusive courses, video libraries, and client portals with recurring paywalls and gated access.",
+                badge: "Memberships",
+              },
+              {
+                title: "Stripe & PayPal Checkout",
+                desc: "Global payment gateway integration with Apple Pay, Google Pay, Klarna, Afterpay, and multicurrency support.",
+                badge: "Commerce",
+              },
+              {
+                title: "Zapier & CRM Automations",
+                desc: "Automated webhook pipes routing leads into HubSpot, Salesforce, ActiveCampaign, or Notion without manual entry.",
+                badge: "Automation",
+              },
+              {
+                title: "GA4 & Meta Pixel Setup",
+                desc: "Server-side and client-side conversion event tracking, Google Tag Manager containers, and eCommerce attribution.",
+                badge: "Analytics",
+              },
+              {
+                title: "Domain & DNS Architecture",
+                desc: "Zero-downtime domain connections from GoDaddy, Namecheap, or Cloudflare with SSL 2048-bit validation.",
+                badge: "Infrastructure",
+              },
+              {
+                title: "Custom Forms & Calculators",
+                desc: "Multi-step interactive form builders, price estimation calculators, and client file upload integrations.",
+                badge: "Forms",
+              },
+              {
+                title: "Multi-Language & Global SEO",
+                desc: "Weglot and Bablic integration with localized URL subdirectories, hreflang tags, and international currency switchers.",
+                badge: "Localization",
+              },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="rounded-2xl border border-black/[0.06] bg-white p-6 shadow-xs transition-all hover:border-[#0077ED]/30 hover:shadow-md"
+              >
+                <span className="inline-block rounded-md bg-[#0077ED]/10 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-[#0077ED] mb-3">
+                  {item.badge}
+                </span>
+                <h3 className="text-lg font-bold text-[#1D1D1F] tracking-tight">{item.title}</h3>
+                <p className="mt-2 text-xs sm:text-sm text-[#515154] leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>

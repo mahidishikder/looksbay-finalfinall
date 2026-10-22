@@ -592,4 +592,346 @@ export const industriesData: IndustryData[] = [
       },
     ],
   },
+  {
+    slug: "coaches-consultants",
+    name: "Coaches & Executive Consultants",
+    title: "Squarespace Websites for Coaches & Consultants",
+    tagline: "High-converting personal brand websites and signature program sales funnels for elite coaches, advisors, and fractional executives.",
+    heroHeadline: "Convert Followers into High-Ticket Coaching & Advisory Retainers",
+    heroSubheadline:
+      "We design authoritative Squarespace 7.1 websites for business coaches, executive advisors, and leadership consultants with integrated discovery call booking, webinar funnels, and course paywalls.",
+    targetAudience: "Executive Coaches, Business Strategists, Leadership Consultants, Keynote Speakers",
+    primaryKeywords: [
+      "squarespace for coaches and consultants",
+      "executive coach squarespace website",
+      "consultant website design squarespace",
+      "coaching sales funnel squarespace",
+      "acuity scheduling for coaches squarespace",
+    ],
+    keyChallenges: [
+      "Generic templates that fail to convey intellectual authority and prestige",
+      "Disjointed tech stacks with clumsy calendar redirects and lost prospects",
+      "Inability to gate VIP resources or manage group coaching cohorts",
+    ],
+    solutionsProvided: [
+      {
+        title: "Signature Offer & Funnel Architecture",
+        description: "Long-form editorial sales pages designed to nurture and convert high-ticket advisory clients.",
+      },
+      {
+        title: "Frictionless Discovery Call Integration",
+        description: "Embedded Acuity Scheduling or Calendly with pre-qualification questionnaires and calendar sync.",
+      },
+      {
+        title: "Squarespace Member Areas Setup",
+        description: "Password-protected client portals for session recordings, worksheets, and exclusive materials.",
+      },
+    ],
+    features: [
+      "Acuity / Calendly Pre-Qual Intake Sync",
+      "Member Areas VIP Client Hub",
+      "Stripe Retainer & Installment Invoicing",
+      "Keynote Speaker Video Stage Reel Embeds",
+      "Podcast & Thought Leadership Silos",
+    ],
+    estimatedTimeline: "2 Weeks",
+    startingPrice: "$3,200",
+    faqs: [
+      {
+        question: "Can clients book paid discovery sessions directly on Squarespace?",
+        answer:
+          "Yes. We integrate Acuity Scheduling or Calendly with Stripe checkout, so clients pay upfront during booking with automated calendar invites, reminders, and Zoom link delivery.",
+      },
+      {
+        question: "Can I host course videos and client worksheets inside Squarespace?",
+        answer:
+          "Yes. We configure Squarespace Member Areas and digital product paywalls, providing your clients with branded, self-serve access to worksheets, templates, and video lessons.",
+      },
+    ],
+  },
+  {
+    slug: "artists-creators",
+    name: "Artists & Digital Creators",
+    title: "Squarespace Websites for Artists & Creators",
+    tagline: "Immersive, gallery-grade digital portfolios and print shops for visual artists, illustrators, and multidisciplinary creators.",
+    heroHeadline: "Showcase Your Art & Sell Original Works Worldwide",
+    heroSubheadline:
+      "Step beyond social media algorithms. We craft bespoke Squarespace websites that present your body of work with museum-level elegance while powering direct-to-collector art sales.",
+    targetAudience: "Fine Artists, Illustrators, Sculptors, Digital Creators, Ceramicists",
+    primaryKeywords: [
+      "squarespace for artists and creators",
+      "artist portfolio squarespace website",
+      "art print shop squarespace",
+      "fine art website design squarespace",
+      "sell original art squarespace",
+    ],
+    keyChallenges: [
+      "Cookie-cutter galleries that compromise image resolution and color accuracy",
+      "Clunky e-commerce checkouts for original one-of-a-kind art pieces",
+      "Lack of commission intake workflows and exhibition archives",
+    ],
+    solutionsProvided: [
+      {
+        title: "Museum-Grade Artwork Portfolios",
+        description: "High-resolution, dynamic zoom galleries optimized with Retina display sharpness and fast CDN delivery.",
+      },
+      {
+        title: "Originals & Limited Edition Print Store",
+        description: "Squarespace commerce with custom variant options, certificate of authenticity downloads, and print-on-demand sync.",
+      },
+      {
+        title: "Private Commission Request Portals",
+        description: "Bespoke commission inquiry forms capturing dimensions, reference photos, and deposit payments.",
+      },
+    ],
+    features: [
+      "Retina HD Art Galleries with Fluid Zoom",
+      "Printful / Print-on-Demand E-Commerce Sync",
+      "Original Artwork Inventory & Framing Options",
+      "Exhibition & Press Archive Silos",
+      "Collector VIP Email Club Integration",
+    ],
+    estimatedTimeline: "2 Weeks",
+    startingPrice: "$2,800",
+    faqs: [
+      {
+        question: "Can I sell both original paintings and limited edition prints on Squarespace?",
+        answer:
+          "Yes. We set up tiered product variants allowing collectors to purchase original framed canvases or automated print-on-demand giclée reproductions.",
+      },
+      {
+        question: "Will high-resolution artwork images slow down my Squarespace site?",
+        answer:
+          "No. We utilize next-gen WebP image compression, responsive srcset loading, and Squarespace's global CDN to ensure razor-sharp clarity without sacrificing Core Web Vitals.",
+      },
+    ],
+  },
+  {
+    slug: "event-planners",
+    name: "Event Planners & Producers",
+    title: "Squarespace Websites for Event Planners & Producers",
+    tagline: "Breathtaking visual storytelling and luxury inquiry funnels for wedding designers, corporate gala producers, and experiential agencies.",
+    heroHeadline: "Captivate High-Budget Event Clients with Cinematic Elegance",
+    heroSubheadline:
+      "We design ultra-refined Squarespace websites for premier event planners and experiential producers, showcasing real weddings, corporate brand activations, and vendor partnerships.",
+    targetAudience: "Luxury Wedding Planners, Experiential Event Producers, Corporate Gala Designers",
+    primaryKeywords: [
+      "squarespace for event planners",
+      "wedding planner squarespace website",
+      "event producer website design squarespace",
+      "luxury wedding portfolio squarespace",
+      "event vendor inquiry form squarespace",
+    ],
+    keyChallenges: [
+      "Websites flooded with photos that load slowly on mobile phones",
+      "Generic contact forms that fail to pre-qualify event budgets",
+      "Inability to cleanly credit photographer, venue, and floral vendor teams",
+    ],
+    solutionsProvided: [
+      {
+        title: "Editorial Real Event Case Studies",
+        description: "Magazine-style wedding and gala galleries with vendor credit rosters and press feature badges.",
+      },
+      {
+        title: "Budget-Qualified Consultation Funnels",
+        description: "Smart inquiry forms with date selectors, budget tier pre-qualification, and CRM auto-routing.",
+      },
+      {
+        title: "Interactive Moodboards & Client Portals",
+        description: "Squarespace Member Areas or password-protected client hubs for timeline and design presentations.",
+      },
+    ],
+    features: [
+      "Cinematic Video Reel Backgrounds",
+      "Budget Pre-Qualification Intake Forms",
+      "Vendor Credit Silos for Backlink Exchanges",
+      "Featured Press & Publication Badges",
+      "Aisle Planner & HoneyBook Lead Forwarding",
+    ],
+    estimatedTimeline: "2–3 Weeks",
+    startingPrice: "$3,400",
+    faqs: [
+      {
+        question: "Can inquiry forms route directly into HoneyBook or Dubsado?",
+        answer:
+          "Yes. We connect your Squarespace inquiry forms to HoneyBook, Dubsado, or Aisle Planner using webhooks, automatically creating new client projects.",
+      },
+      {
+        question: "How do you optimize wedding galleries for Google Image search?",
+        answer:
+          "We configure keyword-targeted alt tags, descriptive image file architectures, and ImageObject schema so your event designs rank prominently on Google Image and Pinterest searches.",
+      },
+    ],
+  },
+  {
+    slug: "fashion-brands",
+    name: "Fashion Brands & Boutiques",
+    title: "Squarespace Websites for Fashion Brands & Boutiques",
+    tagline: "Lookbook-driven digital flagships and frictionless e-commerce for independent fashion labels, jewelry artisans, and apparel boutiques.",
+    heroHeadline: "Turn Runways and Lookbooks into Effortless Checkout Conversions",
+    heroSubheadline:
+      "We build editorial Squarespace 7.1 fashion storefronts that match the polish of luxury design houses. Complete with seasonal lookbooks, size guides, and Stripe one-click checkout.",
+    targetAudience: "Independent Apparel Brands, Luxury Jewelry Designers, Sustainable Fashion Studios, Boutiques",
+    primaryKeywords: [
+      "squarespace for fashion brands",
+      "fashion boutique squarespace website",
+      "clothing brand squarespace template",
+      "luxury jewelry website squarespace",
+      "lookbook squarespace e-commerce",
+    ],
+    keyChallenges: [
+      "Templates that feel commercial rather than high-fashion and curated",
+      "Complicated variant selectors for sizes, colors, and materials",
+      "Mobile checkout drop-off and abandoned carts",
+    ],
+    solutionsProvided: [
+      {
+        title: "Shoppable Editorial Lookbooks",
+        description: "Interactive seasonal collections that let shoppers click directly from editorial photos to product cart.",
+      },
+      {
+        title: "Custom Size Guide & Fabric Drawers",
+        description: "Interactive slide-out size charts, garment care guides, and model specification drawers.",
+      },
+      {
+        title: "Stripe & Apple Pay Instant Checkout",
+        description: "Optimized mobile cart experience supporting Apple Pay, Google Pay, Klarna, and Afterpay.",
+      },
+    ],
+    features: [
+      "Shoppable Runway Lookbooks",
+      "Apple Pay & Klarna / Afterpay Installments",
+      "Custom Size Chart & Fabric Care Drawers",
+      "Instagram Shop & Meta Catalog Product Sync",
+      "Restock Notification & VIP Drop Email Capture",
+    ],
+    estimatedTimeline: "3 Weeks",
+    startingPrice: "$3,900",
+    faqs: [
+      {
+        question: "Can customers pay with Klarna, Afterpay, or Apple Pay on Squarespace?",
+        answer:
+          "Yes. Squarespace natively supports Apple Pay, PayPal, and credit cards via Stripe, as well as Buy-Now-Pay-Later integrations including Klarna and Afterpay.",
+      },
+      {
+        question: "Can we sync Squarespace products with Instagram Shopping and TikTok Shop?",
+        answer:
+          "Yes. We configure automated Meta Product Catalog feeds so your inventory syncs seamlessly with Instagram and Facebook shoppable posts.",
+      },
+    ],
+  },
+  {
+    slug: "saas-startups",
+    name: "SaaS & Tech Startups",
+    title: "Squarespace Websites for SaaS & Tech Startups",
+    tagline: "High-velocity product marketing pages, pricing matrices, and lead generation engines for modern software and tech companies.",
+    heroHeadline: "Launch, Validate & Scale Your Tech Startup with Speed",
+    heroSubheadline:
+      "Skip the engineering backlog. We craft Silicon Valley-caliber Squarespace marketing sites with interactive pricing calculators, feature breakdowns, and API documentation hubs.",
+    targetAudience: "B2B SaaS Companies, AI Startups, Mobile App Creators, Tech Incubators",
+    primaryKeywords: [
+      "squarespace for saas and startups",
+      "b2b saas squarespace website",
+      "startup landing page squarespace",
+      "saas pricing table squarespace",
+      "tech company website design squarespace",
+    ],
+    keyChallenges: [
+      "Engineers spending valuable product sprints fixing marketing site copy and CSS",
+      "Difficulty building interactive multi-tier pricing toggles and feature comparisons",
+      "Slow conversion tracking and attribution across product signups",
+    ],
+    solutionsProvided: [
+      {
+        title: "Interactive Monthly / Annual Pricing Toggles",
+        description: "Custom CSS/JS pricing tables with currency switches, discount flags, and direct links to Stripe billing.",
+      },
+      {
+        title: "Feature Matrix & Product Demo Showcases",
+        description: "Interactive tabbed interfaces highlighting product UI screenshots, animated GIFs, and video walkthroughs.",
+      },
+      {
+        title: "Analytics Attribution & Lead Webhooks",
+        description: "GA4, Google Tag Manager, Meta Pixel, and Zapier webhook integration for automated CRM lead scoring.",
+      },
+    ],
+    features: [
+      "Monthly / Annual Pricing Switcher Tables",
+      "Interactive Product Demo Tabs",
+      "HubSpot / Zapier Lead Routing Webhooks",
+      "App Store & Product Hunt Launch Badges",
+      "Google Tag Manager & GA4 Event Tracking",
+    ],
+    estimatedTimeline: "2 Weeks",
+    startingPrice: "$3,600",
+    faqs: [
+      {
+        question: "Can we create monthly and annual pricing toggles on Squarespace?",
+        answer:
+          "Yes. We engineer lightweight custom JavaScript toggles that switch pricing values and billing URLs smoothly without page reloads.",
+      },
+      {
+        question: "How do you connect Squarespace forms to HubSpot or Salesforce?",
+        answer:
+          "We configure native Zapier or Make.com webhooks to route form submissions directly into HubSpot, Salesforce, or Customer.io with custom field mapping.",
+      },
+    ],
+  },
+  {
+    slug: "non-profits",
+    name: "Non-Profit Organizations & Foundations",
+    title: "Squarespace Websites for Non-Profits & Charities",
+    tagline: "Impact-driven storytelling, transparent donor portals, and recurring donation funnels for 501(c)(3) charities and global NGOs.",
+    heroHeadline: "Mobilize Donors, Share Your Impact & Fund Your Mission",
+    heroSubheadline:
+      "We design inspiring, accessible Squarespace websites for non-profit organizations, educational foundations, and philanthropic initiatives. Complete with recurring donation systems.",
+    targetAudience: "501(c)(3) Non-Profits, Charitable Foundations, Community NGOs, Philanthropic Funds",
+    primaryKeywords: [
+      "squarespace for non-profit organizations",
+      "charity website design squarespace",
+      "non profit donation page squarespace",
+      "donorbox squarespace integration",
+      "501c3 website template squarespace",
+    ],
+    keyChallenges: [
+      "High platform fees eating into charitable donations",
+      "Unclear annual impact reporting that discourages major donors",
+      "Difficulties recruiting volunteers and promoting fundraising galas",
+    ],
+    solutionsProvided: [
+      {
+        title: "Recurring Donation Engines",
+        description: "Integrated Donorbox, Givebutter, or native Squarespace recurring donation forms with zero friction.",
+      },
+      {
+        title: "Interactive Annual Impact Reports",
+        description: "Visual infographics and metric counters showcasing dollars deployed and lives impacted.",
+      },
+      {
+        title: "Volunteer & Board Recruitment Funnels",
+        description: "Streamlined volunteer application forms with committee interest routing and event calendars.",
+      },
+    ],
+    features: [
+      "Donorbox & Givebutter Recurring Donation Embeds",
+      "501(c)(3) Tax Receipt Automated Delivery",
+      "Annual Impact Metrics & Financial Transparency",
+      "Upcoming Gala Event Ticketing & Sponsorships",
+      "WCAG 2.1 AA Accessibility Compliance",
+    ],
+    estimatedTimeline: "2–3 Weeks",
+    startingPrice: "$2,900",
+    faqs: [
+      {
+        question: "Can we accept recurring monthly donations on Squarespace?",
+        answer:
+          "Yes. We implement native Squarespace recurring contributions or embed Donorbox/Givebutter widgets to support monthly recurring giving, donor-covered fees, and ACH bank transfers.",
+      },
+      {
+        question: "Does Squarespace offer discounts for non-profit organizations?",
+        answer:
+          "Yes. As a Squarespace Circle Partner, Looksbay provides non-profits with an exclusive 20% discount on their first year of Squarespace website and Google Workspace subscriptions.",
+      },
+    ],
+  },
 ];
