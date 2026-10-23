@@ -13,6 +13,32 @@ const INQUIRIES_FILE = path.join(DATA_DIR, "inquiries.json");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const ANALYTICS_FILE = path.join(DATA_DIR, "analytics.json");
 const BLOGS_FILE = path.join(DATA_DIR, "blogs.json");
+const CHATS_FILE = path.join(DATA_DIR, "chats.json");
+
+export interface ChatMessage {
+  id: string;
+  sender: "client" | "developer" | "system";
+  senderName?: string;
+  text: string;
+  attachmentName?: string;
+  timestamp: string;
+}
+
+export interface ChatSession {
+  id: string;
+  clientName: string;
+  clientContact?: string;
+  developerId: string;
+  developerName: string;
+  developerRole: string;
+  developerAvatar: string;
+  status: "active" | "resolved";
+  unreadForAdmin: number;
+  unreadForClient: number;
+  createdAt: string;
+  updatedAt: string;
+  messages: ChatMessage[];
+}
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -488,5 +514,196 @@ export async function deleteBlogPost(slug: string): Promise<void> {
     console.error("Local blog delete error:", e);
   }
 }
+
+// --------------------------------------------------------------------------
+// 7. LIVE DEVELOPER CHAT
+// --------------------------------------------------------------------------
+export async function getChatSessions(): Promise<ChatSession[]> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        const items = await db
+          .collection("chats")
+          .find({}, { projection: { _id: 0 } })
+          .sort({ updatedAt: -1 })
+          .toArray();
+        if (items.length > 0) return items as unknown as ChatSession[];
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB chats fetch error:", err);
+  }
+
+  try {
+    ensureDir();
+    if (!fs.existsSync(CHATS_FILE)) {
+      fs.writeFileSync(CHATS_FILE, "[]", "utf-8");
+      return [];
+    }
+    const data = JSON.parse(fs.readFileSync(CHATS_FILE, "utf-8") || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+export async function getChatSession(id: string): Promise<ChatSession | null> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        const item = await db.collection("chats").findOne({ id }, { projection: { _id: 0 } });
+        if (item) return item as unknown as ChatSession;
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB chat get error:", err);
+  }
+
+  const sessions = await getChatSessions();
+  return sessions.find((s) => s.id === id) || null;
+}
+
+export async function saveChatSession(session: ChatSession): Promise<void> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        await db.collection("chats").updateOne(
+          { id: session.id },
+          { $set: session },
+          { upsert: true }
+        );
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB chat save error:", err);
+  }
+
+  try {
+    ensureDir();
+    const list = await getChatSessions();
+    const existingIdx = list.findIndex((s) => s.id === session.id);
+    if (existingIdx >= 0) {
+      list[existingIdx] = session;
+    } else {
+      list.unshift(session);
+    }
+    // Sort by latest update
+    list.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    fs.writeFileSync(CHATS_FILE, JSON.stringify(list, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Local chat save error:", e);
+  }
+}
+
+export async function addChatMessage(
+  sessionId: string,
+  msg: {
+    sender: "client" | "developer" | "system";
+    senderName?: string;
+    text: string;
+    attachmentName?: string;
+  },
+  sessionMeta?: {
+    clientName?: string;
+    clientContact?: string;
+    developerId?: string;
+    developerName?: string;
+    developerRole?: string;
+    developerAvatar?: string;
+  }
+): Promise<ChatSession> {
+  let session = await getChatSession(sessionId);
+  const now = new Date().toISOString();
+
+  const newMsg: ChatMessage = {
+    id: `m_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    sender: msg.sender,
+    senderName: msg.senderName,
+    text: msg.text,
+    attachmentName: msg.attachmentName,
+    timestamp: now,
+  };
+
+  if (!session) {
+    session = {
+      id: sessionId,
+      clientName: sessionMeta?.clientName || "Prospective Client",
+      clientContact: sessionMeta?.clientContact || "",
+      developerId: sessionMeta?.developerId || "mahidi",
+      developerName: sessionMeta?.developerName || "Mahidi Shikder",
+      developerRole: sessionMeta?.developerRole || "Lead Squarespace Architect",
+      developerAvatar: sessionMeta?.developerAvatar || "/assets/favicon.png",
+      status: "active",
+      unreadForAdmin: msg.sender === "client" ? 1 : 0,
+      unreadForClient: msg.sender === "developer" ? 1 : 0,
+      createdAt: now,
+      updatedAt: now,
+      messages: [newMsg],
+    };
+  } else {
+    if (sessionMeta?.clientName && session.clientName === "Prospective Client") {
+      session.clientName = sessionMeta.clientName;
+    }
+    if (sessionMeta?.clientContact) {
+      session.clientContact = sessionMeta.clientContact;
+    }
+    session.messages.push(newMsg);
+    session.updatedAt = now;
+    if (msg.sender === "client") {
+      session.unreadForAdmin = (session.unreadForAdmin || 0) + 1;
+      session.status = "active";
+    } else if (msg.sender === "developer") {
+      session.unreadForClient = (session.unreadForClient || 0) + 1;
+    }
+  }
+
+  await saveChatSession(session);
+  return session;
+}
+
+export async function markChatRead(sessionId: string, reader: "admin" | "client"): Promise<void> {
+  const session = await getChatSession(sessionId);
+  if (!session) return;
+  if (reader === "admin") {
+    session.unreadForAdmin = 0;
+  } else {
+    session.unreadForClient = 0;
+  }
+  await saveChatSession(session);
+}
+
+export async function resolveChatSession(sessionId: string, resolved: boolean = true): Promise<void> {
+  const session = await getChatSession(sessionId);
+  if (!session) return;
+  session.status = resolved ? "resolved" : "active";
+  session.updatedAt = new Date().toISOString();
+  await saveChatSession(session);
+}
+
+export async function deleteChatSession(sessionId: string): Promise<void> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        await db.collection("chats").deleteOne({ id: sessionId });
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB chat delete error:", err);
+  }
+
+  try {
+    ensureDir();
+    const list = await getChatSessions();
+    const filtered = list.filter((s) => s.id !== sessionId);
+    fs.writeFileSync(CHATS_FILE, JSON.stringify(filtered, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Local chat delete error:", e);
+  }
+}
+
 
 

@@ -41,6 +41,10 @@ import {
   X,
   FileText,
   BookOpen,
+  MessageSquare,
+  Send,
+  UserCheck,
+  CornerDownLeft,
 } from "lucide-react";
 import { allTemplates as defaultTemplates } from "@/app/shared/data/templates-data";
 import { blogPosts as defaultBlogPosts, type BlogPost } from "@/app/shared/data/blog-posts";
@@ -133,6 +137,7 @@ interface SiteSettings {
 
 type TabKey =
   | "inquiries"
+  | "chats"
   | "site-control"
   | "portfolio"
   | "templates"
@@ -154,6 +159,13 @@ export default function AdminDashboardPage() {
   const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProject[]>([]);
   const [templateItems, setTemplateItems] = useState<TemplateItem[]>([]);
   const [blogList, setBlogList] = useState<BlogPost[]>([]);
+
+  // Live Client Chat States
+  const [chatSessions, setChatSessions] = useState<any[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
+  const [chatFilter, setChatFilter] = useState<"all" | "active" | "unread" | "resolved">("all");
+  const [adminReplyText, setAdminReplyText] = useState("");
+  const [isSendingAdminReply, setIsSendingAdminReply] = useState(false);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
     studioName: "Looksbay Studio",
     tagline: "Premier Squarespace Circle Platinum Design & Engineering Studio",
@@ -289,7 +301,7 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [inqRes, subsRes, statsRes, portRes, tempRes, settingsRes, blogRes] =
+      const [inqRes, subsRes, statsRes, portRes, tempRes, settingsRes, blogRes, chatsRes] =
         await Promise.all([
           fetch("/api/contact"),
           fetch("/api/admin/users"),
@@ -298,6 +310,7 @@ export default function AdminDashboardPage() {
           fetch("/api/templates"),
           fetch("/api/admin/settings"),
           fetch("/api/blog"),
+          fetch("/api/admin/chats"),
         ]);
 
       if (inqRes.ok) {
@@ -330,10 +343,110 @@ export default function AdminDashboardPage() {
         const blogData = await blogRes.json();
         setBlogList(blogData.posts?.length ? blogData.posts : defaultBlogPosts);
       }
+      if (chatsRes.ok) {
+        const chatsData = await chatsRes.json();
+        setChatSessions(chatsData.sessions || []);
+      }
     } catch (err) {
       console.error("Dashboard fetch error:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Real-time background poller for live client chats
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const pollChats = async () => {
+      try {
+        const res = await fetch("/api/admin/chats");
+        if (res.ok) {
+          const data = await res.json();
+          setChatSessions(data.sessions || []);
+        }
+      } catch {}
+    };
+    const interval = setInterval(pollChats, 3000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
+  const handleSelectChat = async (id: string) => {
+    setSelectedChatId(id);
+    try {
+      await fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId: id, action: "read", reader: "admin" }),
+      });
+      setChatSessions((prev) =>
+        prev.map((s) => (s.id === id ? { ...s, unreadForAdmin: 0 } : s))
+      );
+    } catch {}
+  };
+
+  const handleSendAdminReply = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!selectedChatId || !adminReplyText.trim() || isSendingAdminReply) return;
+    const textToSend = adminReplyText.trim();
+    setAdminReplyText("");
+    setIsSendingAdminReply(true);
+
+    try {
+      const active = chatSessions.find((s) => s.id === selectedChatId);
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: selectedChatId,
+          text: textToSend,
+          sender: "developer",
+          senderName: active?.developerName || siteSettings.studioName || "Mahidi Shikder",
+        }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.session) {
+          setChatSessions((prev) =>
+            prev.map((s) => (s.id === data.session.id ? data.session : s))
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Admin reply error:", err);
+      showToast("Failed to send reply");
+    } finally {
+      setIsSendingAdminReply(false);
+    }
+  };
+
+  const handleToggleResolveChat = async (sessionId: string, currentStatus: string) => {
+    const newStatus = currentStatus === "resolved" ? false : true;
+    try {
+      await fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sessionId, action: "resolve", resolved: newStatus }),
+      });
+      setChatSessions((prev) =>
+        prev.map((s) =>
+          s.id === sessionId ? { ...s, status: newStatus ? "resolved" : "active" } : s
+        )
+      );
+      showToast(newStatus ? "Chat marked as resolved" : "Chat re-opened");
+    } catch {
+      showToast("Failed to update status");
+    }
+  };
+
+  const handleDeleteChat = async (sessionId: string) => {
+    if (!confirm("Are you sure you want to delete this chat conversation?")) return;
+    try {
+      await fetch(`/api/admin/chats?sessionId=${sessionId}`, { method: "DELETE" });
+      setChatSessions((prev) => prev.filter((s) => s.id !== sessionId));
+      if (selectedChatId === sessionId) setSelectedChatId(null);
+      showToast("Chat conversation deleted");
+    } catch {
+      showToast("Failed to delete chat");
     }
   };
 
@@ -806,6 +919,14 @@ export default function AdminDashboardPage() {
                     badge: inquiries.filter((i) => i.status === "New").length || null,
                   },
                   {
+                    id: "chats",
+                    label: "Live Client Chats",
+                    icon: MessageSquare,
+                    badge:
+                      chatSessions.reduce((acc, s) => acc + (s.unreadForAdmin || 0), 0) ||
+                      (chatSessions.length > 0 ? `${chatSessions.length}` : null),
+                  },
+                  {
                     id: "traffic",
                     label: "Live Traffic",
                     icon: BarChart3,
@@ -1052,6 +1173,7 @@ export default function AdminDashboardPage() {
         <div className="md:hidden flex overflow-x-auto p-2 gap-1 bg-white border-b border-zinc-200 shrink-0">
           {[
             { id: "inquiries", label: `Inquiries (${inquiries.length})` },
+            { id: "chats", label: `Live Chat (${chatSessions.length})` },
             { id: "site-control", label: "Website Control" },
             { id: "blog", label: `Blog (${blogList.length})` },
             { id: "portfolio", label: `Portfolio (${portfolioProjects.length})` },
@@ -1391,6 +1513,362 @@ export default function AdminDashboardPage() {
                     )}
                   </tbody>
                 </table>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB: LIVE CLIENT CHATS (Real-time Developer & Client Communication)      */}
+          {/* ========================================================================= */}
+          {activeTab === "chats" && (
+            <div className="space-y-4 animate-fade-in">
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                      Live Client &amp; Developer Chats
+                    </h1>
+                    <span className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 border border-emerald-200">
+                      <span className="relative flex size-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex size-2 rounded-full bg-emerald-500"></span>
+                      </span>
+                      Live Sync
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-zinc-500">
+                    Respond to prospective clients who requested to talk live with your developer. Messages sync instantly to their screen.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* Status Filters */}
+                  <div className="inline-flex rounded-md border border-zinc-200 bg-white p-0.5 text-xs">
+                    {(["all", "active", "unread", "resolved"] as const).map((f) => {
+                      const count =
+                        f === "all"
+                          ? chatSessions.length
+                          : f === "unread"
+                          ? chatSessions.filter((s) => s.unreadForAdmin > 0).length
+                          : chatSessions.filter((s) => s.status === f).length;
+                      return (
+                        <button
+                          key={f}
+                          type="button"
+                          onClick={() => setChatFilter(f)}
+                          className={`rounded px-2.5 py-1 text-[11px] font-medium capitalize transition ${
+                            chatFilter === f
+                              ? "bg-zinc-900 text-white font-semibold shadow-xs"
+                              : "text-zinc-600 hover:text-zinc-900 hover:bg-zinc-50"
+                          }`}
+                        >
+                          {f} ({count})
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Main Chat Workspace (Split Pane) */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-[640px] max-h-[75vh]">
+                {/* Left Pane: Conversation List (4 Cols) */}
+                <div className="md:col-span-4 flex flex-col rounded-xl border border-zinc-200 bg-white shadow-2xs overflow-hidden">
+                  <div className="p-3 border-b border-zinc-100 bg-zinc-50/50 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-zinc-800">
+                      Conversations ({chatSessions.length})
+                    </span>
+                    <span className="text-[10.5px] text-zinc-400">
+                      Auto-refreshes every 3s
+                    </span>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto divide-y divide-zinc-100 [scrollbar-width:thin]">
+                    {chatSessions.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <MessageSquare size={24} className="mx-auto text-zinc-300 mb-2" />
+                        <p className="text-xs font-semibold text-zinc-600">No client chats yet</p>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                          When visitors click "Talk to Developer" in the chat widget, their conversation will appear here!
+                        </p>
+                      </div>
+                    ) : (
+                      chatSessions
+                        .filter((s) => {
+                          if (chatFilter === "active") return s.status === "active";
+                          if (chatFilter === "resolved") return s.status === "resolved";
+                          if (chatFilter === "unread") return s.unreadForAdmin > 0;
+                          return true;
+                        })
+                        .map((session) => {
+                          const isSelected = selectedChatId === session.id;
+                          const lastMsg =
+                            session.messages && session.messages.length > 0
+                              ? session.messages[session.messages.length - 1]
+                              : null;
+                          const hasUnread = (session.unreadForAdmin || 0) > 0;
+
+                          return (
+                            <div
+                              key={session.id}
+                              onClick={() => handleSelectChat(session.id)}
+                              className={`cursor-pointer p-3.5 transition-colors relative ${
+                                isSelected
+                                  ? "bg-zinc-100 border-l-3 border-zinc-900"
+                                  : "hover:bg-zinc-50"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0 flex-1">
+                                  <div className="flex items-center gap-1.5">
+                                    <h4 className="text-xs font-bold text-zinc-900 truncate">
+                                      {session.clientName || "Visitor"}
+                                    </h4>
+                                    {hasUnread && (
+                                      <span className="rounded-full bg-rose-500 px-1.5 py-0.2 text-[9.5px] font-bold text-white shrink-0">
+                                        {session.unreadForAdmin} new
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span className="block text-[10.5px] text-zinc-400 truncate mt-0.5">
+                                    Target: {session.developerName || "Mahidi Shikder"}
+                                  </span>
+                                </div>
+                                <span className="text-[10px] text-zinc-400 shrink-0">
+                                  {new Date(session.updatedAt).toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              </div>
+
+                              <p className="mt-1 text-[11.5px] text-zinc-600 line-clamp-1">
+                                {lastMsg ? lastMsg.text : "Started conversation"}
+                              </p>
+
+                              <div className="mt-2 flex items-center justify-between text-[10px]">
+                                <span
+                                  className={`inline-flex items-center gap-1 font-medium ${
+                                    session.status === "resolved"
+                                      ? "text-zinc-400"
+                                      : "text-emerald-600 font-semibold"
+                                  }`}
+                                >
+                                  <span
+                                    className={`size-1.5 rounded-full ${
+                                      session.status === "resolved"
+                                        ? "bg-zinc-300"
+                                        : "bg-emerald-500"
+                                    }`}
+                                  />
+                                  {session.status === "resolved" ? "Resolved" : "Active Client"}
+                                </span>
+
+                                {session.clientContact && (
+                                  <span className="text-zinc-400 truncate max-w-[120px]">
+                                    {session.clientContact}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })
+                    )}
+                  </div>
+                </div>
+
+                {/* Right Pane: Active Chat Conversation & Live Reply (8 Cols) */}
+                <div className="md:col-span-8 flex flex-col rounded-xl border border-zinc-200 bg-white shadow-2xs overflow-hidden">
+                  {(() => {
+                    const activeSession = chatSessions.find((s) => s.id === selectedChatId);
+
+                    if (!activeSession) {
+                      return (
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-zinc-50/40">
+                          <div className="grid size-12 place-items-center rounded-2xl bg-zinc-100 text-zinc-400 mb-3">
+                            <MessageSquare size={22} />
+                          </div>
+                          <h3 className="text-xs font-bold text-zinc-800">
+                            Select a client conversation to reply live
+                          </h3>
+                          <p className="text-[11.5px] text-zinc-500 max-w-sm mt-1">
+                            Choose any conversation on the left to review their inquiry and chat with them in real time.
+                          </p>
+                        </div>
+                      );
+                    }
+
+                    const cleanContact = (activeSession.clientContact || "").replace(/[^0-9]/g, "");
+
+                    return (
+                      <>
+                        {/* Conversation Header Bar */}
+                        <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50/60 flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="size-9 shrink-0 rounded-full bg-zinc-900 text-white font-bold grid place-items-center text-xs">
+                              {(activeSession.clientName || "C").charAt(0).toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-xs font-bold text-zinc-900 truncate">
+                                  {activeSession.clientName}
+                                </h3>
+                                <span
+                                  className={`rounded-full px-2 py-0.2 text-[10px] font-semibold ${
+                                    activeSession.status === "resolved"
+                                      ? "bg-zinc-100 text-zinc-600"
+                                      : "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  }`}
+                                >
+                                  {activeSession.status === "resolved" ? "Resolved" : "Active"}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5 text-[11px] text-zinc-500">
+                                <span>Developer: <strong>{activeSession.developerName}</strong></span>
+                                {activeSession.clientContact && (
+                                  <>
+                                    <span>·</span>
+                                    <span className="truncate">{activeSession.clientContact}</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {cleanContact && (
+                              <a
+                                href={`https://wa.me/${cleanContact}?text=${encodeURIComponent(
+                                  `Hi ${activeSession.clientName}! This is Looksbay Studio following up on our live website chat.`
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Open in WhatsApp"
+                                className="inline-flex items-center gap-1 rounded-md border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                              >
+                                <MessageCircle size={12} />
+                                <span className="hidden sm:inline">WhatsApp</span>
+                              </a>
+                            )}
+
+                            <button
+                              type="button"
+                              onClick={() => handleToggleResolveChat(activeSession.id, activeSession.status)}
+                              className="rounded-md border border-zinc-200 bg-white px-2.5 py-1 text-[11px] font-medium text-zinc-700 hover:bg-zinc-50 transition"
+                            >
+                              {activeSession.status === "resolved" ? "Re-open" : "Resolve"}
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteChat(activeSession.id)}
+                              title="Delete chat"
+                              className="p-1 rounded-md text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Message Feed */}
+                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FAFBFD] [scrollbar-width:thin]">
+                          {activeSession.messages?.map((msg: any) => {
+                            const isDev = msg.sender === "developer";
+                            const isSystem = msg.sender === "system";
+
+                            if (isSystem) {
+                              return (
+                                <div key={msg.id} className="text-center my-2">
+                                  <span className="inline-block rounded-full bg-zinc-200/80 px-3 py-0.5 text-[10.5px] text-zinc-600 font-medium">
+                                    {msg.text}
+                                  </span>
+                                </div>
+                              );
+                            }
+
+                            return (
+                              <div
+                                key={msg.id}
+                                className={`flex flex-col ${isDev ? "items-end" : "items-start"}`}
+                              >
+                                <span className="text-[10px] text-zinc-400 font-medium mb-1 px-1">
+                                  {isDev ? `${msg.senderName || "Developer (You)"}` : `${activeSession.clientName}`} · {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </span>
+
+                                <div
+                                  className={`max-w-[75%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed shadow-2xs ${
+                                    isDev
+                                      ? "bg-zinc-900 text-white rounded-br-xs font-normal"
+                                      : "bg-white text-zinc-900 border border-zinc-200/80 rounded-bl-xs"
+                                  }`}
+                                >
+                                  <p className="whitespace-pre-wrap">{msg.text}</p>
+                                  {msg.attachmentName && (
+                                    <div className="mt-2 inline-flex items-center gap-1.5 rounded bg-black/10 px-2 py-1 text-[10.5px] font-mono">
+                                      <FileText size={12} />
+                                      <span>{msg.attachmentName}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Canned Quick Responses Strip */}
+                        <div className="px-3 py-1.5 bg-white border-t border-zinc-100 flex items-center gap-1.5 overflow-x-auto text-[11px] [scrollbar-width:none]">
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
+                            <Sparkles size={11} className="text-[#5046E5]" />
+                            Quick Replies:
+                          </span>
+                          {[
+                            "Hello! How can I assist you with your Squarespace project today?",
+                            "Could you share your website URL or inspiration design?",
+                            "Our custom builds include 90+ PageSpeed & custom CSS. What is your timeline?",
+                            "Let's schedule a 15-minute quick call to finalize requirements!",
+                          ].map((quickText, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => setAdminReplyText(quickText)}
+                              className="shrink-0 rounded-md bg-zinc-100 hover:bg-indigo-50 hover:text-indigo-600 px-2.5 py-1 text-zinc-700 font-medium transition"
+                            >
+                              {quickText.length > 32 ? quickText.substring(0, 32) + "..." : quickText}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* Admin Message Composer */}
+                        <div className="p-3 bg-white border-t border-zinc-200">
+                          <form onSubmit={handleSendAdminReply} className="flex gap-2">
+                            <textarea
+                              rows={2}
+                              value={adminReplyText}
+                              onChange={(e) => setAdminReplyText(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault();
+                                  handleSendAdminReply();
+                                }
+                              }}
+                              placeholder={`Type your reply to ${activeSession.clientName}... (Press Enter to send live)`}
+                              className="flex-1 resize-none rounded-lg border border-zinc-300 p-2 text-xs text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-900 focus:outline-none"
+                            />
+                            <button
+                              type="submit"
+                              disabled={!adminReplyText.trim() || isSendingAdminReply}
+                              className="self-end rounded-lg bg-zinc-900 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-zinc-800 disabled:opacity-40 flex items-center gap-1.5 shadow-xs"
+                            >
+                              <Send size={13} />
+                              <span>{isSendingAdminReply ? "Sending..." : "Send"}</span>
+                            </button>
+                          </form>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
               </div>
             </div>
           )}

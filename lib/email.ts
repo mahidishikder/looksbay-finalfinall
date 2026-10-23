@@ -226,7 +226,6 @@ export async function sendInquiryNotification(inquiry: InquiryEmailPayload): Pro
       return { success: true };
     }
 
-    // If no credentials configured yet, log details
     console.warn(
       `[Email] Email reminder configured for ${destinationEmail}, but Gmail App Password (GMAIL_APP_PASS) is not set yet. Please set GMAIL_APP_PASS in Website Control or environment variables.`
     );
@@ -239,3 +238,118 @@ export async function sendInquiryNotification(inquiry: InquiryEmailPayload): Pro
     return { success: false, error: error?.message || "Unknown email error" };
   }
 }
+
+/**
+ * Sends a real-time email reminder to the studio when a visitor initiates a live chat
+ * with a developer or sends an unread message.
+ */
+export async function sendLiveChatAlert(params: {
+  sessionId: string;
+  clientName: string;
+  clientContact?: string;
+  developerName: string;
+  messageText: string;
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const settings = await getSiteSettings();
+    const destinationEmail =
+      process.env.NOTIFICATION_EMAIL ||
+      settings.notificationEmail ||
+      settings.studioEmail ||
+      "helplooksbay@gmail.com";
+
+    const gmailUser =
+      process.env.GMAIL_USER ||
+      process.env.EMAIL_USER ||
+      settings.gmailSender ||
+      settings.studioEmail ||
+      "helplooksbay@gmail.com";
+
+    const gmailPass =
+      process.env.GMAIL_APP_PASS ||
+      process.env.GMAIL_APP_PASSWORD ||
+      process.env.EMAIL_PASS ||
+      settings.gmailAppPassword;
+
+    const resendApiKey = process.env.RESEND_API_KEY || settings.resendApiKey;
+
+    const cleanContact = (params.clientContact || "").replace(/[^0-9]/g, "");
+    const waLink = cleanContact ? `https://wa.me/${cleanContact}` : "";
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin: 0; padding: 24px; background-color: #f4f4f5; font-family: -apple-system, sans-serif; color: #18181b;">
+  <table width="100%" max-width="560px" style="max-width: 560px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e4e4e7; overflow: hidden;">
+    <tr>
+      <td style="background: #5046E5; padding: 20px 24px; color: #ffffff;">
+        <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.85;">Looksbay Live Chat Alert</span>
+        <h2 style="margin: 6px 0 0 0; font-size: 18px;">💬 Client wants to talk with ${params.developerName}</h2>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding: 24px;">
+        <p style="margin-top: 0; font-size: 14px; color: #52525b;">A visitor has requested a live developer chat on Looksbay:</p>
+        <div style="background: #fafafa; border: 1px solid #f4f4f5; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+          <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Client:</strong> ${params.clientName}</p>
+          ${params.clientContact ? `<p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Contact:</strong> ${params.clientContact}</p>` : ""}
+          <p style="margin: 0; font-size: 13px;"><strong>Target Developer:</strong> ${params.developerName}</p>
+        </div>
+        <div style="background: #EEF2FF; border-left: 3px solid #5046E5; padding: 12px 14px; border-radius: 4px; font-size: 13px; color: #1e1b4b; margin-bottom: 20px;">
+          "${params.messageText}"
+        </div>
+        <div style="text-align: center;">
+          <a href="https://looksbay.com/admin" style="display: inline-block; background: #5046E5; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 13px;">
+            Open Live Chat in Admin Dashboard →
+          </a>
+        </div>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `;
+
+    if (resendApiKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Looksbay Live Chat <onboarding@resend.dev>",
+          to: [destinationEmail],
+          subject: `💬 Live Client Chat: ${params.clientName} (${params.developerName})`,
+          html: htmlContent,
+        }),
+      });
+      return { success: true };
+    }
+
+    if (gmailUser && gmailPass) {
+      const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+          user: gmailUser,
+          pass: gmailPass.replace(/\s+/g, ""),
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"Looksbay Live Chat" <${gmailUser}>`,
+        to: destinationEmail,
+        subject: `💬 Live Client Chat: ${params.clientName} (${params.developerName})`,
+        html: htmlContent,
+      });
+      return { success: true };
+    }
+
+    return { success: true };
+  } catch (err: any) {
+    console.error("[Email] Live chat alert error:", err);
+    return { success: false, error: err?.message };
+  }
+}
+
