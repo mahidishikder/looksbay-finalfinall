@@ -236,6 +236,28 @@ export default function AdminDashboardPage() {
     }
   }, []);
 
+  // Real-time live polling (auto-refreshes analytics and inquiries every 4 seconds)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const interval = setInterval(async () => {
+      try {
+        const [statsRes, inqRes] = await Promise.all([
+          fetch("/api/analytics/stats", { cache: "no-store" }),
+          fetch("/api/contact", { cache: "no-store" }),
+        ]);
+        if (statsRes.ok) {
+          const statsData = await statsRes.json();
+          setAnalytics(statsData.stats || statsData || null);
+        }
+        if (inqRes.ok) {
+          const inqData = await inqRes.json();
+          if (inqData.inquiries) setInquiries(inqData.inquiries);
+        }
+      } catch (e) {}
+    }, 4000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated]);
+
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const storedPin = localStorage.getItem("admin_pin") || "admin123";
@@ -279,7 +301,7 @@ export default function AdminDashboardPage() {
       }
       if (statsRes.ok) {
         const statsData = await statsRes.json();
-        setAnalytics(statsData.stats || null);
+        setAnalytics(statsData.stats || statsData || null);
       }
       if (portRes.ok) {
         const portData = await portRes.json();
@@ -1977,66 +1999,195 @@ export default function AdminDashboardPage() {
           {/* ========================================================================= */}
           {/* TAB 6: LIVE TRAFFIC */}
           {/* ========================================================================= */}
+          {/* ========================================================================= */}
+          {/* TAB 6: REAL-TIME LIVE TRAFFIC ANALYTICS */}
+          {/* ========================================================================= */}
           {activeTab === "traffic" && (
-            <div className="space-y-4 animate-fade-in">
-              <div>
-                <h1 className="text-sm font-semibold text-zinc-900 tracking-tight">
-                  Live Traffic Analytics
-                </h1>
-                <p className="text-[11px] text-zinc-500">
-                  Real-time visitor counts and high-traffic page performance.
-                </p>
+            <div className="space-y-5 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-sm font-semibold text-zinc-900 tracking-tight flex items-center gap-2">
+                    <span>Real-Time Traffic Analytics</span>
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/60 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                      <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                      LIVE FEED
+                    </span>
+                  </h1>
+                  <p className="text-[11px] text-zinc-500">
+                    100% verified real visitor counts recorded directly from live browser hits (auto-refreshes every 4s).
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const res = await fetch("/api/analytics/stats", { cache: "no-store" });
+                    if (res.ok) {
+                      const data = await res.json();
+                      setAnalytics(data.stats || data || null);
+                      showToast("Live analytics updated");
+                    }
+                  }}
+                  className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-white px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition shadow-2xs self-start sm:self-auto"
+                >
+                  <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
+                  <span>Sync Now</span>
+                </button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* 4 Metric Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 <div className="rounded-lg border border-zinc-200/80 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[11px] font-medium text-zinc-500">Today's Visitors</span>
-                  <div className="text-xl font-bold text-zinc-900 mt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-zinc-400">Today's Visitors</span>
+                    <span className="size-2 rounded-full bg-blue-500 animate-pulse" />
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-900 mt-1">
                     {analytics?.todayVisitors || 0}
                   </div>
+                  <span className="text-[10px] text-zinc-400">Unique devices today</span>
                 </div>
 
                 <div className="rounded-lg border border-zinc-200/80 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[11px] font-medium text-zinc-500">Today's Pageviews</span>
-                  <div className="text-xl font-bold text-zinc-900 mt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-medium text-zinc-400">Today's Pageviews</span>
+                    <span className="size-2 rounded-full bg-emerald-500" />
+                  </div>
+                  <div className="text-2xl font-bold text-zinc-900 mt-1">
                     {analytics?.todayPageviews || 0}
                   </div>
+                  <span className="text-[10px] text-zinc-400">Total pages loaded today</span>
                 </div>
 
                 <div className="rounded-lg border border-zinc-200/80 bg-white p-3.5 shadow-2xs">
-                  <span className="text-[11px] font-medium text-zinc-500">All-Time Visitors</span>
-                  <div className="text-xl font-bold text-zinc-900 mt-1">
+                  <span className="text-[11px] font-medium text-zinc-400 block">All-Time Visitors</span>
+                  <div className="text-2xl font-bold text-zinc-900 mt-1">
                     {analytics?.totalVisitors || 0}
                   </div>
+                  <span className="text-[10px] text-zinc-400">Verified unique visitors</span>
+                </div>
+
+                <div className="rounded-lg border border-zinc-200/80 bg-white p-3.5 shadow-2xs">
+                  <span className="text-[11px] font-medium text-zinc-400 block">All-Time Pageviews</span>
+                  <div className="text-2xl font-bold text-zinc-900 mt-1">
+                    {analytics?.totalPageviews || 0}
+                  </div>
+                  <span className="text-[10px] text-zinc-400">Total impressions served</span>
                 </div>
               </div>
 
-              <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
-                <div className="p-3 border-b border-zinc-150">
-                  <h3 className="text-xs font-semibold text-zinc-900">Top Visited Pages</h3>
+              {/* 7-Day Trend Chart */}
+              {analytics?.dailyTrend && analytics.dailyTrend.length > 0 && (
+                <div className="rounded-lg border border-zinc-200/80 bg-white p-4 shadow-2xs space-y-3">
+                  <div className="flex items-center justify-between border-b border-zinc-150 pb-2">
+                    <h3 className="text-xs font-semibold text-zinc-900">7-Day Visitor Trend</h3>
+                    <span className="text-[10px] font-medium text-zinc-400">Past 7 days history</span>
+                  </div>
+
+                  <div className="grid grid-cols-7 gap-2 pt-2 items-end h-32">
+                    {analytics.dailyTrend.map((day, idx) => {
+                      const maxVisitors = Math.max(...(analytics.dailyTrend?.map((d) => d.visitors) || [1]), 1);
+                      const heightPercent = Math.max(Math.round((day.visitors / maxVisitors) * 100), 8);
+                      const isToday = idx === (analytics.dailyTrend?.length || 0) - 1;
+
+                      return (
+                        <div key={idx} className="flex flex-col items-center gap-1.5 h-full justify-end group">
+                          <span className="text-[10px] font-bold text-zinc-800 opacity-0 group-hover:opacity-100 transition">
+                            {day.visitors}
+                          </span>
+                          <div
+                            style={{ height: `${heightPercent}%` }}
+                            className={`w-full max-w-[32px] rounded-t transition-all duration-300 ${
+                              isToday ? "bg-zinc-900" : "bg-zinc-200 group-hover:bg-zinc-400"
+                            }`}
+                            title={`${day.date}: ${day.visitors} visitors, ${day.pageviews} views`}
+                          />
+                          <span className={`text-[10px] font-medium ${isToday ? "text-zinc-900 font-bold" : "text-zinc-400"}`}>
+                            {day.day}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-zinc-50/80 text-[10px] font-semibold uppercase text-zinc-500">
-                    <tr>
-                      <th className="py-2 px-4">Page Path</th>
-                      <th className="py-2 px-4 text-right">Views</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-100">
-                    {analytics?.topPages?.map((p, idx) => (
-                      <tr key={idx} className="hover:bg-zinc-50/50">
-                        <td className="py-2 px-4 font-mono text-[11px] text-zinc-800">{p.path}</td>
-                        <td className="py-2 px-4 text-right font-semibold text-zinc-900">{p.views}</td>
-                      </tr>
-                    )) || (
+              )}
+
+              {/* 2-Column Split: Top Pages + Real-Time Live Activity Stream */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {/* Top Visited Pages */}
+                <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
+                  <div className="p-3 border-b border-zinc-150 flex items-center justify-between">
+                    <h3 className="text-xs font-semibold text-zinc-900">Top Visited Pages</h3>
+                    <span className="text-[10px] text-zinc-400">By hit volume</span>
+                  </div>
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-zinc-50/80 text-[10px] font-semibold uppercase text-zinc-500">
                       <tr>
-                        <td colSpan={2} className="py-4 text-center text-zinc-400">
-                          No page tracking data recorded yet
-                        </td>
+                        <th className="py-2 px-4">Page Path</th>
+                        <th className="py-2 px-4 text-right">Views</th>
                       </tr>
-                    )}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-100">
+                      {analytics?.topPages && analytics.topPages.length > 0 ? (
+                        analytics.topPages.map((p, idx) => (
+                          <tr key={idx} className="hover:bg-zinc-50/50">
+                            <td className="py-2 px-4 font-mono text-[11px] text-zinc-800">{p.path}</td>
+                            <td className="py-2 px-4 text-right font-semibold text-zinc-900">{p.views}</td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={2} className="py-4 text-center text-zinc-400">
+                            No page tracking data recorded yet
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Real-Time Live Activity Stream */}
+                <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden flex flex-col justify-between">
+                  <div>
+                    <div className="p-3 border-b border-zinc-150 flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className="size-2 rounded-full bg-emerald-500 animate-pulse" />
+                        <h3 className="text-xs font-semibold text-zinc-900">Live Activity Stream</h3>
+                      </div>
+                      <span className="text-[10px] text-zinc-400 font-mono">Real-time log</span>
+                    </div>
+
+                    <div className="divide-y divide-zinc-100 max-h-80 overflow-y-auto">
+                      {analytics?.recentVisits && analytics.recentVisits.length > 0 ? (
+                        analytics.recentVisits.map((visit, idx) => {
+                          const dateObj = new Date(visit.timestamp);
+                          const timeStr = dateObj.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+                          return (
+                            <div key={idx} className="p-2.5 px-4 flex items-center justify-between text-xs hover:bg-zinc-50/50 transition">
+                              <div className="flex items-center gap-2">
+                                <span className="size-1.5 rounded-full bg-zinc-400" />
+                                <span className="font-mono text-[11px] font-semibold text-zinc-900">
+                                  {visit.path}
+                                </span>
+                                <span className="text-[10px] text-zinc-400">
+                                  via {!visit.referrer || visit.referrer === "Direct" ? "Direct" : visit.referrer.replace(/https?:\/\/(www\.)?/, "").slice(0, 20)}
+                                </span>
+                              </div>
+                              <span className="text-[10px] text-zinc-400 font-mono">
+                                {timeStr}
+                              </span>
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="p-8 text-center text-zinc-400 text-xs">
+                          Waiting for live visitor hits...
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

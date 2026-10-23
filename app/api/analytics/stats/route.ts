@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { getAnalyticsData } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const data = await getAnalyticsData();
@@ -46,7 +49,7 @@ export async function GET() {
       .sort((a, b) => b.views - a.views)
       .slice(0, 10);
 
-    return NextResponse.json({
+    const stats = {
       todayVisitors: todayStats.visitors || 0,
       todayPageviews: todayStats.pageviews || 0,
       yesterdayVisitors: yesterdayStats.visitors || 0,
@@ -54,7 +57,12 @@ export async function GET() {
       totalPageviews,
       dailyTrend: last7Days,
       topPages,
-      recentVisits: (data.recent || []).slice(0, 20),
+      recentVisits: (data.recent || []).slice(0, 30),
+    };
+
+    return NextResponse.json({
+      ...stats,
+      stats,
     });
   } catch (error) {
     return NextResponse.json({

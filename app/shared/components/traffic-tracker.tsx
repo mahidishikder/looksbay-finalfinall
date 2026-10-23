@@ -9,6 +9,7 @@ export function TrafficTracker() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (pathname?.startsWith("/admin")) return;
 
     // Avoid duplicate calls for the same path
     if (lastTracked.current === pathname) return;
