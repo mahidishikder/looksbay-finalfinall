@@ -561,15 +561,15 @@ export function AiAssistant() {
           <div className="relative bg-[#5046E5] px-4 py-3 text-white shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-white/20 p-0.5 border border-white/25 flex items-center justify-center">
+                <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-white p-1 shadow-sm border border-white/30 flex items-center justify-center">
                   <Image
                     src={MAHIDI_PROFILE.avatar}
                     alt={MAHIDI_PROFILE.name}
                     width={40}
                     height={40}
-                    className="size-full rounded-full object-cover"
+                    className="size-full rounded-full object-contain"
                   />
-                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-[#5046E5] bg-emerald-400" />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-white bg-emerald-400" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-[14px] font-bold text-white tracking-tight truncate leading-tight">
@@ -608,13 +608,13 @@ export function AiAssistant() {
                   }`}
                 >
                   {m.sender === "ai" && (
-                    <div className="size-7 shrink-0 overflow-hidden rounded-full bg-zinc-900 p-0.5 flex items-center justify-center shadow-xs">
+                    <div className="size-7 shrink-0 overflow-hidden rounded-full bg-white border border-black/10 p-0.5 flex items-center justify-center shadow-xs">
                       <Image
                         src="/assets/favicon.png"
                         alt="AI"
                         width={22}
                         height={22}
-                        className="size-full rounded-full object-cover"
+                        className="size-full rounded-full object-contain"
                       />
                     </div>
                   )}
@@ -675,13 +675,13 @@ export function AiAssistant() {
                     }`}
                   >
                     {!isClient && (
-                      <div className="size-7 shrink-0 overflow-hidden rounded-full bg-zinc-900 border border-black/10 p-0.5 flex items-center justify-center shadow-xs">
+                      <div className="size-7 shrink-0 overflow-hidden rounded-full bg-white border border-black/10 p-0.5 flex items-center justify-center shadow-xs">
                         <Image
                           src={MAHIDI_PROFILE.avatar}
                           alt={MAHIDI_PROFILE.name}
                           width={24}
                           height={24}
-                          className="size-full rounded-full object-cover"
+                          className="size-full rounded-full object-contain"
                         />
                       </div>
                     )}
@@ -726,13 +726,13 @@ export function AiAssistant() {
             {/* Real-Time Live Typing Indicator */}
             {(isDeveloperTyping || isTypingAI) && (
               <div className="flex gap-2 items-center justify-start py-1 animate-in fade-in duration-150">
-                <div className="size-6 shrink-0 overflow-hidden rounded-full bg-zinc-900 p-0.5 border border-[#5046E5]/30">
+                <div className="size-6 shrink-0 overflow-hidden rounded-full bg-white p-0.5 border border-black/10 shadow-2xs flex items-center justify-center">
                   <Image
                     src={selectedMode === "ai" ? "/assets/favicon.png" : MAHIDI_PROFILE.avatar}
                     alt="Typing"
                     width={20}
                     height={20}
-                    className="size-full rounded-full object-cover"
+                    className="size-full rounded-full object-contain"
                   />
                 </div>
                 <div className="rounded-[14px] rounded-tl-[3px] bg-white border border-[#5046E5]/20 px-3 py-1.5 flex items-center gap-2 shadow-2xs">
