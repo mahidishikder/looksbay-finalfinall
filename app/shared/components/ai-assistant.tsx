@@ -561,47 +561,36 @@ export function AiAssistant() {
           <div className="relative bg-[#5046E5] px-4 py-3 text-white shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="relative size-9 shrink-0 overflow-hidden rounded-full bg-white/20 p-0.5 border border-white/25 flex items-center justify-center">
+                <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-white/20 p-0.5 border border-white/25 flex items-center justify-center">
                   <Image
-                    src={selectedMode === "ai" ? "/assets/favicon.png" : MAHIDI_PROFILE.avatar}
-                    alt="Avatar"
-                    width={36}
-                    height={36}
+                    src={MAHIDI_PROFILE.avatar}
+                    alt={MAHIDI_PROFILE.name}
+                    width={40}
+                    height={40}
                     className="size-full rounded-full object-cover"
                   />
-                  <span className="absolute bottom-0 right-0 size-2 rounded-full border-2 border-[#5046E5] bg-emerald-400" />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-[#5046E5] bg-emerald-400" />
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-[14px] font-bold text-white tracking-tight truncate leading-tight">
-                    {selectedMode === "developer" ? MAHIDI_PROFILE.name : "Looksbay AI"}
+                    {MAHIDI_PROFILE.name}
                   </h3>
-                  <span className="text-[11px] text-white/80 font-medium flex items-center gap-1.5 leading-tight mt-0.5">
-                    <span className="size-1.5 rounded-full bg-emerald-400"></span>
-                    {selectedMode === "developer" ? "Squarespace Expert · Online" : "Squarespace AI · 24/7"}
+                  <span className="text-[11.5px] text-white/90 font-medium flex items-center gap-1.5 leading-tight mt-0.5">
+                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Squarespace Expert · Online Now
                   </span>
                 </div>
               </div>
 
-              {/* Minimal Clean Switcher & Close */}
-              <div className="flex items-center gap-1.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => selectMode(selectedMode === "ai" ? "developer" : "ai")}
-                  title={`Switch to ${selectedMode === "ai" ? "Mahidi" : "AI"}`}
-                  className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/25 transition"
-                >
-                  {selectedMode === "ai" ? "Talk to Mahidi →" : "AI Mode →"}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  title="Close chat"
-                  className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition"
-                >
-                  <X size={17} />
-                </button>
-              </div>
+              {/* Close Button Only */}
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                title="Close chat"
+                className="grid size-8 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition"
+              >
+                <X size={18} />
+              </button>
             </div>
           </div>
 
