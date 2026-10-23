@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   Inbox,
@@ -166,6 +166,26 @@ export default function AdminDashboardPage() {
   const [chatFilter, setChatFilter] = useState<"all" | "active" | "unread" | "resolved">("all");
   const [adminReplyText, setAdminReplyText] = useState("");
   const [isSendingAdminReply, setIsSendingAdminReply] = useState(false);
+  const lastTypingPingRef = useRef<number>(0);
+
+  const playAdminMessageSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(560, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1120, ctx.currentTime + 0.08);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.12);
+    } catch {}
+  };
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
     studioName: "Looksbay Studio",
     tagline: "Premier Squarespace Circle Platinum Design & Engineering Studio",
@@ -384,14 +404,46 @@ export default function AdminDashboardPage() {
     } catch {}
   };
 
+  const handleAdminTyping = (text: string) => {
+    setAdminReplyText(text);
+    if (!selectedChatId) return;
+    const now = Date.now();
+    if (now - lastTypingPingRef.current > 1500) {
+      lastTypingPingRef.current = now;
+      fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: selectedChatId,
+          action: "typing",
+          who: "developer",
+          isTyping: true,
+        }),
+      }).catch(() => {});
+    }
+  };
+
   const handleSendAdminReply = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!selectedChatId || !adminReplyText.trim() || isSendingAdminReply) return;
     const textToSend = adminReplyText.trim();
     setAdminReplyText("");
     setIsSendingAdminReply(true);
+    playAdminMessageSound();
 
     try {
+      // Clear typing indicator
+      fetch("/api/chat", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          sessionId: selectedChatId,
+          action: "typing",
+          who: "developer",
+          isTyping: false,
+        }),
+      }).catch(() => {});
+
       const active = chatSessions.find((s) => s.id === selectedChatId);
       const res = await fetch("/api/chat", {
         method: "POST",
@@ -400,7 +452,7 @@ export default function AdminDashboardPage() {
           sessionId: selectedChatId,
           text: textToSend,
           sender: "developer",
-          senderName: active?.developerName || siteSettings.studioName || "Mahidi Shikder",
+          senderName: "Mahidi Shikder",
         }),
       });
       if (res.ok) {
@@ -1845,7 +1897,7 @@ export default function AdminDashboardPage() {
                             <textarea
                               rows={2}
                               value={adminReplyText}
-                              onChange={(e) => setAdminReplyText(e.target.value)}
+                              onChange={(e) => handleAdminTyping(e.target.value)}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && !e.shiftKey) {
                                   e.preventDefault();

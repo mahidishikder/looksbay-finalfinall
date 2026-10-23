@@ -35,6 +35,8 @@ export interface ChatSession {
   status: "active" | "resolved";
   unreadForAdmin: number;
   unreadForClient: number;
+  developerTypingUntil?: number;
+  clientTypingUntil?: number;
   createdAt: string;
   updatedAt: string;
   messages: ChatMessage[];
@@ -662,6 +664,22 @@ export async function addChatMessage(
 
   await saveChatSession(session);
   return session;
+}
+
+export async function setTypingIndicator(
+  sessionId: string,
+  who: "developer" | "client",
+  isTyping: boolean
+): Promise<void> {
+  const session = await getChatSession(sessionId);
+  if (!session) return;
+  const expiry = isTyping ? Date.now() + 4500 : 0;
+  if (who === "developer") {
+    session.developerTypingUntil = expiry;
+  } else {
+    session.clientTypingUntil = expiry;
+  }
+  await saveChatSession(session);
 }
 
 export async function markChatRead(sessionId: string, reader: "admin" | "client"): Promise<void> {

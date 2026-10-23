@@ -4,6 +4,7 @@ import {
   addChatMessage,
   markChatRead,
   resolveChatSession,
+  setTypingIndicator,
 } from "@/lib/db";
 import { sendLiveChatAlert } from "@/lib/email";
 
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { sessionId, action, reader, resolved } = body;
+    const { sessionId, action, reader, resolved, who, isTyping } = body;
 
     if (!sessionId) {
       return NextResponse.json({ error: "sessionId is required" }, { status: 400 });
@@ -95,6 +96,11 @@ export async function PATCH(request: Request) {
 
     if (action === "read") {
       await markChatRead(sessionId, reader || "client");
+      return NextResponse.json({ success: true });
+    }
+
+    if (action === "typing") {
+      await setTypingIndicator(sessionId, who || "client", isTyping !== false);
       return NextResponse.json({ success: true });
     }
 
