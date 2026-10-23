@@ -3,10 +3,9 @@
     "id": "inq_1",
     "name": "Sophia Vance",
     "email": "sophia@vancedesign.co",
-    "whatsapp": "+1 415 555 2671",
     "project": "Custom Squarespace Development",
     "budget": "$3,000 - $5,000",
-    "message": "Looking for an expert to build custom fluid engine sections and integrate Momence booking for our flagship design studio.",
+    "message": "Looking for an expert to build custom fluid engine sections and integrate Momence booking.",
     "status": "New",
     "createdAt": "2026-10-22T05:15:37.019Z"
   },
@@ -14,10 +13,9 @@
     "id": "inq_2",
     "name": "Marcus Sterling",
     "email": "marcus@sterlinglegal.com",
-    "whatsapp": "+44 7911 123456",
     "project": "Platform Migration (WordPress)",
     "budget": "$5,000+",
-    "message": "We need our law firm site migrated from WordPress to Squarespace 7.1 with seamless 301 redirects and retained SEO ranking.",
+    "message": "We need our law firm site migrated from WordPress to Squarespace 7.1 with 301 redirects.",
     "status": "Contacted",
     "createdAt": "2026-10-21T09:15:37.019Z"
   }
