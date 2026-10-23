@@ -177,13 +177,13 @@ function playReceivedSound() {
   } catch {}
 }
 
-// 3. Satisfying tactile mechanical typing tick sound
-let lastTypingSoundTime = 0;
+// 3. Ultra-realistic tactile mechanical keyboard typing click
+let lastKeystrokeTime = 0;
 function playTypingTick() {
   try {
     const now = Date.now();
-    if (now - lastTypingSoundTime < 80) return; // throttle keystroke ticks
-    lastTypingSoundTime = now;
+    if (now - lastKeystrokeTime < 60) return; // natural throttle
+    lastKeystrokeTime = now;
 
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
@@ -192,23 +192,25 @@ function playTypingTick() {
 
     const filter = ctx.createBiquadFilter();
     filter.type = "bandpass";
-    filter.frequency.setValueAtTime(1400 + Math.random() * 200, t);
-    filter.Q.setValueAtTime(3.5, t);
+    const naturalPitches = [1300, 1550, 1780, 1920, 1420];
+    const pitch = naturalPitches[Math.floor(Math.random() * naturalPitches.length)];
+    filter.frequency.setValueAtTime(pitch, t);
+    filter.Q.setValueAtTime(3.8, t);
     filter.connect(ctx.destination);
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = "triangle";
-    osc.frequency.setValueAtTime(190 + Math.random() * 30, t);
-    osc.frequency.exponentialRampToValueAtTime(70, t + 0.022);
+    osc.frequency.setValueAtTime(260 + Math.random() * 40, t);
+    osc.frequency.exponentialRampToValueAtTime(75, t + 0.024);
 
-    gain.gain.setValueAtTime(0.045, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.022);
+    gain.gain.setValueAtTime(0.055, t);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.024);
 
     osc.connect(gain);
     gain.connect(filter);
     osc.start(t);
-    osc.stop(t + 0.022);
+    osc.stop(t + 0.024);
   } catch {}
 }
 
@@ -344,6 +346,23 @@ export function AiAssistant() {
       setTimeout(() => inputRef.current?.focus(), 150);
     }
   }, [aiMessages, devMessages, isTypingAI, isDeveloperTyping, isOpen, selectedMode]);
+
+  // Continuous live typing sound feedback while developer or AI is actively typing
+  useEffect(() => {
+    if (!isOpen) return;
+    const isTypingActive = isDeveloperTyping || isTypingAI;
+    if (!isTypingActive) return;
+
+    // Immediately play first tick
+    playTypingTick();
+
+    // Natural human keystroke pacing
+    const interval = setInterval(() => {
+      playTypingTick();
+    }, 180);
+
+    return () => clearInterval(interval);
+  }, [isDeveloperTyping, isTypingAI, isOpen]);
 
   // Voice speech-to-text
   useEffect(() => {
