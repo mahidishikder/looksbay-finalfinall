@@ -173,17 +173,24 @@ export default function AdminDashboardPage() {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();
+      const t = ctx.currentTime;
+      const filter = ctx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(2200, t);
+      filter.connect(ctx.destination);
+
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
       osc.type = "sine";
-      osc.frequency.setValueAtTime(560, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1120, ctx.currentTime + 0.08);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.12);
+      osc.frequency.setValueAtTime(440, t);
+      osc.frequency.exponentialRampToValueAtTime(1320, t + 0.06);
+      gain.gain.setValueAtTime(0.12, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+      osc.connect(gain);
+      gain.connect(filter);
+      osc.start(t);
+      osc.stop(t + 0.1);
     } catch {}
   };
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({

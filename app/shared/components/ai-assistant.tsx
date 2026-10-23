@@ -25,6 +25,7 @@ import {
   ChevronDown,
   User,
   Phone,
+  Volume2,
 } from "lucide-react";
 import { findBestSquarespaceAnswer } from "../data/squarespace-knowledge";
 
@@ -76,23 +77,47 @@ export const MAHIDI_PROFILE = {
     "Hello! I'm Mahidi Shikder, lead Squarespace architect at Looksbay Studio. I am online in the studio right now — feel free to ask me anything about your website project, custom code, design, or pricing!",
 };
 
-// Realistic Web Audio API synthesizers for instant sensory feedback
+// Luxury Acoustic Audio Engine for Instant Sensory Feedback
 function playSentSound() {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(520, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(1040, ctx.currentTime + 0.08);
-    gain.gain.setValueAtTime(0.08, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.12);
+    const t = ctx.currentTime;
+
+    // Warm Lowpass Filter
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(2200, t);
+    filter.connect(ctx.destination);
+
+    // Tone 1: Upward airy pop sweep (tactile water droplet / iMessage pop)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(440, t);
+    osc1.frequency.exponentialRampToValueAtTime(1320, t + 0.06);
+    gain1.gain.setValueAtTime(0.12, t);
+    gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+    osc1.connect(gain1);
+    gain1.connect(filter);
+    osc1.start(t);
+    osc1.stop(t + 0.1);
+
+    // Tone 2: Warm body resonance tap
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(320, t);
+    osc2.frequency.exponentialRampToValueAtTime(640, t + 0.04);
+    gain2.gain.setValueAtTime(0.08, t);
+    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.08);
+
+    osc2.connect(gain2);
+    gain2.connect(filter);
+    osc2.start(t);
+    osc2.stop(t + 0.08);
   } catch {}
 }
 
@@ -101,20 +126,55 @@ function playReceivedSound() {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
     const ctx = new AudioCtx();
-    // 3-note harmonic bell chime
-    const notes = [587.33, 783.99, 1046.5]; // D5, G5, C6
-    notes.forEach((freq, idx) => {
+    const t = ctx.currentTime;
+
+    // Acoustic Master Warmth Filter
+    const filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(3600, t);
+    filter.connect(ctx.destination);
+
+    // Luxurious 4-tone crystal marimba / glass bell chord (F5, A5, C6, E6)
+    const chord = [
+      { freq: 698.46, delay: 0.00 }, // F5
+      { freq: 880.00, delay: 0.065 }, // A5
+      { freq: 1046.50, delay: 0.13 }, // C6
+      { freq: 1318.51, delay: 0.195 }, // E6 (Crystal bell shimmer)
+    ];
+
+    chord.forEach(({ freq, delay }) => {
+      const start = t + delay;
+      const duration = 0.45;
+
+      // Primary fundamental bell tone
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
       osc.type = "sine";
-      const startTime = ctx.currentTime + idx * 0.07;
-      osc.frequency.setValueAtTime(freq, startTime);
-      gain.gain.setValueAtTime(0.09, startTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.28);
-      osc.start(startTime);
-      osc.stop(startTime + 0.28);
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.12, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+
+      osc.connect(gain);
+      gain.connect(filter);
+      osc.start(start);
+      osc.stop(start + duration);
+
+      // Shimmering acoustic overtone (marimba / glass harmonic)
+      const overtone = ctx.createOscillator();
+      const overtoneGain = ctx.createGain();
+      overtone.type = "sine";
+      overtone.frequency.setValueAtTime(freq * 2.0, start);
+
+      overtoneGain.gain.setValueAtTime(0.001, start);
+      overtoneGain.gain.linearRampToValueAtTime(0.035, start + 0.01);
+      overtoneGain.gain.exponentialRampToValueAtTime(0.001, start + 0.22);
+
+      overtone.connect(overtoneGain);
+      overtoneGain.connect(filter);
+      overtone.start(start);
+      overtone.stop(start + 0.22);
     });
   } catch {}
 }
@@ -516,6 +576,14 @@ export function AiAssistant() {
               </div>
 
               <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => playReceivedSound()}
+                  title="Test notification chime sound"
+                  className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                >
+                  <Volume2 size={14} />
+                </button>
                 <button
                   type="button"
                   onClick={handleReset}
