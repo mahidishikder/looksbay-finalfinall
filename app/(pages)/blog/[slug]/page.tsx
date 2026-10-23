@@ -16,40 +16,50 @@ import {
   Tag,
   AlertTriangle,
 } from "lucide-react";
-import { blogPosts } from "@/app/shared/data/blog-posts";
+import { blogPosts as staticBlogPosts } from "@/app/shared/data/blog-posts";
+import { getBlogPosts } from "@/lib/db";
 import { NewsletterCTA } from "@/app/shared/components/site-components";
+
+export const dynamic = "force-dynamic";
 
 type Props = {
   params: Promise<{ slug: string }>;
 };
 
 export async function generateStaticParams() {
-  return blogPosts.map((post) => ({
-    slug: post.slug,
-  }));
+  try {
+    const posts = await getBlogPosts();
+    return posts.map((post) => ({ slug: post.slug }));
+  } catch {
+    return staticBlogPosts.map((post) => ({ slug: post.slug }));
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
-  if (!post) {
-    return { title: "Article Not Found | Looksbay" };
+  try {
+    const posts = await getBlogPosts();
+    const post = posts.find((p) => p.slug === slug) || staticBlogPosts.find((p) => p.slug === slug);
+    if (!post) return { title: "Article Not Found | Looksbay" };
+    return {
+      title: `${post.title} — Looksbay Studio`,
+      description: post.excerpt,
+    };
+  } catch {
+    return { title: "Article | Looksbay" };
   }
-  return {
-    title: `${post.title} — Looksbay Studio`,
-    description: post.excerpt,
-  };
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = blogPosts.find((p) => p.slug === slug);
+  const posts = await getBlogPosts();
+  const post = posts.find((p) => p.slug === slug) || staticBlogPosts.find((p) => p.slug === slug);
 
   if (!post) {
     notFound();
   }
 
-  const relatedPosts = blogPosts.filter((p) => p.slug !== slug).slice(0, 3);
+  const relatedPosts = posts.filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <article className="min-h-screen bg-paper">

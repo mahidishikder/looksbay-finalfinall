@@ -17,7 +17,7 @@
     },
     "2026-10-23": {
       "visitors": 8,
-      "pageviews": 9,
+      "pageviews": 10,
       "visitorIds": [
         "v_ryr2lcdmvkcqgnh",
         "v_f5640immvkkj6m2",
@@ -32,7 +32,7 @@
   },
   "pages": {
     "/contact": 21,
-    "/": 20,
+    "/": 21,
     "/services": 2,
     "/services/dedicated-support": 1,
     "/templates/good-vibes": 1,
@@ -42,6 +42,11 @@
     "/services/bespoke-web-design": 1
   },
   "recent": [
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:42:16.714Z",
+      "referrer": "http://localhost:3001/"
+    },
     {
       "path": "/",
       "timestamp": "2026-10-23T06:39:08.223Z",

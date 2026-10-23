@@ -40,9 +40,10 @@ import {
   Share2,
   X,
   FileText,
-  SlidersHorizontal,
+  BookOpen,
 } from "lucide-react";
 import { allTemplates as defaultTemplates } from "@/app/shared/data/templates-data";
+import { blogPosts as defaultBlogPosts, type BlogPost } from "@/app/shared/data/blog-posts";
 
 interface Subscriber {
   id: string;
@@ -131,6 +132,7 @@ type TabKey =
   | "site-control"
   | "portfolio"
   | "templates"
+  | "blog"
   | "traffic"
   | "leads"
   | "security";
@@ -147,6 +149,7 @@ export default function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState<AnalyticsStats | null>(null);
   const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProject[]>([]);
   const [templateItems, setTemplateItems] = useState<TemplateItem[]>([]);
+  const [blogList, setBlogList] = useState<BlogPost[]>([]);
   const [siteSettings, setSiteSettings] = useState<SiteSettings>({
     studioName: "Looksbay Studio",
     tagline: "Premier Squarespace Circle Platinum Design & Engineering Studio",
@@ -157,9 +160,9 @@ export default function AdminDashboardPage() {
     calendlyUrl: "https://calendly.com/looksbay",
     currency: "USD ($)",
     announcementEnabled: true,
-    announcementBadge: "SPECIAL OFFER",
-    announcementText: "Accepting new bespoke Squarespace client commissions for Q1 & Q2 — Complimentary SEO Audit included.",
-    announcementLink: "/contact",
+    announcementBadge: "",
+    announcementText: "Now accepting bespoke website commissions for 2026.",
+    announcementLink: "",
     heroBadge: "Squarespace Circle Platinum Agency",
     heroHeadline: "We craft luxury Squarespace websites that command attention & drive conversions.",
     heroSubtitle: "Bespoke 7.1 websites, fluid engine architecture, custom CSS/JS engineering, 90+ PageSpeed technical SEO, and conversion-ready templates for ambitious brands.",
@@ -187,6 +190,7 @@ export default function AdminDashboardPage() {
   // Modals
   const [isAddPortfolioModalOpen, setIsAddPortfolioModalOpen] = useState(false);
   const [isAddTemplateModalOpen, setIsAddTemplateModalOpen] = useState(false);
+  const [isAddBlogModalOpen, setIsAddBlogModalOpen] = useState(false);
 
   // Form states for Add Portfolio
   const [newPortfolioName, setNewPortfolioName] = useState("");
@@ -204,6 +208,16 @@ export default function AdminDashboardPage() {
   const [newTemplateImage, setNewTemplateImage] = useState("");
   const [newTemplateDemoUrl, setNewTemplateDemoUrl] = useState("https://squarespace.com");
   const [newTemplateDescription, setNewTemplateDescription] = useState("");
+
+  // Form states for Add Blog Post
+  const [newBlogTitle, setNewBlogTitle] = useState("");
+  const [newBlogSlug, setNewBlogSlug] = useState("");
+  const [newBlogCategory, setNewBlogCategory] = useState("Design & Code");
+  const [newBlogReadTime, setNewBlogReadTime] = useState("5 min read");
+  const [newBlogExcerpt, setNewBlogExcerpt] = useState("");
+  const [newBlogImage, setNewBlogImage] = useState("photo-1460925895917-afdab827c52f");
+  const [newBlogAuthor, setNewBlogAuthor] = useState("Looksbay Editorial Team");
+  const [newBlogContent, setNewBlogContent] = useState("");
 
   // Passcode state
   const [newPin, setNewPin] = useState("");
@@ -244,14 +258,16 @@ export default function AdminDashboardPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [inqRes, subsRes, statsRes, portRes, tempRes, settingsRes] = await Promise.all([
-        fetch("/api/contact"),
-        fetch("/api/admin/users"),
-        fetch("/api/analytics"),
-        fetch("/api/portfolio"),
-        fetch("/api/templates"),
-        fetch("/api/admin/settings"),
-      ]);
+      const [inqRes, subsRes, statsRes, portRes, tempRes, settingsRes, blogRes] =
+        await Promise.all([
+          fetch("/api/contact"),
+          fetch("/api/admin/users"),
+          fetch("/api/analytics"),
+          fetch("/api/portfolio"),
+          fetch("/api/templates"),
+          fetch("/api/admin/settings"),
+          fetch("/api/blog"),
+        ]);
 
       if (inqRes.ok) {
         const inqData = await inqRes.json();
@@ -278,6 +294,10 @@ export default function AdminDashboardPage() {
         if (data?.settings) {
           setSiteSettings((prev) => ({ ...prev, ...data.settings }));
         }
+      }
+      if (blogRes.ok) {
+        const blogData = await blogRes.json();
+        setBlogList(blogData.posts?.length ? blogData.posts : defaultBlogPosts);
       }
     } catch (err) {
       console.error("Dashboard fetch error:", err);
@@ -476,6 +496,88 @@ export default function AdminDashboardPage() {
     }
   };
 
+  // Add Blog Handler
+  const handleAddBlog = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newBlogTitle.trim()) {
+      showToast("Article title is required");
+      return;
+    }
+    const cleanSlug =
+      newBlogSlug.trim() ||
+      newBlogTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
+    const newPost: BlogPost = {
+      slug: cleanSlug,
+      title: newBlogTitle.trim(),
+      excerpt: newBlogExcerpt.trim() || "Insights, design breakdowns, and technical guides from Looksbay Studio.",
+      category: newBlogCategory,
+      categoryColor: "bg-blue-50 text-blue-700 border-blue-200",
+      date: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      readTime: newBlogReadTime.trim() || "5 min read",
+      author: {
+        name: newBlogAuthor.trim() || "Looksbay Editorial Team",
+        role: "Squarespace Circle Specialists",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      },
+      image: newBlogImage.trim() || "photo-1460925895917-afdab827c52f",
+      imageAlt: newBlogTitle,
+      tags: ["Squarespace", "Web Design", newBlogCategory],
+      content: {
+        intro: newBlogExcerpt.trim() || "Welcome to this in-depth guide from Looksbay Studio.",
+        sections: [
+          {
+            heading: "Key Insights & Strategy",
+            body: newBlogContent
+              ? newBlogContent.split("\n\n").filter(Boolean)
+              : ["Custom development and bespoke architectural design principles crafted for high conversions."],
+          },
+        ],
+        conclusion: "Need assistance building a custom Squarespace experience? Get in touch with our studio team.",
+      },
+    };
+
+    try {
+      const res = await fetch("/api/blog", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPost),
+      });
+      if (res.ok) {
+        setBlogList((prev) => [newPost, ...prev.filter((p) => p.slug !== newPost.slug)]);
+        setIsAddBlogModalOpen(false);
+        setNewBlogTitle("");
+        setNewBlogSlug("");
+        setNewBlogExcerpt("");
+        setNewBlogContent("");
+        showToast("Article published to blog!");
+      } else {
+        showToast("Failed to publish blog post");
+      }
+    } catch (e) {
+      console.error(e);
+      showToast("Network error publishing blog");
+    }
+  };
+
+  const handleDeleteBlog = async (slug: string, title: string) => {
+    if (!confirm(`Delete blog post "${title}"?`)) return;
+    try {
+      const res = await fetch(`/api/blog?slug=${encodeURIComponent(slug)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setBlogList((prev) => prev.filter((p) => p.slug !== slug));
+        showToast("Article removed from blog");
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const handleUpdatePin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPin || newPin.length < 4) {
@@ -528,6 +630,16 @@ export default function AdminDashboardPage() {
       t.name.toLowerCase().includes(q) ||
       t.slug.toLowerCase().includes(q) ||
       t.categories?.some((c) => c.toLowerCase().includes(q))
+    );
+  });
+
+  // Filtered blog posts
+  const filteredBlogPosts = blogList.filter((b) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      b.title.toLowerCase().includes(q) ||
+      b.category.toLowerCase().includes(q) ||
+      b.slug.toLowerCase().includes(q)
     );
   });
 
@@ -701,6 +813,12 @@ export default function AdminDashboardPage() {
                     icon: ShoppingBag,
                     badge: templateItems.length,
                   },
+                  {
+                    id: "blog",
+                    label: "Blog CMS",
+                    icon: BookOpen,
+                    badge: blogList.length,
+                  },
                 ].map(({ id, label, icon: Icon, badge }) => (
                   <button
                     key={id}
@@ -813,7 +931,7 @@ export default function AdminDashboardPage() {
             <span className="font-semibold text-zinc-900">Looksbay Studio</span>
             <span className="text-zinc-300">/</span>
             <span className="text-zinc-500 capitalize">
-              {activeTab.replace("-", " ")}
+              {activeTab === "blog" ? "Blog CMS" : activeTab.replace("-", " ")}
             </span>
           </div>
 
@@ -851,6 +969,17 @@ export default function AdminDashboardPage() {
               </button>
             )}
 
+            {activeTab === "blog" && (
+              <button
+                type="button"
+                onClick={() => setIsAddBlogModalOpen(true)}
+                className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-black transition shadow-xs"
+              >
+                <Plus size={12} />
+                <span>Write Article</span>
+              </button>
+            )}
+
             {activeTab === "site-control" && (
               <button
                 type="button"
@@ -870,6 +999,7 @@ export default function AdminDashboardPage() {
           {[
             { id: "inquiries", label: `Inquiries (${inquiries.length})` },
             { id: "site-control", label: "Website Control" },
+            { id: "blog", label: `Blog (${blogList.length})` },
             { id: "portfolio", label: `Portfolio (${portfolioProjects.length})` },
             { id: "templates", label: `Templates (${templateItems.length})` },
             { id: "traffic", label: "Traffic" },
@@ -892,18 +1022,17 @@ export default function AdminDashboardPage() {
         {/* Dynamic Main Body */}
         <main className="p-6 max-w-7xl w-full mx-auto space-y-5">
           {/* ========================================================================= */}
-          {/* TAB 1: CLIENT INQUIRIES (Linear / Stripe High-Density Table) */}
+          {/* TAB 1: CLIENT INQUIRIES */}
           {/* ========================================================================= */}
           {activeTab === "inquiries" && (
             <div className="space-y-4 animate-fade-in">
-              {/* Header Title & Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h1 className="text-sm font-semibold text-zinc-900 tracking-tight">
                     Client Inquiries &amp; Leads
                   </h1>
                   <p className="text-[11px] text-zinc-500">
-                    Client submissions from contact forms with direct 1-click WhatsApp and email connectivity.
+                    Real-time inquiries received from your contact forms with direct WhatsApp and Email connectivity.
                   </p>
                 </div>
 
@@ -928,7 +1057,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Slim Executive Metric Strip (Single Surface, Zero Bulky Boxes) */}
+              {/* Slim Executive Metric Strip */}
               <div className="grid grid-cols-2 lg:grid-cols-4 rounded-lg border border-zinc-200/80 bg-white shadow-2xs divide-y lg:divide-y-0 lg:divide-x divide-zinc-150">
                 <div className="p-3.5">
                   <span className="text-[11px] font-medium text-zinc-400 block">Total Inquiries</span>
@@ -972,9 +1101,8 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Integrated Toolbar: Filter Segments + Search */}
+              {/* Toolbar */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-1">
-                {/* Segmented Filter */}
                 <div className="inline-flex rounded-md border border-zinc-200 bg-white p-0.5 shadow-2xs">
                   {[
                     { id: "all", label: "All", count: inquiries.length },
@@ -1005,7 +1133,6 @@ export default function AdminDashboardPage() {
                   ))}
                 </div>
 
-                {/* Inline Search */}
                 <div className="relative w-full sm:w-64">
                   <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
                   <input
@@ -1027,7 +1154,7 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* HIGH-DENSITY LINEAR-GRADE TABLE */}
+              {/* Table */}
               <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-zinc-50/80 border-b border-zinc-200/80 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -1046,9 +1173,7 @@ export default function AdminDashboardPage() {
                         <td colSpan={6} className="py-12 text-center text-zinc-400">
                           <Inbox size={24} className="mx-auto mb-2 text-zinc-300 stroke-1" />
                           <p className="text-xs font-medium text-zinc-600 mb-0.5">No inquiries found</p>
-                          <p className="text-[11px] text-zinc-400">
-                            {searchQuery ? "Try refining your search terms" : "New submissions will appear here automatically"}
-                          </p>
+                          <p className="text-[11px] text-zinc-400">New submissions will appear here automatically</p>
                         </td>
                       </tr>
                     ) : (
@@ -1063,7 +1188,6 @@ export default function AdminDashboardPage() {
 
                         return (
                           <tr key={inq.id} className="hover:bg-zinc-50/60 transition-colors group">
-                            {/* Client Name & Date */}
                             <td className="py-3 px-4">
                               <div className="flex items-center gap-2.5">
                                 <div className="size-6 rounded-full bg-zinc-100 text-zinc-700 font-semibold text-[10px] flex items-center justify-center shrink-0 border border-zinc-200">
@@ -1080,7 +1204,6 @@ export default function AdminDashboardPage() {
                               </div>
                             </td>
 
-                            {/* Contact: Email & WhatsApp */}
                             <td className="py-3 px-4">
                               <div className="space-y-0.5">
                                 <div className="flex items-center gap-1.5">
@@ -1118,7 +1241,6 @@ export default function AdminDashboardPage() {
                               </div>
                             </td>
 
-                            {/* Scope & Budget */}
                             <td className="py-3 px-4">
                               <span className="text-xs text-zinc-800 font-medium block leading-tight">
                                 {inq.project}
@@ -1128,7 +1250,6 @@ export default function AdminDashboardPage() {
                               </span>
                             </td>
 
-                            {/* Brief Snippet */}
                             <td className="py-3 px-4 max-w-[280px]">
                               <p className="line-clamp-2 text-[11px] text-zinc-500 mb-0 leading-relaxed">
                                 {inq.message}
@@ -1142,7 +1263,6 @@ export default function AdminDashboardPage() {
                               </button>
                             </td>
 
-                            {/* Status Selector */}
                             <td className="py-3 px-4">
                               <select
                                 value={inq.status}
@@ -1166,7 +1286,6 @@ export default function AdminDashboardPage() {
                               </select>
                             </td>
 
-                            {/* Actions */}
                             <td className="py-3 px-4 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 {cleanPhone && (
@@ -1223,7 +1342,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 2: WEBSITE CONTROL CENTER (Complete Site-wide Live Control) */}
+          {/* TAB 2: WEBSITE CONTROL CENTER (Short 5-7 word banner, no link) */}
           {/* ========================================================================= */}
           {activeTab === "site-control" && (
             <div className="space-y-5 animate-fade-in max-w-4xl">
@@ -1232,12 +1351,12 @@ export default function AdminDashboardPage() {
                   Website Master Control Center
                 </h1>
                 <p className="text-[11px] text-zinc-500">
-                  Control studio identity, top announcement banner, hero headlines, social profiles, and booking channels in real-time.
+                  Manage announcement message, brand identity, homepage headlines, and contacts in real time.
                 </p>
               </div>
 
               <form onSubmit={handleSaveSiteSettings} className="space-y-5">
-                {/* 1. Live Top Announcement Banner */}
+                {/* 1. Live Top Announcement Banner (Concise 5-7 words, no links) */}
                 <div className="rounded-lg border border-zinc-200/80 bg-white p-4 shadow-2xs space-y-3.5">
                   <div className="flex items-center justify-between border-b border-zinc-150 pb-2.5">
                     <div className="flex items-center gap-2">
@@ -1259,78 +1378,39 @@ export default function AdminDashboardPage() {
                         }
                         className="rounded border-zinc-300 text-zinc-900 focus:ring-0 size-3.5 cursor-pointer"
                       />
-                      <span>Banner Visible on Live Site</span>
+                      <span>Banner Visible on Live Website</span>
                     </label>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[11px] font-medium text-zinc-600 mb-1">
-                        Badge Tag (e.g. SPECIAL OFFER)
-                      </label>
-                      <input
-                        type="text"
-                        value={siteSettings.announcementBadge}
-                        onChange={(e) =>
-                          setSiteSettings({
-                            ...siteSettings,
-                            announcementBadge: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-medium text-zinc-600 mb-1">
-                        Announcement Text
-                      </label>
-                      <input
-                        type="text"
-                        value={siteSettings.announcementText}
-                        onChange={(e) =>
-                          setSiteSettings({
-                            ...siteSettings,
-                            announcementText: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-3">
-                      <label className="block text-[11px] font-medium text-zinc-600 mb-1">
-                        Action Link URL
-                      </label>
-                      <input
-                        type="text"
-                        value={siteSettings.announcementLink}
-                        onChange={(e) =>
-                          setSiteSettings({
-                            ...siteSettings,
-                            announcementLink: e.target.value,
-                          })
-                        }
-                        placeholder="/contact or https://..."
-                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                      Announcement Text (Keep it short: 5 to 7 words)
+                    </label>
+                    <input
+                      type="text"
+                      value={siteSettings.announcementText}
+                      onChange={(e) =>
+                        setSiteSettings({
+                          ...siteSettings,
+                          announcementText: e.target.value,
+                        })
+                      }
+                      placeholder="e.g. Now accepting bespoke website commissions for 2026."
+                      className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-zinc-400 mt-1">
+                      Word count: {siteSettings.announcementText.trim().split(/\s+/).filter(Boolean).length} words
+                    </p>
                   </div>
 
                   {/* Live Banner Preview Box */}
                   <div className="rounded-md border border-zinc-200 bg-zinc-50 p-2.5 text-center">
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400 block mb-1">
-                      Live Preview
+                      Live Header Preview
                     </span>
-                    {siteSettings.announcementEnabled ? (
-                      <div className="bg-[#0077ED] text-white text-[11px] py-1 px-3 rounded flex items-center justify-center gap-2">
-                        {siteSettings.announcementBadge && (
-                          <span className="bg-white/20 text-white font-bold text-[9px] px-1 py-0.2 rounded uppercase">
-                            {siteSettings.announcementBadge}
-                          </span>
-                        )}
+                    {siteSettings.announcementEnabled && siteSettings.announcementText ? (
+                      <div className="bg-[#0077ED] text-white text-[11px] py-1 px-4 rounded font-medium tracking-wide inline-block shadow-2xs">
                         <span>{siteSettings.announcementText}</span>
-                        <span className="underline underline-offset-2 font-semibold">Details →</span>
                       </div>
                     ) : (
                       <span className="text-xs text-zinc-400 italic">Banner is currently disabled</span>
@@ -1608,7 +1688,114 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 3: PORTFOLIO CMS */}
+          {/* TAB 3: BLOG CMS (Publish & Manage Blog Posts) */}
+          {/* ========================================================================= */}
+          {activeTab === "blog" && (
+            <div className="space-y-4 animate-fade-in">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h1 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                    Blog CMS ({blogList.length} Articles)
+                  </h1>
+                  <p className="text-[11px] text-zinc-500">
+                    Publish, update, and manage studio articles shown on your public blog page.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setIsAddBlogModalOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-md bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-black transition shadow-xs"
+                >
+                  <Plus size={12} />
+                  <span>Write Article</span>
+                </button>
+              </div>
+
+              {/* Blog Table */}
+              <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-zinc-50/80 border-b border-zinc-200/80 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+                    <tr>
+                      <th className="py-2.5 px-4 font-semibold">Article</th>
+                      <th className="py-2.5 px-4 font-semibold">Category</th>
+                      <th className="py-2.5 px-4 font-semibold">Date</th>
+                      <th className="py-2.5 px-4 font-semibold">Read Time</th>
+                      <th className="py-2.5 px-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-100">
+                    {filteredBlogPosts.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="py-10 text-center text-zinc-400">
+                          <BookOpen size={24} className="mx-auto mb-2 text-zinc-300 stroke-1" />
+                          <p className="text-xs font-medium text-zinc-600 mb-0.5">No articles found</p>
+                          <p className="text-[11px] text-zinc-400">Click Write Article to publish a new post</p>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredBlogPosts.map((post) => (
+                        <tr key={post.slug} className="hover:bg-zinc-50/60 transition group">
+                          <td className="py-2.5 px-4">
+                            <div className="flex items-center gap-2.5">
+                              <img
+                                src={
+                                  post.image.startsWith("http") || post.image.startsWith("/")
+                                    ? post.image
+                                    : `https://images.unsplash.com/${post.image}?auto=format&fit=crop&w=300&q=80`
+                                }
+                                alt={post.title}
+                                className="size-8 rounded object-cover border border-zinc-200 shrink-0"
+                              />
+                              <div>
+                                <span className="font-semibold text-zinc-900 block leading-tight">
+                                  {post.title}
+                                </span>
+                                <span className="text-[10px] text-zinc-400 font-mono">
+                                  /blog/{post.slug}
+                                </span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-2.5 px-4">
+                            <span className="rounded bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-700">
+                              {post.category}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4 text-zinc-500 text-[11px]">{post.date}</td>
+                          <td className="py-2.5 px-4 text-zinc-500 text-[11px]">{post.readTime}</td>
+                          <td className="py-2.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <Link
+                                href={`/blog/${post.slug}`}
+                                target="_blank"
+                                className="p-1 rounded text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition inline-flex items-center gap-0.5 text-[11px]"
+                                title="View Live Article"
+                              >
+                                <Eye size={12} />
+                              </Link>
+
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteBlog(post.slug, post.title)}
+                                className="p-1 rounded text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition"
+                                title="Delete Article"
+                              >
+                                <Trash2 size={12} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB 4: PORTFOLIO CMS */}
           {/* ========================================================================= */}
           {activeTab === "portfolio" && (
             <div className="space-y-4 animate-fade-in">
@@ -1694,7 +1881,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 4: TEMPLATE STORE */}
+          {/* TAB 5: TEMPLATE STORE */}
           {/* ========================================================================= */}
           {activeTab === "templates" && (
             <div className="space-y-4 animate-fade-in">
@@ -1788,7 +1975,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 5: LIVE TRAFFIC */}
+          {/* TAB 6: LIVE TRAFFIC */}
           {/* ========================================================================= */}
           {activeTab === "traffic" && (
             <div className="space-y-4 animate-fade-in">
@@ -1801,7 +1988,6 @@ export default function AdminDashboardPage() {
                 </p>
               </div>
 
-              {/* 3 Metric Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="rounded-lg border border-zinc-200/80 bg-white p-3.5 shadow-2xs">
                   <span className="text-[11px] font-medium text-zinc-500">Today's Visitors</span>
@@ -1825,7 +2011,6 @@ export default function AdminDashboardPage() {
                 </div>
               </div>
 
-              {/* Top Pages Table */}
               <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
                 <div className="p-3 border-b border-zinc-150">
                   <h3 className="text-xs font-semibold text-zinc-900">Top Visited Pages</h3>
@@ -1857,7 +2042,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 6: SUBSCRIBERS */}
+          {/* TAB 7: SUBSCRIBERS */}
           {/* ========================================================================= */}
           {activeTab === "leads" && (
             <div className="space-y-4 animate-fade-in">
@@ -1889,7 +2074,6 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
-              {/* Subscribers Table */}
               <div className="rounded-lg border border-zinc-200/80 bg-white shadow-2xs overflow-hidden">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-zinc-50/80 border-b border-zinc-200/80 text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
@@ -1924,7 +2108,7 @@ export default function AdminDashboardPage() {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 7: SECURITY & ACCESS */}
+          {/* TAB 8: SECURITY & ACCESS */}
           {/* ========================================================================= */}
           {activeTab === "security" && (
             <div className="space-y-4 animate-fade-in max-w-md">
@@ -1981,7 +2165,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* INQUIRY BRIEF MODAL (High-Density Minimalist Drawer) */}
+      {/* INQUIRY BRIEF MODAL */}
       {/* ========================================================================= */}
       {selectedInquiry && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
@@ -2008,7 +2192,6 @@ export default function AdminDashboardPage() {
               </button>
             </div>
 
-            {/* Quick Contact Bar */}
             <div className="grid grid-cols-2 gap-2 bg-zinc-50 p-2.5 rounded-lg border border-zinc-200/60 text-xs">
               <div>
                 <span className="text-[10px] text-zinc-400 font-medium block">Email Address</span>
@@ -2024,7 +2207,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Scope & Budget */}
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <span className="text-[10px] text-zinc-400 font-medium block">Project Type</span>
@@ -2036,7 +2218,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Full Message */}
             <div>
               <span className="text-[10px] text-zinc-400 font-semibold uppercase tracking-wider block mb-1">
                 Full Client Message
@@ -2046,7 +2227,6 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Status & 1-Click Action Buttons */}
             <div className="flex items-center justify-between pt-2 border-t border-zinc-150">
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-zinc-500 font-medium">Status:</span>
@@ -2090,6 +2270,156 @@ export default function AdminDashboardPage() {
                 </a>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* WRITE ARTICLE / ADD BLOG MODAL */}
+      {/* ========================================================================= */}
+      {isAddBlogModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4 animate-fade-in">
+          <div className="w-full max-w-lg rounded-xl border border-zinc-200 bg-white p-5 shadow-xl space-y-3.5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-zinc-150 pb-2.5">
+              <h2 className="text-xs font-bold text-zinc-900 uppercase tracking-wider">
+                Write &amp; Publish Blog Article
+              </h2>
+              <button
+                type="button"
+                onClick={() => setIsAddBlogModalOpen(false)}
+                className="text-zinc-400 hover:text-zinc-700"
+              >
+                <X size={14} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddBlog} className="space-y-3">
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  Article Title <span className="text-rose-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. 5 Squarespace Design Secrets for 2026"
+                  value={newBlogTitle}
+                  onChange={(e) => setNewBlogTitle(e.target.value)}
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                    Category
+                  </label>
+                  <select
+                    value={newBlogCategory}
+                    onChange={(e) => setNewBlogCategory(e.target.value)}
+                    className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                  >
+                    <option value="Design & Code">Design &amp; Code</option>
+                    <option value="SEO & Traffic">SEO &amp; Traffic</option>
+                    <option value="Templates">Templates &amp; Themes</option>
+                    <option value="Strategy">Strategy &amp; Growth</option>
+                    <option value="Fluid Engine">Fluid Engine</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                    Read Time
+                  </label>
+                  <input
+                    type="text"
+                    value={newBlogReadTime}
+                    onChange={(e) => setNewBlogReadTime(e.target.value)}
+                    placeholder="e.g. 6 min read"
+                    className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  URL Slug (optional)
+                </label>
+                <input
+                  type="text"
+                  placeholder="squarespace-design-secrets"
+                  value={newBlogSlug}
+                  onChange={(e) => setNewBlogSlug(e.target.value)}
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  Article Excerpt / Summary
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Short engaging summary shown in the blog feed..."
+                  value={newBlogExcerpt}
+                  onChange={(e) => setNewBlogExcerpt(e.target.value)}
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  Cover Image URL or Unsplash ID
+                </label>
+                <input
+                  type="text"
+                  value={newBlogImage}
+                  onChange={(e) => setNewBlogImage(e.target.value)}
+                  placeholder="photo-1460925895917-afdab827c52f or https://..."
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  Author Name
+                </label>
+                <input
+                  type="text"
+                  value={newBlogAuthor}
+                  onChange={(e) => setNewBlogAuthor(e.target.value)}
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                  Article Body (Markdown or Paragraphs)
+                </label>
+                <textarea
+                  rows={5}
+                  placeholder="Write your article insights here. Separate paragraphs with an empty line..."
+                  value={newBlogContent}
+                  onChange={(e) => setNewBlogContent(e.target.value)}
+                  className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none font-sans leading-relaxed"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-zinc-150">
+                <button
+                  type="button"
+                  onClick={() => setIsAddBlogModalOpen(false)}
+                  className="rounded-md border border-zinc-200 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="rounded-md bg-zinc-900 px-3.5 py-1.5 text-xs font-medium text-white hover:bg-black transition shadow-xs"
+                >
+                  Publish Article
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

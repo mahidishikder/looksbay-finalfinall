@@ -270,7 +270,7 @@ export default function InquiryForm() {
             name="WhatsApp"
             type="tel"
             autoComplete="tel"
-            placeholder="+1 (555) 019-2834 or +880 1..."
+            placeholder="+1 (555) 019-2834"
             value={whatsapp}
             onChange={(e) => setWhatsapp(e.target.value)}
             required

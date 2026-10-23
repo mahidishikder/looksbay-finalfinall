@@ -3,6 +3,7 @@ import path from "path";
 import { getMongoDb, isMongoConfigured } from "./mongodb";
 import { projects as defaultProjects, type Project } from "@/app/(pages)/portfolio/data";
 import { allTemplates as defaultTemplates, type TemplateData } from "@/app/shared/data/templates-data";
+import { blogPosts as defaultBlogPosts, type BlogPost } from "@/app/shared/data/blog-posts";
 
 // File paths for fallback local storage
 const DATA_DIR = path.join(process.cwd(), "data");
@@ -11,6 +12,7 @@ const TEMPLATES_FILE = path.join(DATA_DIR, "templates.json");
 const INQUIRIES_FILE = path.join(DATA_DIR, "inquiries.json");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const ANALYTICS_FILE = path.join(DATA_DIR, "analytics.json");
+const BLOGS_FILE = path.join(DATA_DIR, "blogs.json");
 
 function ensureDir() {
   if (!fs.existsSync(DATA_DIR)) {
@@ -335,9 +337,9 @@ export async function getSiteSettings(): Promise<any> {
     calendlyUrl: "https://calendly.com/looksbay",
     currency: "USD ($)",
     announcementEnabled: true,
-    announcementBadge: "SPECIAL OFFER",
-    announcementText: "Accepting new bespoke Squarespace client commissions for Q1 & Q2 — Complimentary SEO Audit included.",
-    announcementLink: "/contact",
+    announcementBadge: "",
+    announcementText: "Now accepting bespoke website commissions for 2026.",
+    announcementLink: "",
     heroBadge: "Squarespace Circle Platinum Agency",
     heroHeadline: "We craft luxury Squarespace websites that command attention & drive conversions.",
     heroSubtitle: "Bespoke 7.1 websites, fluid engine architecture, custom CSS/JS engineering, 90+ PageSpeed technical SEO, and conversion-ready templates for ambitious brands.",
@@ -400,4 +402,87 @@ export async function saveSiteSettings(data: any): Promise<void> {
     console.error("Local settings save error:", e);
   }
 }
+
+// --------------------------------------------------------------------------
+// 6. BLOG CMS
+// --------------------------------------------------------------------------
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        const items = await db.collection("blogs").find({}, { projection: { _id: 0 } }).toArray();
+        if (items.length > 0) return items as unknown as BlogPost[];
+        if (defaultBlogPosts.length > 0) {
+          await db.collection("blogs").insertMany(defaultBlogPosts as any);
+          return defaultBlogPosts;
+        }
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB blogs fetch error:", err);
+  }
+
+  try {
+    ensureDir();
+    if (!fs.existsSync(BLOGS_FILE)) {
+      fs.writeFileSync(BLOGS_FILE, JSON.stringify(defaultBlogPosts, null, 2), "utf-8");
+      return defaultBlogPosts;
+    }
+    const data = JSON.parse(fs.readFileSync(BLOGS_FILE, "utf-8") || "[]");
+    return data.length > 0 ? data : defaultBlogPosts;
+  } catch {
+    return defaultBlogPosts;
+  }
+}
+
+export async function addBlogPost(post: BlogPost): Promise<void> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        await db.collection("blogs").updateOne(
+          { slug: post.slug },
+          { $set: { ...post, updatedAt: new Date() } },
+          { upsert: true }
+        );
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB blog insert error:", err);
+  }
+
+  try {
+    ensureDir();
+    const list = await getBlogPosts();
+    const existing = list.filter((p) => p.slug !== post.slug);
+    existing.unshift(post);
+    fs.writeFileSync(BLOGS_FILE, JSON.stringify(existing, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Local blog save error:", e);
+  }
+}
+
+export async function deleteBlogPost(slug: string): Promise<void> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        await db.collection("blogs").deleteOne({ slug });
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB blog delete error:", err);
+  }
+
+  try {
+    ensureDir();
+    const list = await getBlogPosts();
+    const updated = list.filter((p) => p.slug !== slug);
+    fs.writeFileSync(BLOGS_FILE, JSON.stringify(updated, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Local blog delete error:", e);
+  }
+}
+
 

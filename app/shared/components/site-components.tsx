@@ -50,12 +50,10 @@ export function Header() {
     announcementEnabled?: boolean;
     announcementBadge?: string;
     announcementText?: string;
-    announcementLink?: string;
   }>({
     announcementEnabled: true,
-    announcementBadge: "SPECIAL OFFER",
-    announcementText: "Accepting new bespoke Squarespace client commissions for Q1 & Q2 — Complimentary SEO Audit included.",
-    announcementLink: "/contact",
+    announcementBadge: "",
+    announcementText: "Now accepting bespoke website commissions for 2026.",
   });
 
   useEffect(() => {
@@ -70,21 +68,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-20 border-b border-black/[0.08] bg-white/95 backdrop-blur-xl">
       {siteSettings.announcementEnabled && siteSettings.announcementText && (
-        <div className="min-h-7 flex items-center justify-center bg-[#0077ED] px-3.5 py-1 text-center text-[11px] font-medium text-white gap-2">
-          {siteSettings.announcementBadge && (
-            <span className="bg-white/20 text-white font-bold text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
-              {siteSettings.announcementBadge}
-            </span>
-          )}
-          <span className="truncate max-w-[800px]">{siteSettings.announcementText}</span>
-          {siteSettings.announcementLink && (
-            <Link
-              href={siteSettings.announcementLink}
-              className="underline underline-offset-2 hover:opacity-80 font-semibold shrink-0"
-            >
-              Details →
-            </Link>
-          )}
+        <div className="min-h-6 flex items-center justify-center bg-[#0077ED] px-4 py-1 text-center text-[11px] font-medium text-white tracking-wide select-none">
+          <span>{siteSettings.announcementText}</span>
         </div>
       )}
       <div className="mx-auto flex h-[86px] w-[min(1480px,calc(100%_-_80px))] items-center justify-between gap-4 mobile:h-[62px] mobile:w-[calc(100%_-_34px)]">

@@ -1,12 +1,26 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Clock } from "lucide-react";
-import { blogPosts } from "@/app/shared/data/blog-posts";
+import { blogPosts as defaultBlogPosts, type BlogPost } from "@/app/shared/data/blog-posts";
 
 export default function BlogList() {
-  const featuredPost = blogPosts[0];
-  const latestPosts = blogPosts.slice(1, 5);
+  const [posts, setPosts] = useState<BlogPost[]>(defaultBlogPosts);
+
+  useEffect(() => {
+    fetch("/api/blog")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.posts && Array.isArray(data.posts) && data.posts.length > 0) {
+          setPosts(data.posts);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const featuredPost = posts[0];
+  const latestPosts = posts.slice(1, 5);
 
   const resolveImage = (img: string) => {
     if (img.startsWith("/") || img.startsWith("http")) return img;
