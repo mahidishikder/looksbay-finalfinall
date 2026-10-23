@@ -353,6 +353,10 @@ export async function getSiteSettings(): Promise<any> {
     twitterUrl: "https://twitter.com/looksbay",
     responseTime: "Within 4 business hours",
     startingBudget: "$2,500+",
+    notificationEmail: "helplooksbay@gmail.com",
+    gmailSender: "helplooksbay@gmail.com",
+    gmailAppPassword: "",
+    emailNotificationsEnabled: true,
   };
 
   try {

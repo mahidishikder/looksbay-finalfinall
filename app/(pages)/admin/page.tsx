@@ -125,6 +125,10 @@ interface SiteSettings {
   twitterUrl: string;
   responseTime: string;
   startingBudget: string;
+  notificationEmail?: string;
+  gmailSender?: string;
+  gmailAppPassword?: string;
+  emailNotificationsEnabled?: boolean;
 }
 
 type TabKey =
@@ -176,12 +180,17 @@ export default function AdminDashboardPage() {
     twitterUrl: "https://twitter.com/looksbay",
     responseTime: "Within 4 business hours",
     startingBudget: "$2,500+",
+    notificationEmail: "helplooksbay@gmail.com",
+    gmailSender: "helplooksbay@gmail.com",
+    gmailAppPassword: "",
+    emailNotificationsEnabled: true,
   });
 
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isTestingEmail, setIsTestingEmail] = useState(false);
 
   // Inquiries Filters
   const [inquiryFilterStatus, setInquiryFilterStatus] = useState<string>("all");
@@ -347,6 +356,29 @@ export default function AdminDashboardPage() {
       showToast("Network error saving settings");
     } finally {
       setIsSavingSettings(false);
+    }
+  };
+
+  const handleSendTestEmail = async () => {
+    setIsTestingEmail(true);
+    try {
+      await fetch("/api/admin/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(siteSettings),
+      });
+
+      const res = await fetch("/api/admin/test-email", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        showToast("Test notification sent! Check your Gmail.");
+      } else {
+        showToast(data.error || "Email failed. Check App Password.");
+      }
+    } catch (e) {
+      showToast("Network error sending test email");
+    } finally {
+      setIsTestingEmail(false);
     }
   };
 
@@ -1691,6 +1723,114 @@ export default function AdminDashboardPage() {
                         className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* 5. Client Inquiry Email Notifications (Gmail Dispatcher) */}
+                <div className="rounded-lg border border-zinc-200/80 bg-white p-4 shadow-2xs space-y-3.5">
+                  <div className="flex items-center justify-between border-b border-zinc-150 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <Mail size={14} className="text-zinc-600" />
+                      <h2 className="text-xs font-semibold text-zinc-900 tracking-tight mb-0">
+                        Gmail Inquiry Reminders (Instant Form Alerts)
+                      </h2>
+                    </div>
+
+                    <label className="flex items-center gap-2 cursor-pointer text-xs font-medium text-zinc-700">
+                      <input
+                        type="checkbox"
+                        checked={siteSettings.emailNotificationsEnabled ?? true}
+                        onChange={(e) =>
+                          setSiteSettings({
+                            ...siteSettings,
+                            emailNotificationsEnabled: e.target.checked,
+                          })
+                        }
+                        className="rounded border-zinc-300 text-zinc-900 focus:ring-0 size-3.5 cursor-pointer"
+                      />
+                      <span>Active</span>
+                    </label>
+                  </div>
+
+                  <p className="text-[11px] text-zinc-500 mb-0">
+                    Whenever anyone submits your contact form, an instant email reminder with all client details (Name, Email, WhatsApp, Project, Budget, Message) will be delivered directly to your Gmail inbox.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    <div>
+                      <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                        Your Destination Gmail (Where you receive reminders)
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="helplooksbay@gmail.com"
+                        value={siteSettings.notificationEmail || siteSettings.studioEmail || "helplooksbay@gmail.com"}
+                        onChange={(e) =>
+                          setSiteSettings({ ...siteSettings, notificationEmail: e.target.value })
+                        }
+                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-medium text-zinc-600 mb-1">
+                        Sending Gmail Address
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="helplooksbay@gmail.com"
+                        value={siteSettings.gmailSender || siteSettings.studioEmail || "helplooksbay@gmail.com"}
+                        onChange={(e) =>
+                          setSiteSettings({ ...siteSettings, gmailSender: e.target.value })
+                        }
+                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 focus:border-zinc-900 focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2">
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-[11px] font-medium text-zinc-600">
+                          Google 16-Character App Password (for automated sending)
+                        </label>
+                        <a
+                          href="https://myaccount.google.com/apppasswords"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-[10px] text-blue-600 hover:underline font-medium inline-flex items-center gap-0.5"
+                        >
+                          <span>Get Google App Password</span>
+                          <ExternalLink size={10} />
+                        </a>
+                      </div>
+                      <input
+                        type="password"
+                        placeholder="abcd efgh ijkl mnop (or paste with spaces)"
+                        value={siteSettings.gmailAppPassword || ""}
+                        onChange={(e) =>
+                          setSiteSettings({ ...siteSettings, gmailAppPassword: e.target.value })
+                        }
+                        className="w-full rounded-md border border-zinc-200 px-2.5 py-1.5 text-xs text-zinc-900 font-mono tracking-wider focus:border-zinc-900 focus:outline-none"
+                      />
+                      <p className="text-[10px] text-zinc-400 mt-1">
+                        Easy 30-sec setup: Google Account &gt; Security &gt; 2-Step Verification &gt; App Passwords &gt; Create "Looksbay" &gt; paste here.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Test Email Button */}
+                  <div className="pt-1 flex items-center justify-between border-t border-zinc-100">
+                    <span className="text-[10px] text-zinc-400">
+                      Test your email setup anytime with 1 click:
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSendTestEmail}
+                      disabled={isTestingEmail}
+                      className="inline-flex items-center gap-1 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100 transition shadow-2xs"
+                    >
+                      <Mail size={11} className={isTestingEmail ? "animate-pulse" : ""} />
+                      <span>{isTestingEmail ? "Sending Test..." : "Send Test Email to My Gmail"}</span>
+                    </button>
                   </div>
                 </div>
 

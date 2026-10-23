@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getInquiriesList, addInquiry, updateInquiryStatus, deleteInquiryItem } from "@/lib/db";
+import { sendInquiryNotification } from "@/lib/email";
 
 export async function GET(request: Request) {
   try {
@@ -72,6 +73,11 @@ export async function POST(request: Request) {
     };
 
     await addInquiry(newInquiry);
+
+    // Send real-time email notification to the studio's Gmail
+    sendInquiryNotification(newInquiry).catch((err) => {
+      console.error("[Email Notification Failed]:", err);
+    });
 
     return NextResponse.json(
       { message: "Inquiry saved successfully", inquiry: newInquiry },

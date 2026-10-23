@@ -23,5 +23,9 @@
   "facebookUrl": "https://www.facebook.com/looksbay",
   "twitterUrl": "https://twitter.com/looksbay",
   "responseTime": "Within 4 business hours",
-  "startingBudget": "$2,500+"
+  "startingBudget": "$2,500+",
+  "notificationEmail": "helplooksbay@gmail.com",
+  "gmailSender": "helplooksbay@gmail.com",
+  "gmailAppPassword": "",
+  "emailNotificationsEnabled": true
 }
