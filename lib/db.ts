@@ -318,3 +318,86 @@ export async function saveAnalyticsData(data: any): Promise<void> {
     console.error("Local analytics save error:", e);
   }
 }
+
+// --------------------------------------------------------------------------
+// 5. SITE SETTINGS & CONTROL
+// --------------------------------------------------------------------------
+const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
+
+export async function getSiteSettings(): Promise<any> {
+  const defaultSettings = {
+    studioName: "Looksbay Studio",
+    tagline: "Premier Squarespace Circle Platinum Design & Engineering Studio",
+    studioEmail: "hello@looksbay.com",
+    studioWhatsapp: "+1 (415) 555-2671",
+    studioPhone: "+1 (415) 555-2671",
+    studioLocation: "New York, USA & Remote Worldwide",
+    calendlyUrl: "https://calendly.com/looksbay",
+    currency: "USD ($)",
+    announcementEnabled: true,
+    announcementBadge: "SPECIAL OFFER",
+    announcementText: "Accepting new bespoke Squarespace client commissions for Q1 & Q2 — Complimentary SEO Audit included.",
+    announcementLink: "/contact",
+    heroBadge: "Squarespace Circle Platinum Agency",
+    heroHeadline: "We craft luxury Squarespace websites that command attention & drive conversions.",
+    heroSubtitle: "Bespoke 7.1 websites, fluid engine architecture, custom CSS/JS engineering, 90+ PageSpeed technical SEO, and conversion-ready templates for ambitious brands.",
+    heroPrimaryBtnText: "Start a Project",
+    heroPrimaryBtnUrl: "/contact",
+    heroSecondaryBtnText: "Explore Templates",
+    heroSecondaryBtnUrl: "/templates",
+    instagramUrl: "https://www.instagram.com/looksbay",
+    linkedinUrl: "https://www.linkedin.com/company/looksbay",
+    facebookUrl: "https://www.facebook.com/looksbay",
+    twitterUrl: "https://twitter.com/looksbay",
+    responseTime: "Within 4 business hours",
+    startingBudget: "$2,500+",
+  };
+
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        const doc = await db.collection("settings").findOne({ key: "site_settings" }, { projection: { _id: 0 } });
+        if (doc && doc.data) return doc.data;
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB settings fetch error:", err);
+  }
+
+  try {
+    ensureDir();
+    if (!fs.existsSync(SETTINGS_FILE)) {
+      fs.writeFileSync(SETTINGS_FILE, JSON.stringify(defaultSettings, null, 2), "utf-8");
+      return defaultSettings;
+    }
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf-8") || JSON.stringify(defaultSettings));
+  } catch {
+    return defaultSettings;
+  }
+}
+
+export async function saveSiteSettings(data: any): Promise<void> {
+  try {
+    if (isMongoConfigured()) {
+      const db = await getMongoDb();
+      if (db) {
+        await db.collection("settings").updateOne(
+          { key: "site_settings" },
+          { $set: { key: "site_settings", data, updatedAt: new Date() } },
+          { upsert: true }
+        );
+      }
+    }
+  } catch (err) {
+    console.error("MongoDB settings update error:", err);
+  }
+
+  try {
+    ensureDir();
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), "utf-8");
+  } catch (e) {
+    console.error("Local settings save error:", e);
+  }
+}
+

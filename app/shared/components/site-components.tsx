@@ -46,11 +46,47 @@ export function Header() {
     setIsHovered(false);
   }, [pathname]);
 
+  const [siteSettings, setSiteSettings] = useState<{
+    announcementEnabled?: boolean;
+    announcementBadge?: string;
+    announcementText?: string;
+    announcementLink?: string;
+  }>({
+    announcementEnabled: true,
+    announcementBadge: "SPECIAL OFFER",
+    announcementText: "Accepting new bespoke Squarespace client commissions for Q1 & Q2 — Complimentary SEO Audit included.",
+    announcementLink: "/contact",
+  });
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.settings) setSiteSettings(data.settings);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <header className="sticky top-0 z-20 border-b border-black/[0.08] bg-white/95 backdrop-blur-xl">
-      <div className="hidden min-h-6 place-items-center bg-blue px-3.5 py-1 text-center text-[10px] font-semibold tracking-[.07em] text-white">
-        SPECIAL OFFER: COMPLIMENTARY SEO REVIEW WITH EVERY CUSTOM WEBSITE PROJECT
-      </div>
+      {siteSettings.announcementEnabled && siteSettings.announcementText && (
+        <div className="min-h-7 flex items-center justify-center bg-[#0077ED] px-3.5 py-1 text-center text-[11px] font-medium text-white gap-2">
+          {siteSettings.announcementBadge && (
+            <span className="bg-white/20 text-white font-bold text-[9px] px-1.5 py-0.5 rounded uppercase tracking-wider">
+              {siteSettings.announcementBadge}
+            </span>
+          )}
+          <span className="truncate max-w-[800px]">{siteSettings.announcementText}</span>
+          {siteSettings.announcementLink && (
+            <Link
+              href={siteSettings.announcementLink}
+              className="underline underline-offset-2 hover:opacity-80 font-semibold shrink-0"
+            >
+              Details →
+            </Link>
+          )}
+        </div>
+      )}
       <div className="mx-auto flex h-[86px] w-[min(1480px,calc(100%_-_80px))] items-center justify-between gap-4 mobile:h-[62px] mobile:w-[calc(100%_-_34px)]">
         <Link href="/" className="inline-flex shrink-0 items-center" aria-label="Looksbay Studio home">
           <Image src="/looksbay-logo.png" alt="Looksbay" width={1024} height={194} priority className="h-auto w-[180px] mobile:w-[150px]" />

@@ -1,8 +1,8 @@
 {
   "daily": {
     "2026-10-22": {
-      "visitors": 8,
-      "pageviews": 39,
+      "visitors": 9,
+      "pageviews": 40,
       "visitorIds": [
         "v_42pg0zqmvjdrkko",
         "v_bbuvb3qmvjfsoyp",
@@ -11,13 +11,28 @@
         "v_r6htx86mvjfv4g3",
         "v_vi4x0pemvjjaquy",
         "v_5zgkdgqmvjrgqkn",
-        "v_mos9ovimvjymnum"
+        "v_mos9ovimvjymnum",
+        "v_qv6kdl2mvjzmgbj"
+      ]
+    },
+    "2026-10-23": {
+      "visitors": 8,
+      "pageviews": 9,
+      "visitorIds": [
+        "v_ryr2lcdmvkcqgnh",
+        "v_f5640immvkkj6m2",
+        "v_oxzyb37mvkkj702",
+        "v_913etjdmvkkj1c3",
+        "v_5zgkdgqmvjrgqkn",
+        "v_ph95gm5mvkl8ddh",
+        "v_524f708mvkl8ddn",
+        "v_qv6kdl2mvjzmgbj"
       ]
     }
   },
   "pages": {
-    "/contact": 19,
-    "/": 12,
+    "/contact": 21,
+    "/": 20,
     "/services": 2,
     "/services/dedicated-support": 1,
     "/templates/good-vibes": 1,
@@ -27,6 +42,56 @@
     "/services/bespoke-web-design": 1
   },
   "recent": [
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:39:08.223Z",
+      "referrer": "http://localhost:3001/"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:38:51.340Z",
+      "referrer": "http://localhost:3001/admin"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:27:31.363Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:27:30.875Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/contact",
+      "timestamp": "2026-10-23T06:23:43.466Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/contact",
+      "timestamp": "2026-10-23T06:08:13.727Z",
+      "referrer": "https://www.looksbay.com/"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:07:56.684Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T06:07:55.736Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-23T02:29:38.771Z",
+      "referrer": "Direct"
+    },
+    {
+      "path": "/",
+      "timestamp": "2026-10-22T20:22:36.310Z",
+      "referrer": "Direct"
+    },
     {
       "path": "/contact",
       "timestamp": "2026-10-22T19:54:46.412Z",
