@@ -6,7 +6,6 @@ import Image from "next/image";
 import {
   X,
   Send,
-  RotateCcw,
   Zap,
   Mic,
   MicOff,
@@ -16,13 +15,7 @@ import {
   FileText,
   Bot,
   UserCheck,
-  Sparkles,
   Loader2,
-  CheckCircle2,
-  Clock,
-  MessageSquare,
-  ShieldCheck,
-  Volume2,
 } from "lucide-react";
 import { findBestSquarespaceAnswer } from "../data/squarespace-knowledge";
 
@@ -67,157 +60,137 @@ export const MAHIDI_PROFILE = {
   role: "Lead Squarespace Architect",
   title: "Squarespace Expert · Circle Platinum",
   avatar: "/assets/favicon.png",
-  status: "Online Now",
-  responseTime: "< 1 min",
   welcomeText:
     "Hello! I'm Mahidi Shikder, lead Squarespace architect at Looksbay Studio. I am online in the studio right now — feel free to ask me anything about your custom website build, design inspiration, or speed optimization!",
 };
 
 // =========================================================================
-// LUXURY ACOUSTIC SOUND SYNTHESIZERS (Studio Quality Web Audio)
+// SINGLETON MASTER AUDIO ENGINE (Reliable, Unlocked, 100% Audible)
 // =========================================================================
+let masterAudioCtx: AudioContext | null = null;
 
-// 1. Silky, Tactile Apple-Style "Bubble Pop / Swoosh" when sending
-function playSentSound() {
+function getAudioContext(): AudioContext | null {
   try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const t = ctx.currentTime;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(2400, t);
-    filter.connect(ctx.destination);
-
-    // Primary upward bubble glide
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = "sine";
-    osc1.frequency.setValueAtTime(460, t);
-    osc1.frequency.exponentialRampToValueAtTime(1440, t + 0.055);
-    gain1.gain.setValueAtTime(0.14, t);
-    gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.095);
-
-    osc1.connect(gain1);
-    gain1.connect(filter);
-    osc1.start(t);
-    osc1.stop(t + 0.095);
-
-    // Warm sub-body resonance
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = "sine";
-    osc2.frequency.setValueAtTime(320, t);
-    osc2.frequency.exponentialRampToValueAtTime(680, t + 0.035);
-    gain2.gain.setValueAtTime(0.09, t);
-    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.075);
-
-    osc2.connect(gain2);
-    gain2.connect(filter);
-    osc2.start(t);
-    osc2.stop(t + 0.075);
-  } catch {}
+    if (typeof window === "undefined") return null;
+    const AudioContextClass =
+      window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return null;
+    if (!masterAudioCtx) {
+      masterAudioCtx = new AudioContextClass();
+    }
+    if (masterAudioCtx.state === "suspended") {
+      masterAudioCtx.resume().catch(() => {});
+    }
+    return masterAudioCtx;
+  } catch {
+    return null;
+  }
 }
 
-// 2. Luxurious Glass Bell / Marimba Chime Chord when message received
-function playReceivedSound() {
-  try {
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
-    const t = ctx.currentTime;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.setValueAtTime(3800, t);
-    filter.connect(ctx.destination);
-
-    // 4 harmonic chord notes: E5 (659Hz), G#5 (830Hz), B5 (987Hz), E6 (1318Hz)
-    const chord = [
-      { freq: 659.25, delay: 0.00 },
-      { freq: 830.61, delay: 0.06 },
-      { freq: 987.77, delay: 0.12 },
-      { freq: 1318.51, delay: 0.18 },
-    ];
-
-    chord.forEach(({ freq, delay }) => {
-      const start = t + delay;
-      const duration = 0.48;
-
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(freq, start);
-
-      gain.gain.setValueAtTime(0.001, start);
-      gain.gain.linearRampToValueAtTime(0.12, start + 0.012);
-      gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
-
-      osc.connect(gain);
-      gain.connect(filter);
-      osc.start(start);
-      osc.stop(start + duration);
-
-      // Acoustic overtone shimmer
-      const overtone = ctx.createOscillator();
-      const overtoneGain = ctx.createGain();
-      overtone.type = "sine";
-      overtone.frequency.setValueAtTime(freq * 2.0, start);
-
-      overtoneGain.gain.setValueAtTime(0.001, start);
-      overtoneGain.gain.linearRampToValueAtTime(0.032, start + 0.01);
-      overtoneGain.gain.exponentialRampToValueAtTime(0.001, start + 0.24);
-
-      overtone.connect(overtoneGain);
-      overtoneGain.connect(filter);
-      overtone.start(start);
-      overtone.stop(start + 0.24);
-    });
-  } catch {}
-}
-
-// 3. Ultra-realistic tactile mechanical keyboard typing click
-let lastKeystrokeTime = 0;
+// 1. Audible tactile keypress tick sound (every keypress)
+let lastTickTime = 0;
 function playTypingTick() {
   try {
     const now = Date.now();
-    if (now - lastKeystrokeTime < 60) return; // natural throttle
-    lastKeystrokeTime = now;
+    if (now - lastTickTime < 45) return;
+    lastTickTime = now;
 
-    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-    if (!AudioCtx) return;
-    const ctx = new AudioCtx();
+    const ctx = getAudioContext();
+    if (!ctx) return;
     const t = ctx.currentTime;
-
-    const filter = ctx.createBiquadFilter();
-    filter.type = "bandpass";
-    const naturalPitches = [1300, 1550, 1780, 1920, 1420];
-    const pitch = naturalPitches[Math.floor(Math.random() * naturalPitches.length)];
-    filter.frequency.setValueAtTime(pitch, t);
-    filter.Q.setValueAtTime(3.8, t);
-    filter.connect(ctx.destination);
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-    osc.type = "triangle";
-    osc.frequency.setValueAtTime(260 + Math.random() * 40, t);
-    osc.frequency.exponentialRampToValueAtTime(75, t + 0.024);
+    const filter = ctx.createBiquadFilter();
 
-    gain.gain.setValueAtTime(0.055, t);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.024);
+    filter.type = "bandpass";
+    const naturalPitches = [1400, 1650, 1850, 1300];
+    const pitch = naturalPitches[Math.floor(Math.random() * naturalPitches.length)];
+    filter.frequency.setValueAtTime(pitch, t);
+    filter.Q.setValueAtTime(3.0, t);
+    filter.connect(ctx.destination);
+
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(550 + Math.random() * 150, t);
+    osc.frequency.exponentialRampToValueAtTime(140, t + 0.038);
+
+    gain.gain.setValueAtTime(0.18, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.038);
 
     osc.connect(gain);
     gain.connect(filter);
     osc.start(t);
-    osc.stop(t + 0.024);
+    osc.stop(t + 0.038);
+  } catch {}
+}
+
+// 2. Tactile Apple-Style "Bubble Pop" when message sent
+function playSentSound() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+
+    filter.type = "lowpass";
+    filter.frequency.setValueAtTime(2600, t);
+    filter.connect(ctx.destination);
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(440, t);
+    osc.frequency.exponentialRampToValueAtTime(1480, t + 0.06);
+
+    gain.gain.setValueAtTime(0.24, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.1);
+
+    osc.connect(gain);
+    gain.connect(filter);
+    osc.start(t);
+    osc.stop(t + 0.1);
+  } catch {}
+}
+
+// 3. Luxurious crystal marimba chime when message received
+function playReceivedSound() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const t = ctx.currentTime;
+
+    const notes = [
+      { freq: 659.25, delay: 0.00 }, // E5
+      { freq: 830.61, delay: 0.07 }, // G#5
+      { freq: 1046.50, delay: 0.14 }, // C6
+      { freq: 1318.51, delay: 0.21 }, // E6
+    ];
+
+    notes.forEach(({ freq, delay }) => {
+      const start = t + delay;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, start);
+
+      gain.gain.setValueAtTime(0.001, start);
+      gain.gain.linearRampToValueAtTime(0.18, start + 0.015);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.45);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(start);
+      osc.stop(start + 0.45);
+    });
   } catch {}
 }
 
 export function AiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
-  // selectedMode can be: null (choice screen), "ai", or "developer"
-  const [selectedMode, setSelectedMode] = useState<"ai" | "developer" | null>(null);
+  // Default to developer directly, or AI on toggle
+  const [selectedMode, setSelectedMode] = useState<"ai" | "developer">("developer");
 
   // AI chat state
   const [input, setInput] = useState("");
@@ -233,7 +206,6 @@ export function AiAssistant() {
   // Live Developer chat state (Direct with Mahidi Shikder)
   const [clientName, setClientName] = useState("");
   const [clientContact, setClientContact] = useState("");
-  const [showContactFields, setShowContactFields] = useState(false);
   const [devSessionId, setDevSessionId] = useState<string>("");
   const [devMessages, setDevMessages] = useState<DevChatMessage[]>([
     {
@@ -259,7 +231,7 @@ export function AiAssistant() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const recognitionRef = useRef<any>(null);
 
-  // Initialize Session ID & preferences from localStorage
+  // Initialize Session ID & preferences
   useEffect(() => {
     if (typeof window !== "undefined") {
       let savedSessionId = localStorage.getItem("looksbay_chat_session_id");
@@ -298,8 +270,7 @@ export function AiAssistant() {
 
           // Check if Mahidi is typing live
           const typingUntil = data.session.developerTypingUntil || 0;
-          const typingActive = typingUntil > Date.now();
-          setIsDeveloperTyping(typingActive);
+          setIsDeveloperTyping(typingUntil > Date.now());
 
           if (data.session.messages && data.session.messages.length > 0) {
             const newMsgs: DevChatMessage[] = data.session.messages;
@@ -347,7 +318,7 @@ export function AiAssistant() {
     }
   }, [aiMessages, devMessages, isTypingAI, isDeveloperTyping, isOpen, selectedMode]);
 
-  // Continuous live typing sound feedback while developer or AI is actively typing
+  // Continuous typing sound loop when developer or AI is actively typing
   useEffect(() => {
     if (!isOpen) return;
     const isTypingActive = isDeveloperTyping || isTypingAI;
@@ -356,7 +327,6 @@ export function AiAssistant() {
     // Immediately play first tick
     playTypingTick();
 
-    // Natural human keystroke pacing
     const interval = setInterval(() => {
       playTypingTick();
     }, 180);
@@ -425,6 +395,7 @@ export function AiAssistant() {
   };
 
   const selectMode = (mode: "ai" | "developer") => {
+    getAudioContext();
     setSelectedMode(mode);
     localStorage.setItem("looksbay_chat_mode", mode);
     setTimeout(() => inputRef.current?.focus(), 100);
@@ -435,13 +406,7 @@ export function AiAssistant() {
     const trimmed = queryText.trim();
     if ((!trimmed && !attachedFile) || isTypingAI || isSendingDevMsg) return;
 
-    // Default to AI if no mode explicitly picked yet
-    const activeMode = selectedMode || "ai";
-    if (!selectedMode) {
-      setSelectedMode("ai");
-      localStorage.setItem("looksbay_chat_mode", "ai");
-    }
-
+    const activeMode = selectedMode;
     const currentAttachment = attachedFile?.name;
     setInput("");
     setAttachedFile(null);
@@ -541,15 +506,6 @@ export function AiAssistant() {
     sendMessage(input);
   };
 
-  const handleReset = () => {
-    // Reset back to choice screen
-    setSelectedMode(null);
-    localStorage.removeItem("looksbay_chat_mode");
-    setAttachedFile(null);
-    setShowQuickPrompts(false);
-    setShowEmojiPicker(false);
-  };
-
   return (
     <>
       <input
@@ -561,21 +517,24 @@ export function AiAssistant() {
       />
 
       {/* ========================================================= */}
-      {/* 1. FLOATING TRIGGER BUTTON (Hidden when chat box is open) */}
+      {/* 1. CLEAN FLOATING TRIGGER BUTTON (Hidden when box open)    */}
       {/* ========================================================= */}
       {!isOpen && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            getAudioContext();
+            setIsOpen(true);
+          }}
           aria-label="Open Chat"
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#5046E5] pl-2.5 pr-4 py-2 text-white shadow-[0_10px_28px_rgba(80,70,229,0.4)] transition-all duration-300 hover:scale-105 hover:bg-[#4338CA] hover:shadow-[0_14px_34px_rgba(80,70,229,0.5)] active:scale-95"
+          className="fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-[#5046E5] pl-2.5 pr-4 py-2.5 text-white shadow-[0_10px_28px_rgba(80,70,229,0.4)] transition-all duration-300 hover:scale-105 hover:bg-[#4338CA] hover:shadow-[0_14px_34px_rgba(80,70,229,0.5)] active:scale-95"
         >
-          <div className="relative size-[30px] shrink-0 overflow-hidden rounded-full bg-white p-0.5 shadow-sm flex items-center justify-center">
+          <div className="relative size-[28px] shrink-0 overflow-hidden rounded-full bg-white p-0.5 shadow-sm flex items-center justify-center">
             <Image
               src="/assets/favicon.png"
               alt="Looksbay Logo"
-              width={30}
-              height={30}
+              width={28}
+              height={28}
               className="size-full rounded-full object-cover"
             />
           </div>
@@ -590,89 +549,55 @@ export function AiAssistant() {
       )}
 
       {/* ========================================================= */}
-      {/* 2. CHAT WINDOW MODAL (Sits directly in corner when open)   */}
+      {/* 2. CHAT MODAL (Clean, Spacious, Uncluttered)              */}
       {/* ========================================================= */}
       {isOpen && (
         <div
           role="dialog"
           aria-label="Looksbay Chat"
-          className="fixed bottom-6 right-4 sm:right-6 z-50 flex h-[610px] max-h-[90vh] w-[calc(100vw-32px)] sm:w-[400px] flex-col overflow-hidden rounded-[26px] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.24)] border border-black/[0.08] animate-in fade-in zoom-in-95 duration-200"
+          className="fixed bottom-6 right-4 sm:right-6 z-50 flex h-[600px] max-h-[88vh] w-[calc(100vw-32px)] sm:w-[390px] flex-col overflow-hidden rounded-[24px] bg-white shadow-[0_24px_70px_rgba(0,0,0,0.22)] border border-black/[0.08] animate-in fade-in zoom-in-95 duration-200"
         >
-          {/* Header */}
-          <div className="relative bg-[#5046E5] px-5 py-3.5 text-white">
+          {/* Ultra-Clean Balanced Header */}
+          <div className="relative bg-[#5046E5] px-4 py-3 text-white shrink-0">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="relative size-[36px] shrink-0 overflow-hidden rounded-full bg-white/20 p-0.5 flex items-center justify-center border border-white/20">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="relative size-9 shrink-0 overflow-hidden rounded-full bg-white/20 p-0.5 border border-white/25 flex items-center justify-center">
                   <Image
-                    src={MAHIDI_PROFILE.avatar}
-                    alt="Looksbay"
+                    src={selectedMode === "ai" ? "/assets/favicon.png" : MAHIDI_PROFILE.avatar}
+                    alt="Avatar"
                     width={36}
                     height={36}
                     className="size-full rounded-full object-cover"
                   />
-                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-[#5046E5] bg-emerald-400" />
+                  <span className="absolute bottom-0 right-0 size-2 rounded-full border-2 border-[#5046E5] bg-emerald-400" />
                 </div>
-                <div>
-                  <h3 className="text-[14.5px] font-bold tracking-tight text-white leading-tight flex items-center gap-1.5">
-                    {selectedMode === "developer"
-                      ? MAHIDI_PROFILE.name
-                      : selectedMode === "ai"
-                      ? "Looksbay AI Assistant"
-                      : "Looksbay Studio Chat"}
+                <div className="min-w-0">
+                  <h3 className="text-[14px] font-bold text-white tracking-tight truncate leading-tight">
+                    {selectedMode === "developer" ? MAHIDI_PROFILE.name : "Looksbay AI"}
                   </h3>
-                  <span className="text-[11px] text-white/85 font-medium flex items-center gap-1.5 mt-0.5">
-                    <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    {selectedMode === "developer"
-                      ? "Squarespace Expert · Online Now"
-                      : selectedMode === "ai"
-                      ? "Instant Squarespace Help · 24/7"
-                      : "Online & Ready to Help"}
+                  <span className="text-[11px] text-white/80 font-medium flex items-center gap-1.5 leading-tight mt-0.5">
+                    <span className="size-1.5 rounded-full bg-emerald-400"></span>
+                    {selectedMode === "developer" ? "Squarespace Expert · Online" : "Squarespace AI · 24/7"}
                   </span>
                 </div>
               </div>
 
-              {/* Header Right Actions */}
-              <div className="flex items-center gap-1">
-                {/* Mode Switcher Pill (Only visible when a mode is active) */}
-                {selectedMode && (
-                  <button
-                    type="button"
-                    onClick={() => selectMode(selectedMode === "ai" ? "developer" : "ai")}
-                    title={`Switch to ${selectedMode === "ai" ? "Developer" : "AI"}`}
-                    className="rounded-full bg-white/15 px-2.5 py-1 text-[10.5px] font-semibold text-white hover:bg-white/25 transition mr-1"
-                  >
-                    {selectedMode === "ai" ? "Developer →" : "AI Assistant →"}
-                  </button>
-                )}
-
-                {/* Sound Test Speaker */}
+              {/* Minimal Clean Switcher & Close */}
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
-                  onClick={() => playReceivedSound()}
-                  title="Test notification chime sound"
-                  className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                  onClick={() => selectMode(selectedMode === "ai" ? "developer" : "ai")}
+                  title={`Switch to ${selectedMode === "ai" ? "Mahidi" : "AI"}`}
+                  className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/25 transition"
                 >
-                  <Volume2 size={14} />
+                  {selectedMode === "ai" ? "Talk to Mahidi →" : "AI Mode →"}
                 </button>
 
-                {/* Reset / Choice View */}
-                {selectedMode && (
-                  <button
-                    type="button"
-                    onClick={handleReset}
-                    title="Change chat mode"
-                    className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition-colors"
-                  >
-                    <RotateCcw size={13} />
-                  </button>
-                )}
-
-                {/* Close Button: Hides modal, brings back Chat button */}
                 <button
                   type="button"
                   onClick={() => setIsOpen(false)}
                   title="Close chat"
-                  className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition-colors"
+                  className="grid size-7 place-items-center rounded-full text-white/80 hover:bg-white/20 hover:text-white transition"
                 >
                   <X size={17} />
                 </button>
@@ -681,78 +606,12 @@ export function AiAssistant() {
           </div>
 
           {/* ========================================================= */}
-          {/* SCREEN 1: CLEAN 2-BUTTON CHOICE (Hidden once one clicked) */}
+          {/* CHAT FEED (AI or Developer)                               */}
           {/* ========================================================= */}
-          {!selectedMode && (
-            <div className="flex-1 p-5 flex flex-col justify-center items-center bg-[#FAFBFD] space-y-4 animate-in fade-in duration-150">
-              <div className="text-center max-w-[300px]">
-                <h4 className="text-[17px] font-bold text-zinc-900 tracking-tight">
-                  How can we help today?
-                </h4>
-                <p className="text-[12px] text-zinc-500 mt-1">
-                  Choose how you'd like to get assistance with your website project:
-                </p>
-              </div>
-
-              <div className="w-full space-y-2.5">
-                {/* 1. AI Assistant Button */}
-                <button
-                  type="button"
-                  onClick={() => selectMode("ai")}
-                  className="w-full p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-xs hover:border-[#5046E5] hover:bg-[#EEF2FF]/30 transition-all text-left flex items-start gap-3.5 group"
-                >
-                  <div className="size-10 rounded-xl bg-[#5046E5]/10 text-[#5046E5] grid place-items-center shrink-0 group-hover:bg-[#5046E5] group-hover:text-white transition">
-                    <Bot size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-bold text-zinc-900 group-hover:text-[#5046E5] transition">
-                        AI Assistant
-                      </span>
-                      <ArrowRight size={14} className="text-zinc-400 group-hover:text-[#5046E5] transition" />
-                    </div>
-                    <p className="text-[11.5px] text-zinc-500 mt-0.5">
-                      Instant answers 24/7 on Squarespace features, pricing &amp; services.
-                    </p>
-                  </div>
-                </button>
-
-                {/* 2. Developer (Mahidi Shikder) Button */}
-                <button
-                  type="button"
-                  onClick={() => selectMode("developer")}
-                  className="w-full p-4 rounded-2xl bg-white border border-zinc-200/80 shadow-xs hover:border-[#5046E5] hover:bg-[#EEF2FF]/30 transition-all text-left flex items-start gap-3.5 group"
-                >
-                  <div className="size-10 rounded-xl bg-emerald-50 text-emerald-600 grid place-items-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition">
-                    <UserCheck size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[14px] font-bold text-zinc-900 group-hover:text-[#5046E5] transition">
-                          Developer
-                        </span>
-                        <span className="rounded bg-emerald-50 text-emerald-700 text-[10px] font-bold px-1.5 py-0.2">
-                          Online
-                        </span>
-                      </div>
-                      <ArrowRight size={14} className="text-zinc-400 group-hover:text-[#5046E5] transition" />
-                    </div>
-                    <p className="text-[11.5px] text-zinc-500 mt-0.5">
-                      Chat directly with Mahidi Shikder (Squarespace Circle Platinum Expert).
-                    </p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* SCREEN 2: AI ASSISTANT CHAT FEED                          */}
-          {/* ========================================================= */}
-          {selectedMode === "ai" && (
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 bg-white [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-black/10">
-              {aiMessages.map((m) => (
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#FAFBFD] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-black/10">
+            {/* AI Messages */}
+            {selectedMode === "ai" &&
+              aiMessages.map((m) => (
                 <div
                   key={m.id}
                   className={`flex gap-2.5 items-end ${
@@ -760,22 +619,22 @@ export function AiAssistant() {
                   }`}
                 >
                   {m.sender === "ai" && (
-                    <div className="size-8 shrink-0 overflow-hidden rounded-full bg-[#27273E] p-1 flex items-center justify-center shadow-xs">
+                    <div className="size-7 shrink-0 overflow-hidden rounded-full bg-zinc-900 p-0.5 flex items-center justify-center shadow-xs">
                       <Image
                         src="/assets/favicon.png"
                         alt="AI"
-                        width={24}
-                        height={24}
+                        width={22}
+                        height={22}
                         className="size-full rounded-full object-cover"
                       />
                     </div>
                   )}
 
                   <div
-                    className={`max-w-[78%] px-4 py-3 text-[13px] leading-[1.55] shadow-2xs ${
+                    className={`max-w-[78%] px-3.5 py-2.5 text-[13px] leading-[1.55] shadow-2xs ${
                       m.sender === "user"
                         ? "rounded-[18px] rounded-br-[4px] bg-[#5046E5] text-white font-normal"
-                        : "rounded-[18px] rounded-tl-[4px] bg-[#F2F4F7] text-[#1E232E]"
+                        : "rounded-[18px] rounded-tl-[4px] bg-white text-[#1E232E] border border-black/[0.05]"
                     }`}
                   >
                     <p className="m-0 whitespace-pre-wrap">{m.text}</p>
@@ -788,7 +647,7 @@ export function AiAssistant() {
                     )}
 
                     {m.link && (
-                      <div className="mt-2.5 pt-2 border-t border-black/[0.06]">
+                      <div className="mt-2 pt-2 border-t border-black/[0.06]">
                         <Link
                           href={m.link.href}
                           onClick={() => setIsOpen(false)}
@@ -803,206 +662,114 @@ export function AiAssistant() {
                 </div>
               ))}
 
-              {isTypingAI && (
-                <div className="flex gap-2.5 items-end justify-start">
-                  <div className="size-8 shrink-0 overflow-hidden rounded-full bg-[#27273E] p-1 flex items-center justify-center shadow-xs">
-                    <Image
-                      src="/assets/favicon.png"
-                      alt="AI"
-                      width={24}
-                      height={24}
-                      className="size-full rounded-full object-cover"
-                    />
-                  </div>
-                  <div className="rounded-[18px] rounded-tl-[4px] bg-[#F2F4F7] px-4 py-3 flex items-center gap-1.5 shadow-2xs">
-                    <span className="size-2 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.3s]" />
-                    <span className="size-2 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.15s]" />
-                    <span className="size-2 rounded-full bg-[#5046E5] animate-bounce" />
-                  </div>
-                </div>
-              )}
+            {/* Developer Messages */}
+            {selectedMode === "developer" &&
+              devMessages.map((m) => {
+                const isClient = m.sender === "client";
+                const isSystem = m.sender === "system";
 
-              <div ref={messagesEndRef} />
-            </div>
-          )}
-
-          {/* ========================================================= */}
-          {/* SCREEN 3: LIVE DEVELOPER (MAHIDI SHIKDER CHAT)            */}
-          {/* ========================================================= */}
-          {selectedMode === "developer" && (
-            <div className="flex-1 overflow-y-auto bg-[#FBFBFE] [scrollbar-width:thin] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-black/10 flex flex-col">
-              {/* Mahidi Shikder Direct Clean Profile Strip */}
-              <div className="mx-3 mt-3 p-3 rounded-2xl bg-white border border-[#E5E7EB] shadow-2xs">
-                <div className="flex items-start justify-between gap-2.5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="relative size-10 shrink-0 overflow-hidden rounded-full bg-zinc-900 border-2 border-[#5046E5]/20 p-0.5">
-                      <Image
-                        src={MAHIDI_PROFILE.avatar}
-                        alt={MAHIDI_PROFILE.name}
-                        width={40}
-                        height={40}
-                        className="size-full rounded-full object-cover"
-                      />
-                      <span className="absolute bottom-0 right-0 size-2.5 rounded-full border-2 border-white bg-emerald-500" />
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="text-[13px] font-bold text-[#111827] leading-tight">
-                          {MAHIDI_PROFILE.name}
-                        </h4>
-                        <span className="rounded bg-emerald-50 border border-emerald-200 px-1.5 py-0.2 text-[9px] font-bold text-emerald-700">
-                          Active Now
-                        </span>
-                      </div>
-                      <span className="text-[11px] text-[#4F46E5] font-semibold block leading-tight mt-0.5">
-                        Squarespace Expert · Circle Platinum
+                if (isSystem) {
+                  return (
+                    <div key={m.id} className="text-center my-1.5">
+                      <span className="inline-block rounded-full bg-zinc-200/70 px-3 py-0.5 text-[10.5px] text-zinc-600 font-medium">
+                        {m.text}
                       </span>
                     </div>
-                  </div>
+                  );
+                }
 
-                  <button
-                    type="button"
-                    onClick={() => setShowContactFields((prev) => !prev)}
-                    className="text-[10.5px] text-[#5046E5] font-semibold hover:underline bg-[#EEF2FF] px-2 py-1 rounded-md"
+                return (
+                  <div
+                    key={m.id}
+                    className={`flex gap-2.5 items-end ${
+                      isClient ? "justify-end" : "justify-start"
+                    }`}
                   >
-                    {showContactFields ? "Hide" : "+ My Info"}
-                  </button>
-                </div>
-
-                {showContactFields && (
-                  <div className="mt-2.5 pt-2.5 border-t border-black/[0.05] grid grid-cols-2 gap-2 animate-in fade-in duration-150">
-                    <div>
-                      <input
-                        type="text"
-                        value={clientName}
-                        onChange={(e) => setClientName(e.target.value)}
-                        placeholder="Your Name (e.g. Alex)"
-                        className="w-full rounded-lg border border-zinc-200 px-2 py-1 text-[11.5px] text-zinc-900 focus:outline-none focus:border-[#5046E5]"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="text"
-                        value={clientContact}
-                        onChange={(e) => setClientContact(e.target.value)}
-                        placeholder="WhatsApp/Email"
-                        className="w-full rounded-lg border border-zinc-200 px-2 py-1 text-[11.5px] text-zinc-900 focus:outline-none focus:border-[#5046E5]"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Message Feed with Mahidi */}
-              <div className="flex-1 px-4 py-2 space-y-3.5">
-                {devMessages.map((m) => {
-                  const isClient = m.sender === "client";
-                  const isSystem = m.sender === "system";
-
-                  if (isSystem) {
-                    return (
-                      <div key={m.id} className="text-center my-1.5">
-                        <span className="inline-block rounded-full bg-zinc-200/70 px-3 py-0.5 text-[10.5px] text-zinc-600 font-medium">
-                          {m.text}
-                        </span>
+                    {!isClient && (
+                      <div className="size-7 shrink-0 overflow-hidden rounded-full bg-zinc-900 border border-black/10 p-0.5 flex items-center justify-center shadow-xs">
+                        <Image
+                          src={MAHIDI_PROFILE.avatar}
+                          alt={MAHIDI_PROFILE.name}
+                          width={24}
+                          height={24}
+                          className="size-full rounded-full object-cover"
+                        />
                       </div>
-                    );
-                  }
+                    )}
 
-                  return (
                     <div
-                      key={m.id}
-                      className={`flex gap-2.5 items-end ${
-                        isClient ? "justify-end" : "justify-start"
+                      className={`max-w-[78%] px-3.5 py-2.5 text-[13px] leading-[1.55] shadow-2xs ${
+                        isClient
+                          ? "rounded-[18px] rounded-br-[4px] bg-[#5046E5] text-white font-normal"
+                          : "rounded-[18px] rounded-tl-[4px] bg-white text-[#1E232E] border border-black/[0.05]"
                       }`}
                     >
                       {!isClient && (
-                        <div className="size-8 shrink-0 overflow-hidden rounded-full bg-zinc-900 border border-black/10 p-0.5 flex items-center justify-center shadow-xs">
-                          <Image
-                            src={MAHIDI_PROFILE.avatar}
-                            alt={MAHIDI_PROFILE.name}
-                            width={26}
-                            height={26}
-                            className="size-full rounded-full object-cover"
-                          />
+                        <span className="block text-[10.5px] font-bold text-[#5046E5] mb-0.5">
+                          Mahidi Shikder · Expert
+                        </span>
+                      )}
+
+                      <p className="m-0 whitespace-pre-wrap">{m.text}</p>
+
+                      {m.attachmentName && (
+                        <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-black/10 px-2.5 py-1 text-[11px] font-medium">
+                          <FileText size={12} />
+                          <span className="truncate max-w-[170px]">{m.attachmentName}</span>
                         </div>
                       )}
 
-                      <div
-                        className={`max-w-[78%] px-4 py-2.5 text-[13px] leading-[1.55] shadow-2xs ${
-                          isClient
-                            ? "rounded-[18px] rounded-br-[4px] bg-[#5046E5] text-white font-normal"
-                            : "rounded-[18px] rounded-tl-[4px] bg-white text-[#1E232E] border border-black/[0.05]"
+                      <span
+                        className={`block text-[9.5px] mt-1 text-right ${
+                          isClient ? "text-white/60" : "text-zinc-400"
                         }`}
                       >
-                        {!isClient && (
-                          <span className="block text-[10.5px] font-bold text-[#5046E5] mb-0.5">
-                            {m.senderName || MAHIDI_PROFILE.name} · Expert
-                          </span>
-                        )}
-
-                        <p className="m-0 whitespace-pre-wrap">{m.text}</p>
-
-                        {m.attachmentName && (
-                          <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-black/10 px-2.5 py-1 text-[11px] font-medium">
-                            <FileText size={12} />
-                            <span className="truncate max-w-[170px]">{m.attachmentName}</span>
-                          </div>
-                        )}
-
-                        <span
-                          className={`block text-[9.5px] mt-1 text-right ${
-                            isClient ? "text-white/60" : "text-zinc-400"
-                          }`}
-                        >
-                          {new Date(m.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-
-                {/* Real-Time "Mahidi Shikder is typing..." Indicator */}
-                {isDeveloperTyping && (
-                  <div className="flex gap-2 items-center justify-start py-1 animate-in fade-in duration-200">
-                    <div className="size-7 shrink-0 overflow-hidden rounded-full bg-zinc-900 p-0.5 border border-[#5046E5]/30">
-                      <Image
-                        src={MAHIDI_PROFILE.avatar}
-                        alt="Mahidi"
-                        width={24}
-                        height={24}
-                        className="size-full rounded-full object-cover"
-                      />
-                    </div>
-                    <div className="rounded-[16px] rounded-tl-[4px] bg-white border border-[#5046E5]/20 px-3.5 py-2 flex items-center gap-2 shadow-2xs">
-                      <span className="text-[11.5px] font-bold text-[#5046E5]">
-                        Mahidi Shikder is typing live
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.3s]" />
-                        <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.15s]" />
-                        <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce" />
+                        {new Date(m.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </span>
                     </div>
                   </div>
-                )}
+                );
+              })}
 
-                {isSendingDevMsg && (
-                  <div className="flex items-center justify-end gap-1.5 text-[11px] text-[#5046E5] font-medium pr-1">
-                    <Loader2 size={12} className="animate-spin" />
-                    <span>Delivering to Mahidi...</span>
-                  </div>
-                )}
-
-                <div ref={messagesEndRef} />
+            {/* Real-Time Live Typing Indicator */}
+            {(isDeveloperTyping || isTypingAI) && (
+              <div className="flex gap-2 items-center justify-start py-1 animate-in fade-in duration-150">
+                <div className="size-6 shrink-0 overflow-hidden rounded-full bg-zinc-900 p-0.5 border border-[#5046E5]/30">
+                  <Image
+                    src={selectedMode === "ai" ? "/assets/favicon.png" : MAHIDI_PROFILE.avatar}
+                    alt="Typing"
+                    width={20}
+                    height={20}
+                    className="size-full rounded-full object-cover"
+                  />
+                </div>
+                <div className="rounded-[14px] rounded-tl-[3px] bg-white border border-[#5046E5]/20 px-3 py-1.5 flex items-center gap-2 shadow-2xs">
+                  <span className="text-[11px] font-bold text-[#5046E5]">
+                    {selectedMode === "developer" ? "Mahidi is typing live" : "AI is preparing answer"}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.3s]" />
+                    <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce [animation-delay:-0.15s]" />
+                    <span className="size-1.5 rounded-full bg-[#5046E5] animate-bounce" />
+                  </span>
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Popovers */}
+            {isSendingDevMsg && (
+              <div className="flex items-center justify-end gap-1.5 text-[11px] text-[#5046E5] font-medium pr-1">
+                <Loader2 size={12} className="animate-spin" />
+                <span>Delivering to Mahidi...</span>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompts Popover */}
           {showQuickPrompts && (
             <div className="mx-3 mb-2 rounded-2xl border border-[#5046E5]/20 bg-white p-3 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-150">
               <div className="flex items-center justify-between pb-2 border-b border-black/[0.05] mb-2">
@@ -1034,6 +801,7 @@ export function AiAssistant() {
             </div>
           )}
 
+          {/* Emoji Picker Popover */}
           {showEmojiPicker && (
             <div className="mx-3 mb-2 rounded-2xl border border-black/[0.08] bg-white p-2.5 shadow-lg animate-in fade-in slide-in-from-bottom-2 duration-150">
               <div className="flex items-center justify-between pb-1.5 border-b border-black/[0.05] mb-2">
@@ -1063,6 +831,7 @@ export function AiAssistant() {
             </div>
           )}
 
+          {/* Voice Banner */}
           {isListening && (
             <div className="mx-3 mb-2 flex items-center justify-between rounded-xl bg-red-50 border border-red-200 px-3 py-1.5 text-red-600 text-[12px] font-medium animate-pulse">
               <span className="flex items-center gap-1.5">
@@ -1079,6 +848,7 @@ export function AiAssistant() {
             </div>
           )}
 
+          {/* Attached File Preview */}
           {attachedFile && (
             <div className="mx-3 mb-2 flex items-center justify-between rounded-xl bg-[#EEF2FF] border border-[#5046E5]/30 px-3 py-1.5 text-[12px] text-[#5046E5]">
               <span className="flex items-center gap-1.5 font-medium truncate max-w-[280px]">
@@ -1098,7 +868,7 @@ export function AiAssistant() {
           )}
 
           {/* Bottom Message Input Box (With Tactile Typing Sound) */}
-          <div className="p-3 bg-white border-t border-black/[0.06]">
+          <div className="p-3 bg-white border-t border-black/[0.06] shrink-0">
             <form
               onSubmit={handleFormSubmit}
               className="rounded-[18px] border border-[#E5E7EB] bg-[#F9FAFB] p-2.5 transition-all focus-within:border-[#5046E5] focus-within:bg-white focus-within:shadow-[0_2px_12px_rgba(80,70,229,0.08)]"
@@ -1108,10 +878,12 @@ export function AiAssistant() {
                 rows={2}
                 value={input}
                 onChange={(e) => {
+                  getAudioContext();
                   setInput(e.target.value);
-                  playTypingTick(); // Tactile typing sound on every keypress!
+                  playTypingTick(); // Clear tactile mechanical keyclick on every keystroke!
                 }}
                 onKeyDown={(e) => {
+                  getAudioContext();
                   if (e.key === "Enter" && !e.shiftKey) {
                     e.preventDefault();
                     sendMessage(input);
@@ -1121,7 +893,7 @@ export function AiAssistant() {
                   isListening
                     ? "Listening..."
                     : selectedMode === "developer"
-                    ? `Message Mahidi Shikder live... (Press Enter)`
+                    ? `Message Mahidi Shikder live...`
                     : "Ask AI or inquire about website design..."
                 }
                 className="w-full resize-none border-0 bg-transparent text-[13px] text-[#1E232E] placeholder:text-[#9CA3AF] focus:outline-none"
@@ -1140,7 +912,7 @@ export function AiAssistant() {
                       showQuickPrompts ? "text-[#5046E5] bg-[#EEF2FF]" : "hover:text-[#5046E5] hover:bg-black/[0.04]"
                     }`}
                   >
-                    <Zap size={16} />
+                    <Zap size={15} />
                   </button>
 
                   <button
@@ -1151,7 +923,7 @@ export function AiAssistant() {
                       isListening ? "text-red-500 bg-red-100 animate-pulse" : "hover:text-[#5046E5] hover:bg-black/[0.04]"
                     }`}
                   >
-                    {isListening ? <MicOff size={16} /> : <Mic size={16} />}
+                    {isListening ? <MicOff size={15} /> : <Mic size={15} />}
                   </button>
 
                   <button
@@ -1162,7 +934,7 @@ export function AiAssistant() {
                       attachedFile ? "text-[#5046E5] bg-[#EEF2FF]" : "hover:text-[#5046E5] hover:bg-black/[0.04]"
                     }`}
                   >
-                    <Paperclip size={16} />
+                    <Paperclip size={15} />
                   </button>
 
                   <button
@@ -1176,7 +948,7 @@ export function AiAssistant() {
                       showEmojiPicker ? "text-[#5046E5] bg-[#EEF2FF]" : "hover:text-[#5046E5] hover:bg-black/[0.04]"
                     }`}
                   >
-                    <Smile size={16} />
+                    <Smile size={15} />
                   </button>
                 </div>
 
